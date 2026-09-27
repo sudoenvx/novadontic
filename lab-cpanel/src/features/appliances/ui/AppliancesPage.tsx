@@ -50,7 +50,7 @@ export function AppliancesPage() {
       </Card>
 
       {visibleAppliances.length > 0 ? (
-        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+        <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {visibleAppliances.map((appliance) => (
             <ApplianceCard
               key={appliance.id}

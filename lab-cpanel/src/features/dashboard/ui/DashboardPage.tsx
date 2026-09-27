@@ -4,43 +4,29 @@ import {
   BriefcaseBusiness,
   CalendarClock,
   Layers3,
-  Plus,
 } from 'lucide-react'
 
 import { Card, CardDescription, CardHeader, CardTitle } from '../../../shared/ui/Card'
 import {
   FilterTab,
-  FilterTabAction,
   FilterTabs,
   FilterTabsList,
 } from '../../../shared/ui/FilterTabs'
 import { Page } from '../../../shared/ui/Page'
 import { StatisticCard } from '../../../shared/ui/StatisticCard'
-import { CreateApplianceDialog, type NewAppliance } from './CreateApplianceDialog'
 import { DashboardCaseTable } from './DashboardCaseTable'
 import {
   countCasesByType,
   filterCasesByType,
 } from '../domain/case'
-import type { Appliance } from '../domain/appliance'
 import { applianceFixtures } from '../data/appliances'
 import { caseFixtures } from '../data/cases'
 
 export function DashboardPage() {
   const [selectedCaseType, setSelectedCaseType] = useState('all')
-  const [isAddApplianceOpen, setIsAddApplianceOpen] = useState(false)
-  const [appliances, setAppliances] = useState<Appliance[]>(applianceFixtures)
 
   const caseCounts = countCasesByType(caseFixtures)
   const visibleCases = filterCasesByType(caseFixtures, selectedCaseType)
-
-  function handleCreateAppliance({ name, color }: NewAppliance) {
-    setAppliances((currentAppliances) => [
-      ...currentAppliances,
-      { name, color },
-    ])
-    setSelectedCaseType(name)
-  }
 
   return (
     <Page>
@@ -92,7 +78,7 @@ export function DashboardPage() {
               <FilterTab value="all" count={caseFixtures.length}>
                 All
               </FilterTab>
-              {appliances.map((appliance) => (
+              {applianceFixtures.map((appliance) => (
                 <FilterTab
                   key={appliance.name}
                   value={appliance.name}
@@ -102,25 +88,13 @@ export function DashboardPage() {
                   {appliance.name}
                 </FilterTab>
               ))}
-              <FilterTabAction
-                onClick={() => setIsAddApplianceOpen(true)}
-              >
-                <Plus />
-                Add appliance
-              </FilterTabAction>
             </FilterTabsList>
           </FilterTabs>
-
-          <DashboardCaseTable cases={visibleCases} />
         </Card>
+
+        <DashboardCaseTable cases={visibleCases} />
       </section>
 
-      <CreateApplianceDialog
-        open={isAddApplianceOpen}
-        onOpenChange={setIsAddApplianceOpen}
-        existingAppliances={appliances}
-        onCreate={handleCreateAppliance}
-      />
     </Page>
   )
 }

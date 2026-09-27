@@ -81,7 +81,7 @@
   --info-active: oklch(from var(--info) calc(l - 0.15) c h);
   --info-foreground: oklch(100% 0 0);
   --info-soft: oklch(from var(--info) calc(l + 0.3) calc(c * 0.2) h);
-  --info-soft-foreground: oklch(25% 0.05 230);
+  --info-soft-foreground: oklch(22.814% 0.04219 228.492);
 
   --border: var(--neutral-300);
   --border-soft: var(--neutral-200);
@@ -90,6 +90,11 @@
 
   --gradient-brand: linear-gradient(110deg, var(--brand-blue), var(--brand-violet));
   --gradient-brand-hover: linear-gradient(110deg, var(--brand-blue-dark), var(--brand-violet));
+
+  --shadow-card-value: 0 1px 2px color-mix(in srgb, var(--brand-ink) 8%, transparent), 0 4px 12px color-mix(in srgb, var(--brand-ink) 5%, transparent);
+  --shadow-float-value: 0 12px 30px color-mix(in srgb, var(--brand-ink) 14%, transparent);
+  --shadow-popover-value: 0 10px 24px color-mix(in srgb, var(--brand-ink) 16%, transparent);
+  --shadow-dialog-value: 0 20px 55px color-mix(in srgb, var(--brand-ink) 20%, transparent);
 
   --text-size-2xs: 0.65625rem;
   --text-size-xs: 0.6875rem;

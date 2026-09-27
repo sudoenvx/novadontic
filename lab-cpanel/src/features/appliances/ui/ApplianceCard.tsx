@@ -32,7 +32,7 @@ export function ApplianceCard({ appliance, onOpen, onToggle }: ApplianceCardProp
       onClick={onOpen}
       onKeyDown={handleKeyDown}
       aria-label={`Open ${appliance.name}`}
-      className={`group gap-4 cursor-pointer transition-all  focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 `}
+      className={`group gap-4 cursor-pointer transition-all  focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2`}
     >
       {/* Header: icon, name, scope pill, and the toggle — the switch is the one
           control that must NOT trigger onOpen, so its click is stopped below. */}
@@ -81,11 +81,11 @@ export function ApplianceCard({ appliance, onOpen, onToggle }: ApplianceCardProp
           <Badge tone={appliance.isActive ? 'success' : 'destructive'}>
             {appliance.isActive ? 'Active' : 'Inactive'}
           </Badge>
-          <Badge tone={appliance.casesUsing > 0 ? 'neutral' : 'neutral'}>
+          <Badge tone={appliance.casesUsing > 0 ? 'info' : 'neutral'}>
             {appliance.casesUsing > 0 ? `${appliance.casesUsing} cases used it` : 'Not used yet'}
           </Badge>
-          <Badge tone="neutral">{groupCount} groups</Badge>
-          <Badge tone="neutral">{fieldCount} fields</Badge>
+          <Badge tone="info">{groupCount} groups</Badge>
+          <Badge tone="info">{fieldCount} fields</Badge>
         </div>
       </div>
     </Card>

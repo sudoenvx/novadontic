@@ -75,11 +75,11 @@ function PgBtn({
       disabled={disabled}
       title={title}
       className={cn(
-        'min-w-6 h-6 px-1.5 rounded-xs text-[11px] font-medium tabular-nums',
-        'transition-colors flex items-center justify-center font-inter',
+        'min-w-6 h-6 px-1.5 rounded-xs text-sm tabular-nums',
+        'transition-colors flex items-center justify-center font-mono font-medium!',
         active
-          ? 'bg-primary border-primary text-primary-text'
-          : 'bg-secondary/20  text-text hover:bg-secondary/20 hover:text-text hover:border-border-strong',
+          ? 'bg-primary border-primary text-primary-foreground'
+          : 'bg-muted  text-text hover:bg-neutral-300 hover:text-text hover:border-border-strong',
         disabled && 'opacity-40 cursor-not-allowed pointer-events-none',
       )}
     >

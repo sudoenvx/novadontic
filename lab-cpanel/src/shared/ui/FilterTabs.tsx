@@ -5,12 +5,12 @@ import type { ComponentProps, ReactNode } from 'react'
 import { cn } from 'cn'
 
 const filterTabVariants = cva(
-  'inline-flex shrink-0 items-center gap-1.5 rounded-xs py-0.5 px-2.5 text-xs font-medium uppercase transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue/30 disabled:pointer-events-none disabled:opacity-50 [&_svg:not([class*=\'size-\'])]:size-3',
+  'inline-flex shrink-0 items-center gap-1.5 rounded-xs py-1 px-2.5 text-xs font-medium uppercase transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue/30 disabled:pointer-events-none disabled:opacity-50 [&_svg:not([class*=\'size-\'])]:size-3',
   {
     variants: {
       variant: {
         default:
-          'bg-neutral-100 text-secondary hover:bg-neutral-200 data-pressed:bg-primary data-pressed:text-primary-foreground',
+          'bg-neutral-100 text-text-muted hover:bg-neutral-200 data-pressed:bg-primary data-pressed:text-primary-foreground',
         accent:
           'bg-accent-soft text-accent-soft-foreground hover:bg-accent/80 data-pressed:bg-accent data-pressed:text-accent-foreground',
       },

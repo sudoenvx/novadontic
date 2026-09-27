@@ -20,9 +20,7 @@ export const casePipelineFixtures: CasePipelineCase[] = [
   {
     id: 'OR-4821',
     patientName: 'Yassin Farouk',
-    patientAge: 24,
-    patientGender: 'Male',
-    chartNumber: 'PT-1040',
+    patientCode: 'PT-1040',
     clinicName: 'Smile Studio',
     doctorName: 'Dr. Nour Hassan',
     request: 'Clear aligners, both arch',
@@ -97,9 +95,7 @@ function createListCase(
   return {
     id,
     patientName,
-    patientAge: 0,
-    patientGender: 'Not provided',
-    chartNumber: 'Pending',
+    patientCode: 'Pending',
     clinicName,
     doctorName,
     request: caseType,

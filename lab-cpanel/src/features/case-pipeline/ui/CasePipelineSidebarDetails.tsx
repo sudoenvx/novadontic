@@ -1,29 +1,17 @@
 import { Card, CardHeader, CardTitle } from '../../../shared/ui/Card'
-import { getInitials } from '../../../shared/lib/string/getInitials'
 import type { ReactNode } from 'react'
 import type { CasePipelineCase } from '../domain/casePipeline'
 
 export function CasePipelineSidebarDetails({ caseItem }: { caseItem: CasePipelineCase }) {
   return (
     <aside className="grid gap-2 lg:sticky lg:top-3 lg:self-start">
-      <InfoCard title="Patient">
-        <div className="flex items-center gap-2">
-          <span className="grid size-9 place-items-center rounded-full bg-primary text-sm font-semibold text-primary-foreground">{getInitials(caseItem.patientName)}</span>
-          <div>
-            <p className="font-semibold text-text">{caseItem.patientName}</p>
-            <p className="text-xs text-text-muted">{caseItem.patientAge ? `${caseItem.patientAge} yrs · ${caseItem.patientGender}` : caseItem.patientGender}</p>
-          </div>
-        </div>
-        <Detail label="Chart #" value={caseItem.chartNumber} />
-        <Detail label="Arch" value={caseItem.arch} />
-        <Detail label="Allergy" value={caseItem.allergy} />
-      </InfoCard>
       <InfoCard title="Doctor & clinic">
         <Detail label="Doctor" value={caseItem.doctorName} />
         <Detail label="Clinic" value={caseItem.clinicName} />
         <Detail label="Request" value={caseItem.request} />
       </InfoCard>
       <InfoCard title="Case meta">
+        <Detail label="Patient code" value={caseItem.patientCode} />
         <Detail label="Type" value={caseItem.caseType} />
         <Detail label="Units" value={caseItem.units ? `${caseItem.units} items` : 'Pending'} />
         <Detail label="Due" value={caseItem.dueDate} emphasis={caseItem.status !== 'On track'} />

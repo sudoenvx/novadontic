@@ -1,14 +1,7 @@
 import { cn } from 'cn'
 
 import { Badge, type BadgeTone } from '../../../shared/ui/Badge'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '../../../shared/ui/Table'
+import { DataTable, type DataTableColumn } from '../../../shared/ui/data-table'
 import type {
   CaseStatus,
   CaseType,
@@ -40,82 +33,69 @@ const statusTone: Record<CaseStatus, BadgeTone> = {
   'Needs attention': 'destructive',
 }
 
+const columns: DataTableColumn<DashboardCase>[] = [
+  {
+    id: 'case',
+    header: 'Case',
+    sortValue: (row) => row.id,
+    cell: (dashboardCase) => (
+      <div className="flex items-center gap-2.5">
+        <span className="grid size-8 shrink-0 place-items-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
+          {dashboardCase.assignee}
+        </span>
+        <div>
+          <p className="font-semibold text-text">{dashboardCase.id}</p>
+          <p className="text-sm text-text-muted">
+            {dashboardCase.patientName} · {dashboardCase.clinic}
+          </p>
+        </div>
+      </div>
+    ),
+  },
+  {
+    id: 'case-type',
+    header: 'Case type',
+    accessorKey: 'caseType',
+    cell: (dashboardCase) => (
+      <Badge
+        color={caseTypeColor[dashboardCase.caseType].color}
+        foregroundColor={caseTypeColor[dashboardCase.caseType].foregroundColor}
+      >
+        {dashboardCase.caseType}
+      </Badge>
+    ),
+  },
+  { id: 'stage', header: 'Stage', accessorKey: 'stage', className: 'text-secondary' },
+  {
+    id: 'due-date',
+    header: 'Due',
+    accessorKey: 'dueDate',
+    className: 'text-secondary',
+    cell: (dashboardCase) => (
+      <span className={cn(dashboardCase.dueDate === 'Today' && 'font-semibold text-warning')}>
+        {dashboardCase.dueDate}
+      </span>
+    ),
+  },
+  {
+    id: 'status',
+    header: 'Status',
+    accessorKey: 'status',
+    cell: (dashboardCase) => <Badge tone={statusTone[dashboardCase.status]}>{dashboardCase.status}</Badge>,
+  },
+]
+
 type DashboardCaseTableProps = {
   cases: DashboardCase[]
 }
 
 export function DashboardCaseTable({ cases }: DashboardCaseTableProps) {
   return (
-    <div className="mt-2 overflow-x-auto">
-      <Table className="min-w-[720px]">
-        <TableHeader>
-          <TableRow>
-            <TableHead>Case</TableHead>
-            <TableHead>Case type</TableHead>
-            <TableHead>Stage</TableHead>
-            <TableHead>Due</TableHead>
-            <TableHead>Status</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {cases.length > 0 ? (
-            cases.map((dashboardCase) => (
-              <DashboardCaseRow
-                key={dashboardCase.id}
-                dashboardCase={dashboardCase}
-              />
-            ))
-          ) : (
-            <TableRow>
-              <TableCell colSpan={5} className="py-8 text-center text-text-muted">
-                No cases for this appliance yet.
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
-    </div>
-  )
-}
-
-function DashboardCaseRow({ dashboardCase }: { dashboardCase: DashboardCase }) {
-  return (
-    <TableRow>
-      <TableCell>
-        <div className="flex items-center gap-2.5">
-          <span className="grid size-8 shrink-0 place-items-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
-            {dashboardCase.assignee}
-          </span>
-          <div>
-            <p className="font-semibold text-text">{dashboardCase.id}</p>
-            <p className="text-sm text-text-muted">
-              {dashboardCase.patientName} · {dashboardCase.clinic}
-            </p>
-          </div>
-        </div>
-      </TableCell>
-      <TableCell>
-        <Badge
-          color={caseTypeColor[dashboardCase.caseType].color}
-          foregroundColor={caseTypeColor[dashboardCase.caseType].foregroundColor}
-        >
-          {dashboardCase.caseType}
-        </Badge>
-      </TableCell>
-      <TableCell className="text-secondary">{dashboardCase.stage}</TableCell>
-      <TableCell
-        className={cn(
-          'text-secondary',
-          dashboardCase.dueDate === 'Today' && 'font-semibold text-warning',
-        )}
-      >
-        {dashboardCase.dueDate}
-      </TableCell>
-      <TableCell>
-        <Badge tone={statusTone[dashboardCase.status]}>
-          {dashboardCase.status}
-        </Badge>
-      </TableCell>
-    </TableRow>
+    <DataTable
+      columns={columns}
+      data={cases}
+      emptyMessage="No cases for this appliance yet."
+      getRowId={(dashboardCase) => dashboardCase.id}
+    />
   )
 }

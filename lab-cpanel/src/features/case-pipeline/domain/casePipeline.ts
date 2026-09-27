@@ -40,9 +40,7 @@ export type CaseActivityItem = {
 export type CasePipelineCase = {
   id: string
   patientName: string
-  patientAge: number
-  patientGender: string
-  chartNumber: string
+  patientCode: string
   clinicName: string
   doctorName: string
   request: string

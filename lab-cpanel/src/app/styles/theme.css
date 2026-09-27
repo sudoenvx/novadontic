@@ -87,6 +87,11 @@
   --color-border-strong: var(--border-strong);
   --color-border-hover: var(--border-hover);
 
+  --shadow-card: var(--shadow-card-value);
+  --shadow-float: var(--shadow-float-value);
+  --shadow-popover: var(--shadow-popover-value);
+  --shadow-dialog: var(--shadow-dialog-value);
+
   --font-family-sans: "Inter";
   --font-family-mono: ui-monospace, "SFMono-Regular", Consolas, monospace;
 

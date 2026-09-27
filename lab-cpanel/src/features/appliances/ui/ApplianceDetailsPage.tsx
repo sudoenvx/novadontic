@@ -259,9 +259,9 @@ export function ApplianceDetailsPage() {
           </div>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Badge>{getApplianceGroupCount(appliance)} field groups</Badge>
-          <Badge>{getApplianceFieldCount(appliance)} fields</Badge>
-          <Badge>{appliance.casesUsing} cases using this type</Badge>
+          <Badge tone="info">{getApplianceGroupCount(appliance)} field groups</Badge>
+          <Badge tone="info">{getApplianceFieldCount(appliance)} fields</Badge>
+          <Badge tone="info">{appliance.casesUsing} cases using this type</Badge>
         </div>
       </Card>
 
