@@ -1,0 +1,29 @@
+@utility bg-brand-gradient {
+  background-image: var(--gradient-brand);
+}
+
+@utility row {
+  display: flex;
+  flex-direction: row;
+  gap: 0.5rem;
+}
+
+@utility row-center {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+@utility col {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+@utility flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+

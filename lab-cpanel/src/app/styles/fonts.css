@@ -1,0 +1,118 @@
+  @layer base {
+      @font-face {
+          font-family: 'Jakarta';
+          src: url('/fonts/Jakarta/PlusJakartaSans-ExtraLight.ttf') format('truetype');
+          font-weight: 200;
+          font-style: normal;
+      }
+
+      @font-face {
+          font-family: 'Jakarta';
+          src: url('/fonts/Jakarta/PlusJakartaSans-Light.ttf') format('truetype');
+          font-weight: 300;
+          font-style: normal;
+      }
+
+      @font-face {
+          font-family: 'Jakarta';
+          src: url('/fonts/Jakarta/PlusJakartaSans-Regular.ttf') format('truetype');
+          font-weight: 400;
+          font-style: normal;
+      }
+
+      @font-face {
+          font-family: 'Jakarta';
+          src: url('/fonts/Jakarta/PlusJakartaSans-Medium.ttf') format('truetype');
+          font-weight: 500;
+          font-style: normal;
+      }
+
+      /* Since you don't have a specific SemiBold file, we map it to Bold */
+      @font-face {
+          font-family: 'Jakarta';
+          src: url('/fonts/Jakarta/PlusJakartaSans-Bold.ttf') format('truetype');
+          font-weight: 600;
+          font-style: normal;
+      }
+
+      @font-face {
+          font-family: 'Jakarta';
+          src: url('/fonts/Jakarta/PlusJakartaSans-Bold.ttf') format('truetype');
+          font-weight: 700;
+          font-style: normal;
+      }
+
+      @font-face {
+          font-family: 'Jakarta';
+          src: url('/fonts/Jakarta/PlusJakartaSans-ExtraBold.ttf') format('truetype');
+          font-weight: 800;
+          font-style: normal;
+      }
+
+      @font-face {
+          font-family: 'Jakarta';
+          src: url('/fonts/Jakarta/PlusJakartaSans-Black.ttf') format('truetype');
+          font-weight: 900;
+          font-style: normal;
+      }
+
+
+
+
+      @font-face {
+          font-family: 'Inter';
+          src: url('./fonts/Inter/Inter_18pt-ExtraLight.ttf') format('truetype');
+          font-weight: 200;
+          font-style: normal;
+      }
+
+      @font-face {
+          font-family: 'Inter';
+          src: url('./fonts/Inter/Inter_18pt-Light.ttf') format('truetype');
+          font-weight: 300;
+          font-style: normal;
+      }
+
+      @font-face {
+          font-family: 'Inter';
+          src: url('./fonts/Inter/Inter_18pt-Regular.ttf') format('truetype');
+          font-weight: 400;
+          font-style: normal;
+      }
+
+      @font-face {
+          font-family: 'Inter';
+          src: url('./fonts/Inter/Inter_18pt-Medium.ttf') format('truetype');
+          font-weight: 500;
+          font-style: normal;
+      }
+
+      /* Since you don't have a specific SemiBold file, we map it to Bold */
+      @font-face {
+          font-family: 'Inter';
+          src: url('./fonts/Inter/Inter_18pt-Bold.ttf') format('truetype');
+          font-weight: 600;
+          font-style: normal;
+      }
+
+      @font-face {
+          font-family: 'Inter';
+          src: url('./fonts/Inter/Inter_18pt-Bold.ttf') format('truetype');
+          font-weight: 700;
+          font-style: normal;
+      }
+
+      @font-face {
+          font-family: 'Inter';
+          src: url('./fonts/Inter/Inter_18pt-ExtraBold.ttf') format('truetype');
+          font-weight: 800;
+          font-style: normal;
+      }
+
+      @font-face {
+          font-family: 'Inter';
+          src: url('./fonts/Inter/Inter_18pt-Black.ttf') format('truetype');
+          font-weight: 900;
+          font-style: normal;
+      }
+  }

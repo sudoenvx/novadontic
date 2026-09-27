@@ -1,0 +1,78 @@
+import { Plus, Search } from 'lucide-react'
+import { useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+
+import { Button } from '../../../shared/ui/Button'
+import { Card } from '../../../shared/ui/Card'
+import { InputGroup, InputGroupAddon, InputGroupInput } from '../../../shared/ui/InputGroup'
+import { Page } from '../../../shared/ui/Page'
+import { toast } from '../../../shared/ui/Toast'
+import { appliances as applianceFixtures } from '../data/appliances'
+import { filterAppliances, isApplianceNameAvailable, type Appliance } from '../domain/appliance'
+import { ApplianceCard } from './ApplianceCard'
+import { CreateApplianceTypeDialog } from './CreateApplianceTypeDialog'
+
+export function AppliancesPage() {
+  const navigate = useNavigate()
+  const [appliances, setAppliances] = useState<Appliance[]>(applianceFixtures)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [isCreateOpen, setIsCreateOpen] = useState(false)
+  const visibleAppliances = useMemo(() => filterAppliances(appliances, searchTerm), [appliances, searchTerm])
+
+  function handleCreate(appliance: Appliance) {
+    setAppliances((current) => [...current, appliance])
+    toast.add({ title: 'Appliance type created', description: `${appliance.name} is ready for field setup.`, type: 'success' })
+    navigate(`/appliances/${appliance.id}`, { state: { appliance } })
+  }
+
+  function handleToggle(applianceId: string) {
+    setAppliances((current) => current.map((appliance) => appliance.id === applianceId ? { ...appliance, isActive: !appliance.isActive } : appliance))
+    const appliance = appliances.find((item) => item.id === applianceId)
+    if (appliance) {
+      toast.add({ title: `${appliance.name} ${appliance.isActive ? 'deactivated' : 'activated'}`, type: 'success' })
+    }
+  }
+
+  return (
+    <Page size="full">
+      <Card className="gap-3 p-4 md:flex-row md:items-center md:justify-between">
+        <div>
+          <h1 className="text-base font-semibold text-text">Appliances &amp; fields</h1>
+          <p className="text-sm text-text-muted">Groups let you organize related fields; each field controls its own type, default, and options.</p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <InputGroup className="w-64" variant="neutral">
+            <InputGroupAddon><Search /></InputGroupAddon>
+            <InputGroupInput value={searchTerm} onChange={(event) => setSearchTerm(event.target.value)} placeholder="Search appliances" aria-label="Search appliances" />
+          </InputGroup>
+          <Button onClick={() => setIsCreateOpen(true)}><Plus /> Add appliance type</Button>
+        </div>
+      </Card>
+
+      {visibleAppliances.length > 0 ? (
+        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+          {visibleAppliances.map((appliance) => (
+            <ApplianceCard
+              key={appliance.id}
+              appliance={appliance}
+              onOpen={() => navigate(`/appliances/${appliance.id}`, { state: { appliance } })}
+              onToggle={() => handleToggle(appliance.id)}
+            />
+          ))}
+        </div>
+      ) : (
+        <Card className="items-center py-12 text-center">
+          <p className="font-medium text-text">No appliance types found</p>
+          <p className="text-sm text-text-muted">Try another search or add a custom appliance type.</p>
+        </Card>
+      )}
+
+      <CreateApplianceTypeDialog
+        open={isCreateOpen}
+        onOpenChange={setIsCreateOpen}
+        onCreate={handleCreate}
+        isNameAvailable={(name) => isApplianceNameAvailable(appliances, name)}
+      />
+    </Page>
+  )
+}

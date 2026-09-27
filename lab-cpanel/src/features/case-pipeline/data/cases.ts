@@ -1,0 +1,118 @@
+import type { CasePipelineCase } from '../domain/casePipeline'
+
+const file = (
+  id: string,
+  name: string,
+  type: 'STL' | 'IMG' | 'PDF',
+  uploadedBy: string,
+  uploadedAt: string,
+  size: string,
+): CasePipelineCase['productionSteps'][number]['files'][number] => ({
+  id,
+  name,
+  type,
+  uploadedBy,
+  uploadedAt,
+  size,
+})
+
+export const casePipelineFixtures: CasePipelineCase[] = [
+  {
+    id: 'OR-4821',
+    patientName: 'Yassin Farouk',
+    patientAge: 24,
+    patientGender: 'Male',
+    chartNumber: 'PT-1040',
+    clinicName: 'Smile Studio',
+    doctorName: 'Dr. Nour Hassan',
+    request: 'Clear aligners, both arch',
+    caseType: 'Clear aligners',
+    arch: 'Both',
+    allergy: 'None known',
+    units: 24,
+    status: 'Due today',
+    priority: 'Rush',
+    stage: 'Quality check',
+    dueDate: 'Today',
+    createdAt: '10 Sep',
+    productionSteps: [
+      {
+        id: 'received',
+        name: 'Received',
+        status: 'completed',
+        technician: 'Mina S.',
+        files: [
+          file('scan-upper', 'upper_scan.stl', 'STL', 'Dr. Nour Hassan', '18 Sep', '8.7 MB'),
+          file('scan-lower', 'lower_scan.stl', 'STL', 'Dr. Nour Hassan', '18 Sep', '1.2 MB'),
+          file('bite-photo', 'bite_photo_1.jpg', 'IMG', 'Dr. Nour Hassan', '18 Sep', '3.4 MB'),
+        ],
+      },
+      {
+        id: 'design',
+        name: 'Design',
+        status: 'completed',
+        technician: 'Mina S.',
+        files: [file('design-file', 'OR-4821_setup.pdf', 'PDF', 'Mina S.', '19 Sep', '2.1 MB')],
+      },
+      {
+        id: 'production',
+        name: 'Production',
+        status: 'completed',
+        technician: 'Ahmed R.',
+        files: [
+          file('tray-upper', 'tray_06_upper.stl', 'STL', 'Ahmed R.', '23 Sep', '6.8 MB'),
+          file('tray-lower', 'tray_06_lower.stl', 'STL', 'Ahmed R.', '23 Sep', '6.4 MB'),
+        ],
+      },
+      { id: 'quality', name: 'Quality check', status: 'active', files: [] },
+      { id: 'ready', name: 'Ready to ship', status: 'pending', files: [] },
+      { id: 'delivered', name: 'Delivered', status: 'pending', files: [] },
+    ],
+    activities: [
+      { id: 'received', author: 'System', initials: '◷', message: 'Case received from Dr. Nour Hassan', createdAt: '10 Sep', isSystem: true },
+      { id: 'clinic-note', author: 'Dr. Nour Hassan', initials: 'NH', message: 'Note from the clinic: Refinement set 2 of 3.', createdAt: '11 Sep' },
+      { id: 'design-started', author: 'System', initials: '◷', message: 'Moved to Design', createdAt: '13 Sep', isSystem: true },
+      { id: 'production-started', author: 'System', initials: '◷', message: 'Moved to Production', createdAt: '16 Sep', isSystem: true },
+      { id: 'quality-started', author: 'System', initials: '◷', message: 'Moved to Quality check', createdAt: '18 Sep', isSystem: true },
+      { id: 'rush-note', author: 'Dina Amer', initials: 'DA', message: 'Flagged as rush — prioritising on the bench today.', createdAt: '18 Sep' },
+    ],
+  },
+  createListCase('OR-4822', 'Lina Samir', 'Dr. Karim Adel', 'Bright Dental', 'Retainers', 'Due tomorrow', 'Normal', 'Design'),
+  createListCase('OR-4823', 'Mostafa Adel', 'Dr. Salma Fathy', 'Bright Dental', 'Palatal expander', '27 Sep', 'Normal', 'Received'),
+  createListCase('OR-4824', 'Habiba Tarek', 'Dr. Omar Nabil', 'Adel Ortho', 'Hawley', 'Overdue 1d', 'Rush', 'Production'),
+  createListCase('OR-4825', 'Ziad Mansour', 'Dr. Mona Ezzat', 'Ezzat Clinic', 'Clear aligners', '28 Sep', 'Normal', 'Quality check'),
+  createListCase('OR-4826', 'Nour Emad', 'Dr. Youssef Ramy', 'Smile Studio', 'Essix', '26 Sep', 'Normal', 'Delivered'),
+]
+
+function createListCase(
+  id: string,
+  patientName: string,
+  doctorName: string,
+  clinicName: string,
+  caseType: string,
+  dueDate: string,
+  priority: 'Normal' | 'Rush',
+  stage: CasePipelineCase['stage'],
+): CasePipelineCase {
+  return {
+    id,
+    patientName,
+    patientAge: 0,
+    patientGender: 'Not provided',
+    chartNumber: 'Pending',
+    clinicName,
+    doctorName,
+    request: caseType,
+    caseType,
+    arch: 'Not provided',
+    allergy: 'None known',
+    units: 0,
+    status: dueDate.startsWith('Overdue') ? 'Needs attention' : dueDate === 'Due tomorrow' ? 'On track' : 'Due today',
+    priority,
+    stage,
+    dueDate,
+    createdAt: '18 Sep',
+    productionSteps: [],
+    activities: [],
+  }
+}
