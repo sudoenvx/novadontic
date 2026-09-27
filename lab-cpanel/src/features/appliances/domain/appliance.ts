@@ -8,6 +8,8 @@ export type ApplianceFieldType =
   | 'textarea'
   | 'date'
   | 'checkbox'
+  | 'file'
+  | 'image'
 
 export type ApplianceFieldOption = {
   label: string
@@ -22,8 +24,8 @@ export type ApplianceField = {
   required: boolean
   helpText?: string
   defaultValue?: string
-  dependsOn?: string
-  dependsOnValue?: string
+  dependsOn?: string | null
+  dependsOnValue?: string | null
   options: ApplianceFieldOption[]
 }
 
@@ -36,8 +38,6 @@ export type ApplianceFieldGroup = {
 export type Appliance = {
   id: string
   name: string
-  icon: string
-  color: string
   source: ApplianceSource
   isActive: boolean
   casesUsing: number

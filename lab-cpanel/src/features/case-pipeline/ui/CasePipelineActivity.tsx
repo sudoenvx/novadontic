@@ -32,7 +32,7 @@ export function CasePipelineActivity({
         <CardTitle>Activity</CardTitle>
       </CardHeader>
       <div className="relative grid gap-4 pl-8">
-        <span className="absolute top-2 bottom-14 left-3 w-px bg-border-subtle" aria-hidden="true" />
+        <span className="absolute top-2 bottom-14 left-3 w-px bg-border-soft" aria-hidden="true" />
         {activities.map((activity) => (
           <div key={activity.id} className="relative">
             <span className={`absolute -left-8 grid size-6 place-items-center rounded-full ${activity.isSystem ? 'bg-surface-muted text-text-muted' : 'bg-accent text-accent-foreground'}`}>

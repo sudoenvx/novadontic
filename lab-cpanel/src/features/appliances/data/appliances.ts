@@ -4,8 +4,6 @@ const applianceResponses: ApplianceResponse[] = [
   {
     id: 'clear-aligners',
     name: 'Clear aligners',
-    icon: '🦷',
-    color: '#e4eefb',
     source: 'Platform default',
     isActive: true,
     casesUsing: 38,
@@ -32,8 +30,6 @@ const applianceResponses: ApplianceResponse[] = [
   {
     id: 'retainer',
     name: 'Retainer',
-    icon: '🛡️',
-    color: '#ece8fb',
     source: 'Platform default',
     isActive: true,
     casesUsing: 22,
@@ -42,8 +38,6 @@ const applianceResponses: ApplianceResponse[] = [
   {
     id: 'palatal-expander',
     name: 'Palatal expander',
-    icon: '🌼',
-    color: '#e1f1ed',
     source: 'Platform default',
     isActive: true,
     casesUsing: 9,
@@ -52,8 +46,6 @@ const applianceResponses: ApplianceResponse[] = [
   {
     id: 'hawley',
     name: 'Hawley',
-    icon: '🔧',
-    color: '#f5eadc',
     source: 'Platform default',
     isActive: true,
     casesUsing: 14,
@@ -62,8 +54,6 @@ const applianceResponses: ApplianceResponse[] = [
   {
     id: 'essix',
     name: 'Essix',
-    icon: '▣',
-    color: '#e1f0f5',
     source: 'Platform default',
     isActive: true,
     casesUsing: 11,
@@ -72,8 +62,6 @@ const applianceResponses: ApplianceResponse[] = [
   {
     id: 'twin-block',
     name: 'Twin block',
-    icon: '🦴',
-    color: '#f4e5ef',
     source: 'Platform default',
     isActive: true,
     casesUsing: 3,
@@ -82,8 +70,6 @@ const applianceResponses: ApplianceResponse[] = [
   {
     id: 'space-maintainer',
     name: 'Space maintainer',
-    icon: '📍',
-    color: '#edf1df',
     source: 'Platform default',
     isActive: false,
     casesUsing: 0,
@@ -92,8 +78,6 @@ const applianceResponses: ApplianceResponse[] = [
   {
     id: 'sports-guard',
     name: 'Sports guard',
-    icon: '🏉',
-    color: '#f0e9e4',
     source: 'Custom type',
     isActive: false,
     casesUsing: 0,

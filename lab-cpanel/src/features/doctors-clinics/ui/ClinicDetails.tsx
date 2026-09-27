@@ -47,12 +47,12 @@ export function ClinicDetails({
           </Button>
         </div>
 
-        <div className="grid gap-3 border-t border-border-subtle pt-3 sm:grid-cols-3">
+        <div className="grid gap-3 border-t border-border-soft pt-3 sm:grid-cols-3">
           <ContactDetail icon={<Phone size={16} />} label="Phone" value={clinic.phone} />
           <ContactDetail
             icon={<Mail size={16} />}
-            label="Billing email"
-            value={clinic.billingEmail}
+            label="Email"
+            value={clinic.email}
           />
           <ContactDetail
             label="Active doctors"
@@ -61,7 +61,7 @@ export function ClinicDetails({
         </div>
       </CardHeader>
 
-      <div className="border-t border-border-subtle pt-3">
+      <div className="border-t border-border-soft pt-3">
         <div className="mb-3 flex items-center justify-between gap-3">
           <div>
             <h2 className="text-md font-semibold text-text">Doctors at {clinic.name}</h2>

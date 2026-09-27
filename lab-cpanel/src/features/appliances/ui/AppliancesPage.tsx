@@ -35,7 +35,7 @@ export function AppliancesPage() {
 
   return (
     <Page size="full">
-      <Card className="gap-3 p-4 md:flex-row md:items-center md:justify-between">
+      <Card className="gap-3 md:flex-row md:items-center md:justify-between">
         <div>
           <h1 className="text-base font-semibold text-text">Appliances &amp; fields</h1>
           <p className="text-sm text-text-muted">Groups let you organize related fields; each field controls its own type, default, and options.</p>
@@ -61,7 +61,7 @@ export function AppliancesPage() {
           ))}
         </div>
       ) : (
-        <Card className="items-center py-12 text-center">
+        <Card className="min-h-40 items-center justify-center text-center">
           <p className="font-medium text-text">No appliance types found</p>
           <p className="text-sm text-text-muted">Try another search or add a custom appliance type.</p>
         </Card>

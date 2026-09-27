@@ -1,8 +1,6 @@
 import type { Appliance, ApplianceFieldGroup } from '../domain/appliance'
 
-export type ApplianceFieldGroupResponse = Omit<ApplianceFieldGroup, 'id'> & {
-  id: string
-}
+export type ApplianceFieldGroupResponse = ApplianceFieldGroup
 
 export type ApplianceResponse = Omit<Appliance, 'groups'> & {
   fieldGroups: ApplianceFieldGroupResponse[]

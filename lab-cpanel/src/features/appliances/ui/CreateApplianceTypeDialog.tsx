@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, type FormEvent } from 'react'
 
 import { Button } from '../../../shared/ui/Button'
 import {
@@ -31,36 +31,32 @@ export function CreateApplianceTypeDialog({
   isNameAvailable,
 }: CreateApplianceTypeDialogProps) {
   const [name, setName] = useState('')
-  const [icon, setIcon] = useState('🦷')
-  const [color, setColor] = useState('#e4eefb')
   const [error, setError] = useState('')
 
   function handleOpenChange(nextOpen: boolean) {
     if (!nextOpen) {
       setName('')
-      setIcon('🦷')
-      setColor('#e4eefb')
       setError('')
     }
     onOpenChange(nextOpen)
   }
 
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    if (!name.trim()) {
+    const normalizedName = name.trim()
+
+    if (!normalizedName) {
       setError('Enter an appliance name.')
       return
     }
-    if (!isNameAvailable(name)) {
+    if (!isNameAvailable(normalizedName)) {
       setError('An appliance with this name already exists.')
       return
     }
 
     onCreate({
-      id: createId(name),
-      name: name.trim(),
-      icon: icon.trim() || '🦷',
-      color,
+      id: createId(normalizedName),
+      name: normalizedName,
       source: 'Custom type',
       isActive: true,
       casesUsing: 0,
@@ -80,16 +76,6 @@ export function CreateApplianceTypeDialog({
           <div className="grid gap-1.5">
             <Label htmlFor="appliance-name">Name</Label>
             <Input id="appliance-name" value={name} onChange={(event) => setName(event.target.value)} placeholder="e.g. Night guard" autoFocus />
-          </div>
-          <div className="grid grid-cols-[1fr_auto] gap-3">
-            <div className="grid gap-1.5">
-              <Label htmlFor="appliance-icon">Icon</Label>
-              <Input id="appliance-icon" value={icon} onChange={(event) => setIcon(event.target.value)} maxLength={4} />
-            </div>
-            <div className="grid gap-1.5">
-              <Label htmlFor="appliance-color">Color</Label>
-              <Input id="appliance-color" type="color" value={color} onChange={(event) => setColor(event.target.value)} className="w-12 p-1" />
-            </div>
           </div>
           {error && <p className="text-xs text-destructive">{error}</p>}
           <DialogFooter>

@@ -152,14 +152,14 @@ export function AppHeader({ context }: AppHeaderProps) {
             <CommandGroup heading="Navigate">
               <CommandItem onSelect={() => navigateTo("/")}>
                 <LayoutDashboard /> Dashboard{" "}
-                <CommandShortcut>G D</CommandShortcut>
+                <CommandShortcut>{formatForDisplay("G D")}</CommandShortcut>
               </CommandItem>
               <CommandItem onSelect={() => navigateTo("/doctors-clinics")}>
                 <Building2 /> Doctors & clinics
               </CommandItem>
               <CommandItem onSelect={() => navigateTo("/cases")}>
                 <ClipboardList /> Case pipeline{" "}
-                <CommandShortcut>G C</CommandShortcut>
+                <CommandShortcut>{formatForDisplay("G C")}</CommandShortcut>
               </CommandItem>
               <CommandItem onSelect={() => navigateTo("/appliances")}>
                 <SlidersHorizontal /> Appliances & fields

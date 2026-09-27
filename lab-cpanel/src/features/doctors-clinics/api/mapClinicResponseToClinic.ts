@@ -7,6 +7,6 @@ export function mapClinicResponseToClinic(response: ClinicResponse): Clinic {
     name: response.name,
     address: response.address,
     phone: response.phone,
-    billingEmail: response.billing_email,
+    email: response.email,
   }
 }

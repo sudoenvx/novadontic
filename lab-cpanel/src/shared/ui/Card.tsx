@@ -5,18 +5,22 @@ function Card({
   className,
   size = "sm",
   variant = "default",
+  disabled = false,
   ...props
 }: React.ComponentProps<"div"> & {
   size?: "default" | "sm" | "md" | "xs"
   variant?: "default" | "transparent" | "window"
+  disabled?: boolean
 }) {
   return (
     <div
       data-slot="card"
       data-size={size}
       data-variant={variant}
+      data-disabled={disabled || undefined}
       className={cn(
         "group/card flex flex-col overflow-hidden rounded-md bg-surface text-sm text-ink",
+        "data-[disabled]:pointer-events-none data-[disabled]:opacity-70",
         "[--card-spacing:--spacing(3)] data-[size=xs]:[--card-spacing:--spacing(1.5)] data-[size=sm]:[--card-spacing:--spacing(2)] data-[size=md]:[--card-spacing:--spacing(4)]",
         "data-[variant=transparent]:border-transparent data-[variant=transparent]:bg-transparent",
         // Added: Extra inner container spacing for the window layout so the nested elements don't hit the outer border

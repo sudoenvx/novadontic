@@ -17,15 +17,18 @@ type FieldGroupDialogProps = {
   onOpenChange: (open: boolean) => void
   onCreate: (name: string) => void
   isNameAvailable: (name: string) => boolean
+  initialName?: string
+  title?: string
+  submitLabel?: string
 }
 
-export function FieldGroupDialog({ open, onOpenChange, onCreate, isNameAvailable }: FieldGroupDialogProps) {
-  const [name, setName] = useState('')
+export function FieldGroupDialog({ open, onOpenChange, onCreate, isNameAvailable, initialName = '', title = 'Add field group', submitLabel = 'Add group' }: FieldGroupDialogProps) {
+  const [name, setName] = useState(initialName)
   const [error, setError] = useState('')
 
   function handleOpenChange(nextOpen: boolean) {
     if (!nextOpen) {
-      setName('')
+      setName(initialName)
       setError('')
     }
     onOpenChange(nextOpen)
@@ -49,7 +52,7 @@ export function FieldGroupDialog({ open, onOpenChange, onCreate, isNameAvailable
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Add field group</DialogTitle>
+          <DialogTitle>{title}</DialogTitle>
           <DialogDescription>Keep related prescription and clinical fields together for a faster case workflow.</DialogDescription>
         </DialogHeader>
         <form className="grid gap-3" onSubmit={handleSubmit}>
@@ -60,7 +63,7 @@ export function FieldGroupDialog({ open, onOpenChange, onCreate, isNameAvailable
           {error && <p className="text-xs text-destructive">{error}</p>}
           <DialogFooter>
             <Button type="button" variant="neutral" onClick={() => handleOpenChange(false)}>Cancel</Button>
-            <Button type="submit">Add group</Button>
+            <Button type="submit">{submitLabel}</Button>
           </DialogFooter>
         </form>
       </DialogContent>

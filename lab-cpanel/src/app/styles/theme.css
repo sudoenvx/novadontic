@@ -65,25 +65,25 @@
   --color-warning-hover: var(--warning-hover);
   --color-warning-active: var(--warning-active);
   --color-warning-foreground: var(--warning-foreground);
-  --color-warning-subtle: var(--warning-subtle);
-  --color-warning-subtle-foreground: var(--warning-subtle-foreground);
+  --color-warning-soft: var(--warning-soft);
+  --color-warning-soft-foreground: var(--warning-soft-foreground);
 
   --color-success: var(--success);
   --color-success-hover: var(--success-hover);
   --color-success-active: var(--success-active);
   --color-success-foreground: var(--success-foreground);
-  --color-success-subtle: var(--success-subtle);
-  --color-success-subtle-foreground: var(--success-subtle-foreground);
+  --color-success-soft: var(--success-soft);
+  --color-success-soft-foreground: var(--success-soft-foreground);
 
   --color-info: var(--info);
   --color-info-hover: var(--info-hover);
   --color-info-active: var(--info-active);
   --color-info-foreground: var(--info-foreground);
-  --color-info-subtle: var(--info-subtle);
-  --color-info-subtle-foreground: var(--info-subtle-foreground);
+  --color-info-soft: var(--info-soft);
+  --color-info-soft-foreground: var(--info-soft-foreground);
 
   --color-border: var(--border);
-  --color-border-subtle: var(--border-subtle);
+  --color-border-soft: var(--border-soft);
   --color-border-strong: var(--border-strong);
   --color-border-hover: var(--border-hover);
 

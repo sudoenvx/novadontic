@@ -16,7 +16,7 @@ export type NewClinic = {
   name: string
   address: string
   phone: string
-  billingEmail: string
+  email: string
 }
 
 type CreateClinicDialogProps = {
@@ -35,14 +35,14 @@ export function CreateClinicDialog({
   const [name, setName] = useState('')
   const [address, setAddress] = useState('')
   const [phone, setPhone] = useState('')
-  const [billingEmail, setBillingEmail] = useState('')
+  const [email, setEmail] = useState('')
   const [error, setError] = useState('')
 
   function resetForm() {
     setName('')
     setAddress('')
     setPhone('')
-    setBillingEmail('')
+    setEmail('')
     setError('')
   }
 
@@ -59,7 +59,7 @@ export function CreateClinicDialog({
 
     const normalizedName = name.trim()
 
-    if (!normalizedName || !address.trim() || !phone.trim() || !billingEmail.trim()) {
+    if (!normalizedName || !address.trim() || !phone.trim() || !email.trim()) {
       setError('Complete all clinic details.')
       return
     }
@@ -77,7 +77,7 @@ export function CreateClinicDialog({
       name: normalizedName,
       address: address.trim(),
       phone: phone.trim(),
-      billingEmail: billingEmail.trim(),
+      email: email.trim(),
     })
     handleOpenChange(false)
   }
@@ -123,13 +123,13 @@ export function CreateClinicDialog({
                 placeholder="+20 ..."
               />
             </Field>
-            <Field label="Billing email" htmlFor="clinic-email">
+            <Field label="Email" htmlFor="clinic-email">
               <Input
                 id="clinic-email"
                 type="email"
-                value={billingEmail}
-                onChange={(event) => setBillingEmail(event.currentTarget.value)}
-                placeholder="billing@clinic.eg"
+                value={email}
+                onChange={(event) => setEmail(event.currentTarget.value)}
+                placeholder="hello@clinic.eg"
               />
             </Field>
           </div>

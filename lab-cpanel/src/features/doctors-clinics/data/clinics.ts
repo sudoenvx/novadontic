@@ -7,28 +7,28 @@ const clinicResponses: ClinicResponse[] = [
     name: 'Smile Studio',
     address: '12 Tahrir St, Cairo',
     phone: '+20 100 111 2222',
-    billing_email: 'billing@smilestudio.eg',
+    email: 'hello@smilestudio.eg',
   },
   {
     id: 'adel-ortho',
     name: 'Adel Ortho',
     address: '4 Gezira St, Giza',
     phone: '+20 100 231 4412',
-    billing_email: 'billing@adelortho.eg',
+    email: 'hello@adelortho.eg',
   },
   {
     id: 'bright-dental',
     name: 'Bright Dental',
     address: '19 Corniche Rd, Alexandria',
     phone: '+20 100 882 1350',
-    billing_email: 'billing@brightdental.eg',
+    email: 'hello@brightdental.eg',
   },
   {
     id: 'ezzat-clinic',
     name: 'Ezzat Clinic',
     address: '7 Mostafa St, Mansoura',
     phone: '+20 100 772 9104',
-    billing_email: 'billing@ezzatclinic.eg',
+    email: 'hello@ezzatclinic.eg',
   },
 ]
 

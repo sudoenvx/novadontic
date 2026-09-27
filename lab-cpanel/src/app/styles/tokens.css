@@ -58,32 +58,33 @@
   --destructive-hover: oklch(from var(--destructive) calc(l - 0.052) calc(c * 1.08) h);
   --destructive-active: oklch(from var(--destructive) calc(l - 0.1) calc(c * 1.15) h);
   --destructive-foreground: oklch(100% 0 0);
-  --destructive-soft: oklch(from var(--destructive) calc(l + 0.3) calc(c * 0.17) h);
+  /* --destructive-soft: oklch(from var(--destructive) calc(l + 0.35) calc(c * 0.17) h); */
+  --destructive-soft: #f3dad5;
   --destructive-soft-foreground: oklch(30.8% 0.012 285.6);
 
   --warning: oklch(71.92% 0.12792 75.796);
   --warning-hover: oklch(from var(--warning) calc(l - 0.08) c h);
   --warning-active: oklch(from var(--warning) calc(l - 0.15) c h);
   --warning-foreground: oklch(25% 0.05 75);
-  --warning-subtle: oklch(from var(--warning) calc(l + 0.18) calc(c * 0.3) h);
-  --warning-subtle-foreground: oklch(30% 0.05 75);
+  --warning-soft: oklch(from var(--warning) calc(l + 0.18) calc(c * 0.3) h);
+  --warning-soft-foreground: oklch(30% 0.05 75);
 
   --success: oklch(59.051% 0.10639 163.88);
   --success-hover: oklch(from var(--success) calc(l - 0.08) c h);
   --success-active: oklch(from var(--success) calc(l - 0.15) c h);
   --success-foreground: oklch(100% 0 0);
-  --success-subtle: oklch(from var(--success) calc(l + 0.3) calc(c * 0.25) h);
-  --success-subtle-foreground: oklch(25% 0.05 163);
+  --success-soft: oklch(from var(--success) calc(l + 0.3) calc(c * 0.25) h);
+  --success-soft-foreground: oklch(25% 0.05 163);
 
   --info: oklch(59.882% 0.11679 231.816);
   --info-hover: oklch(from var(--info) calc(l - 0.08) c h);
   --info-active: oklch(from var(--info) calc(l - 0.15) c h);
   --info-foreground: oklch(100% 0 0);
-  --info-subtle: oklch(from var(--info) calc(l + 0.3) calc(c * 0.2) h);
-  --info-subtle-foreground: oklch(25% 0.05 230);
+  --info-soft: oklch(from var(--info) calc(l + 0.3) calc(c * 0.2) h);
+  --info-soft-foreground: oklch(25% 0.05 230);
 
   --border: var(--neutral-300);
-  --border-subtle: var(--neutral-200);
+  --border-soft: var(--neutral-200);
   --border-strong: var(--neutral-400);
   --border-hover: oklch(from var(--border) calc(l - 0.1) c h);
 

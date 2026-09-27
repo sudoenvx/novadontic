@@ -68,7 +68,7 @@ function ProductionStep({
         <span className="text-xs text-text-muted">{step.files.length} {step.files.length === 1 ? 'file' : 'files'}</span>
         <ChevronDown className="ml-auto size-4 text-text-muted transition-transform group-open:rotate-180" />
       </summary>
-      <div className="mt-2 grid gap-2 border-t border-border-subtle pt-2">
+      <div className="mt-2 grid gap-2 border-t border-border-soft pt-2">
         <button
           type="button"
           className="rounded-sm bg-surface px-3 py-3 text-sm text-secondary hover:bg-primary-soft"

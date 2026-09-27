@@ -134,7 +134,7 @@ export function DoctorsClinicsPage() {
 
   return (
     <Page size="full">
-      <div className="flex flex-wrap items-center justify-between gap-2 rounded-md bg-surface p-2 ring-1 ring-inset ring-border-subtle">
+      <div className="flex flex-wrap items-center justify-between gap-2 rounded-md bg-surface p-2 ring-1 ring-inset ring-border-soft">
         <Tabs
           value={viewMode}
           onValueChange={(value) => {
@@ -265,7 +265,7 @@ export function DoctorsClinicsPage() {
 
 function EmptyState({ title, description }: { title: string; description: string }) {
   return (
-    <div className="flex min-h-56 flex-col items-center justify-center rounded-md bg-surface px-4 py-8 text-center ring-1 ring-inset ring-border-subtle">
+    <div className="flex min-h-56 flex-col items-center justify-center rounded-md bg-surface px-4 py-8 text-center ring-1 ring-inset ring-border-soft">
       <p className="text-sm font-semibold text-text">{title}</p>
       <p className="mt-1 max-w-sm text-sm text-text-muted">{description}</p>
     </div>

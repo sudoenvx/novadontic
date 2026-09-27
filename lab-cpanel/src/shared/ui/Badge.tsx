@@ -14,8 +14,8 @@ export type BadgeProps = HTMLAttributes<HTMLSpanElement> & {
 const toneClasses: Record<BadgeTone, string> = {
   neutral: 'bg-surface-muted text-secondary',
   info: 'bg-primary-soft text-primary-soft-foreground',
-  success: 'bg-primary-soft text-primary-soft-foreground',
-  warning: 'bg-accent-soft text-accent-soft-foreground',
+  success: 'bg-success-soft text-success-soft-foreground',
+  warning: 'bg-warning-soft text-warning-soft-foreground',
   destructive: 'bg-destructive-soft text-destructive',
 }
 

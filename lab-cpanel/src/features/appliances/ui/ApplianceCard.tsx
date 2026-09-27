@@ -1,9 +1,10 @@
-import { ArrowUpRight, Layers3 } from 'lucide-react'
+import { SparklesIcon } from 'lucide-react'
 
 import { Badge } from '../../../shared/ui/Badge'
-import { Button } from '../../../shared/ui/Button'
 import { Card } from '../../../shared/ui/Card'
+import { Switch } from '../../../shared/ui/Switch'
 import { getApplianceFieldCount, getApplianceGroupCount, type Appliance } from '../domain/appliance'
+import type { KeyboardEvent } from 'react'
 
 type ApplianceCardProps = {
   appliance: Appliance
@@ -14,54 +15,78 @@ type ApplianceCardProps = {
 export function ApplianceCard({ appliance, onOpen, onToggle }: ApplianceCardProps) {
   const fieldCount = getApplianceFieldCount(appliance)
   const groupCount = getApplianceGroupCount(appliance)
+  const isConfigured = fieldCount > 0
+  const isGlobal = appliance.source?.toLowerCase().includes('platform') ?? false
+
+  const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault()
+      onOpen()
+    }
+  }
 
   return (
-    <Card className="gap-3">
+    <Card
+      role="button"
+      tabIndex={0}
+      onClick={onOpen}
+      onKeyDown={handleKeyDown}
+      aria-label={`Open ${appliance.name}`}
+      className={`group gap-4 cursor-pointer transition-all  focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 `}
+    >
+      {/* Header: icon, name, scope pill, and the toggle — the switch is the one
+          control that must NOT trigger onOpen, so its click is stopped below. */}
       <div className="flex items-start justify-between gap-3">
         <div className="flex min-w-0 items-center gap-3">
-          <span className="grid size-11 shrink-0 place-items-center rounded-md text-xl" style={{ backgroundColor: appliance.color }} aria-hidden="true">
-            {appliance.icon}
+          <span
+            className={`grid size-9 shrink-0 place-items-center rounded-sm transition-colors ${
+              appliance.isActive
+                ? 'bg-neutral-100 text-primary-soft-foreground'
+                : 'bg-surface-muted text-text-muted'
+            }`}
+            aria-hidden="true"
+          >
+            <SparklesIcon size={19} />
           </span>
           <div className="min-w-0">
-            <h2 className="truncate text-sm font-semibold text-text">{appliance.name}</h2>
-            <p className="text-xs text-text-muted">{appliance.source}</p>
+            <h2 className="truncate text-sm font-semibold text-text" title={appliance.name}>
+              {appliance.name}
+            </h2>
+            <p className="mt-0.5 truncate text-xs text-text-muted">
+              {isGlobal ? 'Platform default' : appliance.source}
+            </p>
           </div>
         </div>
-        <button
-          type="button"
-          role="switch"
-          aria-checked={appliance.isActive}
+        <Switch
+          checked={appliance.isActive}
           aria-label={`${appliance.isActive ? 'Deactivate' : 'Activate'} ${appliance.name}`}
-          onClick={(event) => {
-            event.stopPropagation()
+          onCheckedChange={() => {
             onToggle()
           }}
-          className={`relative mt-1 h-6 w-10 shrink-0 rounded-full p-0.5 transition-colors ${appliance.isActive ? 'bg-primary' : 'bg-surface-muted'}`}
-        >
-          <span className={`block size-5 rounded-full bg-surface shadow-sm transition-transform ${appliance.isActive ? 'translate-x-4' : 'translate-x-0'}`} />
-        </button>
+          onClick={(event) => event.stopPropagation()}
+        />
       </div>
-      <div className="border-t border-border pt-3">
-        <div className="flex gap-6">
-          <div>
-            <p className="text-lg font-semibold leading-none text-text">{groupCount}</p>
-            <p className="mt-1 text-[10px] uppercase text-text-muted">Groups</p>
-          </div>
-          <div>
-            <p className="text-lg font-semibold leading-none text-text">{fieldCount}</p>
-            <p className="mt-1 text-[10px] uppercase text-text-muted">Fields</p>
-          </div>
-        </div>
-      </div>
+
+      {!isConfigured && (
+        <p className="-mt-1 text-xs font-medium text-amber-600">
+          No fields configured yet — cases of this type won't collect any specifics.
+        </p>
+      )}
+
+      {/* Footer: status + usage on the left (what it IS), action on the right
+          (what you can DO). Configure still works as its own button for anyone
+          who only wants to click the exact label, but the whole card is live. */}
       <div className="flex items-center justify-between gap-2">
-        {appliance.casesUsing > 0 ? (
-          <Badge tone="success"><Layers3 /> {appliance.casesUsing} cases using it</Badge>
-        ) : (
-          <Badge>Not used yet</Badge>
-        )}
-        <Button variant="ghost" size="sm" onClick={onOpen}>
-          Manage <ArrowUpRight />
-        </Button>
+        <div className="flex min-w-0 flex-wrap items-center gap-2">
+          <Badge tone={appliance.isActive ? 'success' : 'destructive'}>
+            {appliance.isActive ? 'Active' : 'Inactive'}
+          </Badge>
+          <Badge tone={appliance.casesUsing > 0 ? 'neutral' : 'neutral'}>
+            {appliance.casesUsing > 0 ? `${appliance.casesUsing} cases used it` : 'Not used yet'}
+          </Badge>
+          <Badge tone="neutral">{groupCount} groups</Badge>
+          <Badge tone="neutral">{fieldCount} fields</Badge>
+        </div>
       </div>
     </Card>
   )

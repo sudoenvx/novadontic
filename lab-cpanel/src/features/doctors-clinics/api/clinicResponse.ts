@@ -3,5 +3,5 @@ export type ClinicResponse = {
   name: string
   address: string
   phone: string
-  billing_email: string
+  email: string
 }

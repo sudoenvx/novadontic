@@ -5,7 +5,7 @@ export type Clinic = {
   name: string
   address: string
   phone: string
-  billingEmail: string
+  email: string
 }
 
 export function filterClinics(

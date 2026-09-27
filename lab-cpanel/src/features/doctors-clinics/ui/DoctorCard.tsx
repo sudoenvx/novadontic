@@ -51,7 +51,7 @@ export function DoctorCard({
 
   return (
     <article
-      className={`flex min-w-0 flex-col gap-3 rounded-md border border-border-subtle p-2 ${onClick ? 'cursor-pointer transition-colors hover:border-primary' : ''}`}
+      className={`flex min-w-0 flex-col gap-3 rounded-md border border-border-soft p-2 ${onClick ? 'cursor-pointer transition-colors hover:border-primary' : ''}`}
       onClick={handleCardClick}
       onKeyDown={handleCardKeyDown}
       role={onClick ? 'button' : undefined}
@@ -111,7 +111,7 @@ export function DoctorCard({
         <DoctorPortalStatusBadge status={doctor.status} />
       </div>
 
-      <div className="flex items-center justify-between gap-3 border-t border-border-subtle pt-2 text-xs text-secondary">
+      <div className="flex items-center justify-between gap-3 border-t border-border-soft pt-2 text-xs text-secondary">
         <span>
           <strong className="text-text">{doctor.activeCases}</strong>{' '}
           active {doctor.activeCases === 1 ? 'case' : 'cases'}
