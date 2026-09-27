@@ -37,7 +37,7 @@ export function AppliancesPage() {
     <Page size="full">
       <Card className="gap-3 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-base font-semibold text-text">Appliances &amp; fields</h1>
+          <h1 className="text-base font-semibold uppercase text-primary-hover">Appliances &amp; fields</h1>
           <p className="text-sm text-text-muted">Groups let you organize related fields; each field controls its own type, default, and options.</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">

@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { useState } from 'react'
-import { Plus, Search } from 'lucide-react'
+import { LayoutGrid, List, Plus, Search } from 'lucide-react'
 
 import { Card, CardHeader, CardTitle } from '../../../shared/ui/Card'
 import { Button } from '../../../shared/ui/Button'
@@ -24,8 +24,10 @@ import { CreateClinicDialog, type NewClinic } from './CreateClinicDialog'
 import { CreateDoctorDialog, type NewDoctor } from './CreateDoctorDialog'
 import { DoctorFormDialog, type DoctorFormValues } from './DoctorFormDialog'
 import { DoctorCard } from './DoctorCard'
+import { DoctorTable } from './DoctorTable'
 
 type ViewMode = 'clinics' | 'doctors'
+type DoctorDisplayMode = 'grid' | 'table'
 
 export function DoctorsClinicsPage() {
   const navigate = useNavigate()
@@ -37,6 +39,7 @@ export function DoctorsClinicsPage() {
   const [isCreateClinicOpen, setIsCreateClinicOpen] = useState(false)
   const [isCreateDoctorOpen, setIsCreateDoctorOpen] = useState(false)
   const [editingDoctor, setEditingDoctor] = useState<Doctor | null>(null)
+  const [doctorDisplayMode, setDoctorDisplayMode] = useState<DoctorDisplayMode>('grid')
 
   const visibleClinics = filterClinics(clinics, doctors, searchTerm)
   const visibleDoctors = filterDoctors(doctors, clinics, searchTerm)
@@ -167,9 +170,13 @@ export function DoctorsClinicsPage() {
             aria-label="Search clinics or doctors"
           />
         </InputGroup>
-        <Button onClick={() => setIsCreateClinicOpen(true)}>
-          <Plus />
-          Add clinic
+        {viewMode === 'doctors' && (
+          <Button onClick={() => setIsCreateDoctorOpen(true)}>
+            <Plus /> Add doctor
+          </Button>
+        )}
+        <Button variant={viewMode === 'doctors' ? 'neutral' : 'default'} onClick={() => setIsCreateClinicOpen(true)}>
+          <Plus /> Add clinic
         </Button>
         </div>
       </div>
@@ -204,26 +211,41 @@ export function DoctorsClinicsPage() {
         </section>
       ) : (
         <Card size="sm">
-          <CardHeader>
+          <CardHeader className="flex flex-wrap items-center justify-between gap-3">
             <CardTitle className="normal-case">
               All doctors <span className="text-text-muted">({visibleDoctors.length})</span>
             </CardTitle>
+            <div className="flex items-center gap-1 rounded-sm bg-surface-muted p-0.5" aria-label="Choose doctor display view">
+              <Button type="button" size="icon-sm" variant={doctorDisplayMode === 'grid' ? 'default' : 'ghost'} aria-label="Show doctors as cards" aria-pressed={doctorDisplayMode === 'grid'} onClick={() => setDoctorDisplayMode('grid')}><LayoutGrid /></Button>
+              <Button type="button" size="icon-sm" variant={doctorDisplayMode === 'table' ? 'default' : 'ghost'} aria-label="Show doctors as table" aria-pressed={doctorDisplayMode === 'table'} onClick={() => setDoctorDisplayMode('table')}><List /></Button>
+            </div>
           </CardHeader>
           {visibleDoctors.length > 0 ? (
-            <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {visibleDoctors.map((doctor) => (
-                <DoctorCard
-                  key={doctor.id}
-                  doctor={doctor}
-                  clinicName={clinics.find((clinic) => clinic.id === doctor.clinicId)?.name}
-                  showClinic
-                  onDelete={() => handleDeleteDoctor(doctor.id)}
-                  onEdit={() => openEditDoctor(doctor)}
-                  onRevokePortalAccess={() => handleRevokePortalAccess(doctor.id)}
-                  onClick={() => openDoctorDetails(doctor)}
-                />
-              ))}
-            </div>
+            doctorDisplayMode === 'table' ? (
+              <DoctorTable
+                doctors={visibleDoctors}
+                getClinicName={(doctor) => clinics.find((clinic) => clinic.id === doctor.clinicId)?.name}
+                onDelete={(doctor) => handleDeleteDoctor(doctor.id)}
+                onEdit={openEditDoctor}
+                onRevokePortalAccess={(doctor) => handleRevokePortalAccess(doctor.id)}
+                onView={openDoctorDetails}
+              />
+            ) : (
+              <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                {visibleDoctors.map((doctor) => (
+                  <DoctorCard
+                    key={doctor.id}
+                    doctor={doctor}
+                    clinicName={clinics.find((clinic) => clinic.id === doctor.clinicId)?.name}
+                    showClinic
+                    onDelete={() => handleDeleteDoctor(doctor.id)}
+                    onEdit={() => openEditDoctor(doctor)}
+                    onRevokePortalAccess={() => handleRevokePortalAccess(doctor.id)}
+                    onClick={() => openDoctorDetails(doctor)}
+                  />
+                ))}
+              </div>
+            )
           ) : (
             <EmptyState
               title="No doctors found"

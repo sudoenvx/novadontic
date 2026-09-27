@@ -1,7 +1,7 @@
 import { cn } from 'cn'
 import type { CSSProperties, HTMLAttributes } from 'react'
 
-export type BadgeTone = 'neutral' | 'info' | 'success' | 'warning' | 'destructive'
+export type BadgeTone = 'neutral' | 'info' | 'success' | 'warning' | 'destructive' | 'accent'
 export type BadgeSize = 'sm' | 'md'
 
 export type BadgeProps = HTMLAttributes<HTMLSpanElement> & {
@@ -17,6 +17,7 @@ const toneClasses: Record<BadgeTone, string> = {
   success: 'bg-success-soft text-success-soft-foreground',
   warning: 'bg-warning-soft text-warning-soft-foreground',
   destructive: 'bg-destructive-soft text-destructive',
+  accent: 'bg-accent-soft text-accent',
 }
 
 const sizeClasses: Record<BadgeSize, string> = {

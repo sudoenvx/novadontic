@@ -398,7 +398,7 @@ export function ApplianceDetailsPage() {
                     </div>
                   ))
                 ) : (
-                  <p className="px-4 py-6 text-sm text-text-muted">
+                  <p className="px-4 py-3 text-sm text-text-muted">
                     No fields yet. Add the first field to this group.
                   </p>
                 )}

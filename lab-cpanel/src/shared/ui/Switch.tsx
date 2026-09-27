@@ -3,7 +3,7 @@ import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from 'cn'
 
 const switchVariants = cva(
-  'inline-flex shrink-0 cursor-pointer items-center rounded-full bg-surface-muted p-0.5 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary/30 data-disabled:pointer-events-none data-disabled:cursor-not-allowed data-disabled:opacity-50 data-checked:[&>span]:translate-x-full',
+  'inline-flex shrink-0 cursor-default items-center rounded-full bg-surface-muted p-0.5 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary/30 data-disabled:pointer-events-none data-disabled:cursor-not-allowed data-disabled:opacity-50 data-checked:[&>span]:translate-x-full',
   {
     variants: {
       variant: {

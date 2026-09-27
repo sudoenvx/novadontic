@@ -1,4 +1,4 @@
-import { SparklesIcon } from 'lucide-react'
+import { LayoutDashboard } from 'lucide-react'
 
 import { Badge } from '../../../shared/ui/Badge'
 import { Card } from '../../../shared/ui/Card'
@@ -39,14 +39,14 @@ export function ApplianceCard({ appliance, onOpen, onToggle }: ApplianceCardProp
       <div className="flex items-start justify-between gap-3">
         <div className="flex min-w-0 items-center gap-3">
           <span
-            className={`grid size-9 shrink-0 place-items-center rounded-sm transition-colors ${
+            className={`grid size-8 shrink-0 place-items-center rounded-sm transition-colors ${
               appliance.isActive
                 ? 'bg-neutral-100 text-primary-soft-foreground'
                 : 'bg-surface-muted text-text-muted'
             }`}
             aria-hidden="true"
           >
-            <SparklesIcon size={19} />
+            <LayoutDashboard size={19} />
           </span>
           <div className="min-w-0">
             <h2 className="truncate text-sm font-semibold text-text" title={appliance.name}>

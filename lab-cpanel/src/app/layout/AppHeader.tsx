@@ -12,6 +12,7 @@ import {
   Settings,
   SlidersHorizontal,
   UserRound,
+  Workflow,
 } from "lucide-react";
 
 import { Brand } from "../../shared/ui/Brand";
@@ -122,6 +123,9 @@ export function AppHeader({ context }: AppHeaderProps) {
               <DropdownMenuItem onClick={() => navigateTo("/appliances")}>
                 <SlidersHorizontal /> Appliances & fields
               </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigateTo("/appliance-workflow-templates")}>
+                <Workflow /> Workflow templates
+              </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
@@ -163,6 +167,9 @@ export function AppHeader({ context }: AppHeaderProps) {
               </CommandItem>
               <CommandItem onSelect={() => navigateTo("/appliances")}>
                 <SlidersHorizontal /> Appliances & fields
+              </CommandItem>
+              <CommandItem onSelect={() => navigateTo("/appliance-workflow-templates")}>
+                <Workflow /> Workflow templates
               </CommandItem>
             </CommandGroup>
             <CommandGroup heading="Account">

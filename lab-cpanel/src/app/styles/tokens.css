@@ -39,7 +39,7 @@
   --secondary-foreground: oklch(92% 0 0);
 
   --primary: var(--brand-blue);
-  --primary-foreground: oklch(92% 0 0);
+  --primary-foreground: oklch(94% 0 0);
   --primary-soft: oklch(from var(--primary) calc(l + 0.28) calc(c * 0.5) h);
   --primary-soft-light: oklch(from var(--primary) calc(l + 0.34) calc(c * 0.14) h);
   --primary-soft-foreground: var(--neutral-700);
@@ -47,7 +47,7 @@
   --primary-active: oklch(from var(--primary) calc(l + 0.12) calc(c * 0.75) h);
 
   --accent: var(--brand-violet);
-  --accent-foreground: #000;
+  --accent-foreground: oklch(92% 0 0);
   --accent-soft: oklch(from var(--accent) calc(l + 0.28) calc(c * 0.5) h);
   --accent-soft-light: oklch(from var(--accent) calc(l + 0.34) calc(c * 0.14) h);
   --accent-soft-foreground: var(--neutral-700);

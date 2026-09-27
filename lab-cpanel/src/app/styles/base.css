@@ -30,7 +30,6 @@ p {
 h1,
 h2,
 h3 {
-  color: var(--color-brand-ink);
   letter-spacing: -0.018em;
 }
 
@@ -42,7 +41,6 @@ select {
 }
 
 button {
-  border: 0;
   cursor: pointer;
 }
 
