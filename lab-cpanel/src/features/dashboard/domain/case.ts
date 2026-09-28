@@ -1,4 +1,4 @@
-export type CaseType = 'Clear aligners' | 'Retainers' | 'Expanders' | 'Fixed appliances'
+export type CaseType = 'Aligner' | 'Retainer'
 export type CaseStage = 'Planning' | 'Production' | 'Quality check' | 'Ready'
 export type CaseStatus = 'On track' | 'Due today' | 'Needs attention'
 
@@ -7,6 +7,7 @@ export type DashboardCase = {
   patientName: string
   clinic: string
   caseType: CaseType
+  category: string
   stage: CaseStage
   dueDate: string
   status: CaseStatus

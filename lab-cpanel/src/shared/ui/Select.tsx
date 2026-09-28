@@ -1,9 +1,24 @@
 import * as React from "react"
 import { Select as SelectPrimitive } from "@base-ui/react/select"
 import { cn } from "cn"
+import { cva, type VariantProps } from "class-variance-authority"
 import { ChevronDownIcon, CheckIcon, ChevronUpIcon } from "lucide-react"
 
 const Select = SelectPrimitive.Root
+
+const selectTriggerVariants = cva(
+  "flex w-fit items-center justify-between font-medium gap-1.5 rounded-sm border! px-2 py-1 text-xs/relaxed whitespace-nowrap transition-colors outline-none focus-visible:border-neutral-600 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-2 aria-invalid:ring-destructive/20 data-placeholder:text-text data-[size=default]:h-7 data-[size=sm]:h-6 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-1.5 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-3.5 cursor-default!",
+  {
+    variants: {
+      variant: {
+        default: "bg-surface border-border! dark:bg-input/30 dark:hover:bg-input/50",
+        neutral:
+          "bg-neutral-100 border-none text-neutral-900  dark:bg-neutral-800 dark:border-neutral-700! dark:text-neutral-100 dark:hover:bg-neutral-700",
+      },
+    },
+    defaultVariants: { variant: "default" },
+  }
+)
 
 function SelectGroup({ className, ...props }: SelectPrimitive.Group.Props) {
   return (
@@ -30,19 +45,17 @@ function SelectValue({ className, children, ...props }: SelectPrimitive.Value.Pr
 function SelectTrigger({
   className,
   size = "default",
+  variant = "default",
   children,
   ...props
-}: SelectPrimitive.Trigger.Props & {
+}: SelectPrimitive.Trigger.Props & VariantProps<typeof selectTriggerVariants> & {
   size?: "sm" | "default"
 }) {
   return (
     <SelectPrimitive.Trigger
       data-slot="select-trigger"
       data-size={size}
-      className={cn(
-        "flex w-fit items-center justify-between font-medium gap-1.5 rounded-sm bg-surface border! border-border! px-2 py-1 text-xs/relaxed whitespace-nowrap transition-colors outline-none focus-visible:border-neutral-600 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-2 aria-invalid:ring-destructive/20 data-placeholder:text-text data-[size=default]:h-7 data-[size=sm]:h-6 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-1.5 dark:bg-input/30 dark:hover:bg-input/50 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-3.5",
-        className
-      )}
+      className={cn(selectTriggerVariants({ variant }), className)}
       {...props}
     >
       {children}
@@ -116,7 +129,7 @@ function SelectItem({
     <SelectPrimitive.Item
       data-slot="select-item"
       className={cn(
-        "relative min-h-6 flex w-full cursor-default items-center gap-2 rounded-sm px-1.5 py-0.0 text-xs/relaxed outline-hidden select-none hover:bg-neutral-100 focus:text-text not-data-[variant=destructive]:focus:**:text-text data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-3.5 *:[span]:last:flex *:[span]:last:items-center *:[span]:last:gap-2 data-selected:bg-muted!",
+        "relative min-h-6 flex w-full cursor-default items-center gap-2 rounded-sm px-1.5 py-0.0 text-sm/relaxed outline-hidden select-none hover:bg-neutral-100 focus:text-text not-data-[variant=destructive]:focus:**:text-text data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-3.5 *:[span]:last:flex *:[span]:last:items-center *:[span]:last:gap-2 data-selected:bg-muted!",
         className
       )}
       {...props}

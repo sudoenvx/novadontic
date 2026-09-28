@@ -36,7 +36,7 @@ export function DataTableHeader<TData>({
         </TableHead>
       )}
       {columns.map((column) => (
-        <TableHead key={column.id} className={`py-1.5 text-start text-text-muted text-sm  ${column.headerClassName ?? ''}`}>
+        <TableHead key={column.id} className={`py-1.5 text-start text-text-muted text-sm uppercase ${column.headerClassName ?? ''}`}>
           <SortableHeader column={column} sortState={sortState} onSortChange={onSortChange} />
         </TableHead>
       ))}

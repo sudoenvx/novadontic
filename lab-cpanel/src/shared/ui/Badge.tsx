@@ -17,7 +17,7 @@ const toneClasses: Record<BadgeTone, string> = {
   success: 'bg-success-soft text-success-soft-foreground',
   warning: 'bg-warning-soft text-warning-soft-foreground',
   destructive: 'bg-destructive-soft text-destructive',
-  accent: 'bg-accent-soft text-accent',
+  accent: 'bg-accent-soft text-text',
 }
 
 const sizeClasses: Record<BadgeSize, string> = {

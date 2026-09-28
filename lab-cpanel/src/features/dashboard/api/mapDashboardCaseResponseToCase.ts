@@ -9,6 +9,7 @@ export function mapDashboardCaseResponseToCase(
     patientName: response.patient_name,
     clinic: response.clinic_name,
     caseType: response.appliance_type,
+    category: response.case_category,
     stage: response.production_stage,
     dueDate: response.due_date,
     status: response.case_status,

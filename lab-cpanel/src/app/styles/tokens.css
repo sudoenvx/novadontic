@@ -1,114 +1,385 @@
+/* ============================================================================
+   NOVADONTIC DESIGN SYSTEM  ·  tokens.css
+   ----------------------------------------------------------------------------
+   THIS FILE = THE VALUES.   theme.css = HOW TAILWIND SEES THEM.
+
+   Import order in your main CSS:
+       @import "tailwindcss";
+       @import "./tokens.css";
+       @import "./theme.css";
+
+   HOW TO USE (read this once):
+   1. To change how the whole app looks, edit ONLY this file.
+   2. In components use Tailwind classes:  bg-surface  text-text-muted
+      border-border  rounded-lg  shadow-card  bg-primary-soft ...
+      Never write raw hex colors or px sizes in components.
+   3. Every colour comes in a family:
+        --x              solid colour (buttons, icons, links)
+        --x-hover        hover state of the solid colour
+        --x-active       pressed state
+        --x-foreground   text that sits ON the solid colour
+        --x-soft         pale tint (tags, alerts, selected rows)
+        --x-soft-foreground   text that sits ON the soft tint
+   4. The look is the landing page's: blue→violet gradient, Plus Jakarta Sans,
+      white cards with a 1px soft border, sentence-case text (NO all-caps).
+   5. Dark mode: put data-theme="dark" on <html>. Only the section at the
+      bottom of this file changes. Components need no dark: classes.
+   ========================================================================== */
+
 :root {
-  color-scheme: light;
+    color-scheme: light;
 
-  --neutral-50: #f3f3f3;
-  --neutral-100: #ededed;
-  --neutral-200: #e5e5e5;
-  --neutral-300: #d4d4d4;
-  --neutral-400: #a3a3a3;
-  --neutral-500: #737373;
-  --neutral-600: #525252;
-  --neutral-700: #404040;
-  --neutral-800: #262626;
-  --neutral-900: #171717;
+    /* ==========================================================================
+     1. BRAND  (the only place raw brand colours live)
+     ========================================================================== */
+    --brand-blue: #2f6bff;
+    --brand-blue-dark: #1f4fd1;
+    /* text on pale blue, pressed states */
+    --brand-violet: #8b3ff2;
+    --brand-violet-dark: #6a26c4;
+    --brand-ink: #12172a;
+    /* the near-black used for text and dark pills */
+    --brand-navy: #0e1526;
+    /* dark sections, dark mode background */
 
-  --brand-blue: #0a78be;
-  --brand-blue-dark: #0061a0;
-  --brand-violet: #5462b7;
-  --brand-ink: #464749;
+    /* ==========================================================================
+     2. NEUTRALS  (blue-tinted greys, same as the landing page)
+     Use semantic tokens below in components, not these directly.
+     ========================================================================== */
+    --neutral-50: #f8f9fc;
+    --neutral-100: #f4f5fa;
+    /* app background */
+    --neutral-200: #eceff7;
+    /* soft fills, hover, dividers */
+    --neutral-300: #dfe3ee;
+    /* borders */
+    --neutral-400: #b8bfd0;
+    --neutral-500: #8a93a8;
+    --neutral-600: #5b6478;
+    /* secondary text */
+    --neutral-700: #3a4258;
+    --neutral-800: #1e2540;
+    --neutral-900: #12172a;
 
-  --surface: oklch(100% 0 0);
-  --surface-raised: oklch(98% 0 0);
-  --surface-secondary: var(--neutral-100);
-  --surface-muted: var(--neutral-200);
-  --surface-muted-light: var(--neutral-100);
-  --surface-soft: oklch(98% 0 0);
-  --canvas: color-mix(in srgb, var(--neutral-200) 70%, transparent);
+    /* ==========================================================================
+     3. SURFACES  (what things sit on)
+     canvas  → the page behind everything
+     surface → cards, panels, table rows, inputs
+     muted   → hover fills, disabled fills, code blocks
+     ========================================================================== */
+    --canvas: #f4f5fa;
+    --surface: #ffffff;
+    --surface-raised: #ffffff;
+    /* popovers, menus, dialogs */
+    --surface-soft: #fafbfe;
+    /* subtle zebra / nested panels */
+    --surface-secondary: #eceff7;
+    --surface-muted: #eceff7;
+    --surface-muted-light: #f4f5fa;
+    --overlay: rgb(14 21 38 / 45%);
+    /* dim layer behind dialogs */
 
-  --text: var(--neutral-800);
-  --text-primary: var(--neutral-800);
-  --text-secondary: var(--neutral-600);
-  --text-muted: var(--neutral-500);
-  --text-faint: var(--neutral-400);
-  --ink: var(--brand-ink);
-  --focus: var(--primary);
+    /* ==========================================================================
+     4. TEXT
+     ========================================================================== */
+    --text: var(--brand-ink);
+    --text-primary: var(--brand-ink);
+    /* headings, values, names */
+    --text-secondary: var(--neutral-600);
+    /* labels, descriptions */
+    --text-muted: var(--neutral-600);
+    --text-faint: var(--neutral-500);
+    /* placeholders, timestamps */
+    --ink: var(--brand-ink);
+    --link: var(--brand-blue);
 
-  --secondary: var(--neutral-700);
-  --secondary-hover: oklch(from var(--secondary) calc(l - 0.1) c h);
-  --secondary-active: oklch(from var(--secondary) calc(l - 0.18) c h);
-  --secondary-foreground: oklch(92% 0 0);
+    /* ==========================================================================
+     5. ACTION COLOURS
+     primary   = main action (gradient button, active nav, focus)
+     accent    = violet, second brand colour (highlights, "new", charts)
+     secondary = the DARK INK button/pill (selected toggle, "Save" on dark)
+     ========================================================================== */
+    --primary: var(--brand-blue);
+    --primary-light: #5b8cff;
+    --primary-hover: color-mix(in oklab, var(--primary) 88%, black);
+    --primary-active: color-mix(in oklab, var(--primary) 78%, black);
+    --primary-foreground: #ffffff;
+    --primary-soft: #e6edff;
+    --primary-soft-light: #f1f5ff;
+    --primary-soft-foreground: var(--brand-blue-dark);
 
-  --primary: var(--brand-blue);
-  --primary-foreground: oklch(94% 0 0);
-  --primary-soft: oklch(from var(--primary) calc(l + 0.28) calc(c * 0.5) h);
-  --primary-soft-light: oklch(from var(--primary) calc(l + 0.34) calc(c * 0.14) h);
-  --primary-soft-foreground: var(--neutral-700);
-  --primary-hover: oklch(from var(--primary) calc(l - 0.062) calc(c * 0.87) h);
-  --primary-active: oklch(from var(--primary) calc(l + 0.12) calc(c * 0.75) h);
+    --accent: var(--brand-violet);
+    --accent-hover: color-mix(in oklab, var(--accent) 88%, black);
+    --accent-active: color-mix(in oklab, var(--accent) 78%, black);
+    --accent-foreground: #ffffff;
+    --accent-soft: #efe4fd;
+    --accent-soft-light: #f7f1fe;
+    --accent-soft-foreground: var(--brand-violet-dark);
 
-  --accent: var(--brand-violet);
-  --accent-foreground: oklch(92% 0 0);
-  --accent-soft: oklch(from var(--accent) calc(l + 0.28) calc(c * 0.5) h);
-  --accent-soft-light: oklch(from var(--accent) calc(l + 0.34) calc(c * 0.14) h);
-  --accent-soft-foreground: var(--neutral-700);
-  --accent-hover: oklch(from var(--accent) calc(l - 0.062) calc(c * 0.87) h);
-  --accent-active: oklch(from var(--accent) calc(l + 0.12) calc(c * 0.75) h);
+    --secondary: var(--brand-ink);
+    --secondary-hover: #232b47;
+    --secondary-active: #323b5c;
+    --secondary-foreground: #ffffff;
 
-  --destructive: #c43f31;
-  --destructive-hover: oklch(from var(--destructive) calc(l - 0.052) calc(c * 1.08) h);
-  --destructive-active: oklch(from var(--destructive) calc(l - 0.1) calc(c * 1.15) h);
-  --destructive-foreground: oklch(100% 0 0);
-  /* --destructive-soft: oklch(from var(--destructive) calc(l + 0.35) calc(c * 0.17) h); */
-  --destructive-soft: #f3dad5;
-  --destructive-soft-foreground: oklch(30.8% 0.012 285.6);
+    /* ==========================================================================
+     6. STATUS COLOURS  (meaning, not decoration)
+     success = completed / delivered     warning = due today / attention
+     destructive = rush / late / delete  info    = in progress / neutral notice
+     ========================================================================== */
+    --success: #0b7a68;
+    --success-hover: color-mix(in oklab, var(--success) 88%, black);
+    --success-active: color-mix(in oklab, var(--success) 78%, black);
+    --success-foreground: #ffffff;
+    --success-soft: #dcf3ee;
+    --success-soft-foreground: #075648;
 
-  --warning: oklch(71.92% 0.12792 75.796);
-  --warning-hover: oklch(from var(--warning) calc(l - 0.08) c h);
-  --warning-active: oklch(from var(--warning) calc(l - 0.15) c h);
-  --warning-foreground: oklch(25% 0.05 75);
-  --warning-soft: oklch(from var(--warning) calc(l + 0.18) calc(c * 0.3) h);
-  --warning-soft-foreground: oklch(30% 0.05 75);
+    --warning: #c77700;
+    --warning-hover: color-mix(in oklab, var(--warning) 88%, black);
+    --warning-active: color-mix(in oklab, var(--warning) 78%, black);
+    --warning-foreground: #ffffff;
+    --warning-soft: #fdf0d8;
+    --warning-soft-foreground: #8a5200;
 
-  --success: oklch(59.051% 0.10639 163.88);
-  --success-hover: oklch(from var(--success) calc(l - 0.08) c h);
-  --success-active: oklch(from var(--success) calc(l - 0.15) c h);
-  --success-foreground: oklch(100% 0 0);
-  --success-soft: oklch(from var(--success) calc(l + 0.3) calc(c * 0.25) h);
-  --success-soft-foreground: oklch(25% 0.05 163);
+    --destructive: #d64550;
+    --destructive-hover: color-mix(in oklab, var(--destructive) 88%, black);
+    --destructive-active: color-mix(in oklab, var(--destructive) 78%, black);
+    --destructive-foreground: #ffffff;
+    --destructive-soft: #fde6e8;
+    --destructive-soft-foreground: #a02733;
 
-  --info: oklch(59.882% 0.11679 231.816);
-  --info-hover: oklch(from var(--info) calc(l - 0.08) c h);
-  --info-active: oklch(from var(--info) calc(l - 0.15) c h);
-  --info-foreground: oklch(100% 0 0);
-  --info-soft: oklch(from var(--info) calc(l + 0.3) calc(c * 0.2) h);
-  --info-soft-foreground: oklch(22.814% 0.04219 228.492);
+    --info: var(--brand-blue);
+    --info-hover: var(--primary-hover);
+    --info-active: var(--primary-active);
+    --info-foreground: #ffffff;
+    --info-soft: #e6edff;
+    --info-soft-foreground: var(--brand-blue-dark);
 
-  --border: var(--neutral-300);
-  --border-soft: var(--neutral-200);
-  --border-strong: var(--neutral-400);
-  --border-hover: oklch(from var(--border) calc(l - 0.1) c h);
+    /* ==========================================================================
+     7. BORDERS & FOCUS
+     Default border is 1px --border. Never use 2px dark borders for "active";
+     use --ring-active (soft halo) instead.
+     ========================================================================== */
+    --border: #dfe3ee;
+    --border-soft: #eceff7;
+    /* dividers inside cards */
+    --border-strong: #b8bfd0;
+    /* inputs on hover, dashed drop zones */
+    --border-hover: #c9cfdf;
+    --border-active: #b9c9ff;
+    /* active stage / selected card */
+    --focus: var(--brand-blue);
+    /* keyboard focus outline */
+    --ring-active: 0 0 0 3px var(--primary-soft);
+    /* soft halo for active cards */
+    --ring-focus: 0 0 0 3px color-mix(in oklab, var(--brand-blue) 28%, transparent);
 
-  --gradient-brand: linear-gradient(110deg, var(--brand-blue), var(--brand-violet));
-  --gradient-brand-hover: linear-gradient(110deg, var(--brand-blue-dark), var(--brand-violet));
+    /* ==========================================================================
+     8. GRADIENTS  (the signature; use on ONE primary action per view,
+     progress bars, step nodes, avatars, and brand text)
+     ========================================================================== */
+    --gradient-brand: linear-gradient(135deg, var(--brand-blue), var(--brand-violet));
+    --gradient-brand-hover: linear-gradient(135deg, var(--brand-blue-dark), var(--brand-violet-dark));
 
-  --shadow-card-value: 0 1px 2px color-mix(in srgb, var(--brand-ink) 8%, transparent), 0 4px 12px color-mix(in srgb, var(--brand-ink) 5%, transparent);
-  --shadow-float-value: 0 12px 30px color-mix(in srgb, var(--brand-ink) 14%, transparent);
-  --shadow-popover-value: 0 10px 24px color-mix(in srgb, var(--brand-ink) 16%, transparent);
-  --shadow-dialog-value: 0 20px 55px color-mix(in srgb, var(--brand-ink) 20%, transparent);
+    /* ==========================================================================
+     9. SHADOWS  (cards are mostly border-only; shadows are for things that float)
+     ========================================================================== */
+    --shadow-card-value: 0 1px 2px rgb(18 23 42 / 6%);
+    --shadow-float-value: 0 12px 30px rgb(18 23 42 / 12%);
+    --shadow-popover-value: 0 10px 24px rgb(18 23 42 / 14%);
+    --shadow-dialog-value: 0 20px 55px rgb(18 23 42 / 20%);
 
-  --text-size-2xs: 0.65625rem;
-  --text-size-xs: 0.6875rem;
-  --text-size-sm: 0.75rem;
-  --text-size-base: 0.8125rem;
-  --text-size-md: 0.875rem;
-  --text-size-lg: 1rem;
-  --text-size-xl: 1.125rem;
-  --text-size-2xl: 1.375rem;
-  --text-size-3xl: 1.625rem;
+    /* ==========================================================================
+     10. TYPOGRAPHY
+     Family: Plus Jakarta Sans (load it in index.html / @font-face).
+     Scale is COMPACT (13px body). Headings 700–800, tight tracking.
+     RULES: sentence case. No uppercase, no wide letter-spacing on buttons,
+     tags or links.
+     ========================================================================== */
+    --font-sans-value: "Plus Jakarta Sans", "Noto Sans Arabic", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --font-mono-value: ui-monospace, "SFMono-Regular", Consolas, monospace;
 
-  --radius-token-xs: 0.2rem;
-  --radius-token-sm: 0.3rem;
-  --radius-token-md: 0.5rem;
-  --radius-token-lg: 0.7rem;
-  --radius-token-pill: 999px;
+    --text-size-2xs: 0.6875rem;
+    /* 11px  micro labels, counters */
+    --text-size-xs: 0.71875rem;
+    /* 11.5px tags, pills, helper text */
+    --text-size-sm: 0.78125rem;
+    /* 12.5px secondary text, table meta */
+    --text-size-base: 0.84375rem;
+    /* 13.5px DEFAULT body / table cells */
+    --text-size-md: 0.9375rem;
+    /* 15px  card titles, section titles */
+    --text-size-lg: 1.0625rem;
+    /* 17px  */
+    --text-size-xl: 1.25rem;
+    /* 20px  */
+    --text-size-2xl: 1.5rem;
+    /* 24px  page titles (e.g. OR-4821) */
+    --text-size-3xl: 1.875rem;
+    /* 30px  dashboard hero numbers */
+
+    --leading-tight: 1.15;
+    /* headings */
+    --leading-snug: 1.35;
+    --leading-normal: 1.5;
+    /* body */
+    --tracking-tight: -0.02em;
+    /* headings */
+    --tracking-normal: 0;
+
+    --weight-regular: 400;
+    --weight-medium: 500;
+    --weight-semibold: 600;
+    --weight-bold: 700;
+    /* buttons, tags, labels */
+    --weight-extrabold: 800;
+    /* headings */
+
+    /* ==========================================================================
+     11. RADIUS  (landing look, scaled down for compact UI)
+     xs tags inside dense rows · sm buttons/inputs · md stage rows, menus
+     lg cards · xl dialogs, big panels · pill chips, avatars
+     ========================================================================== */
+    --radius-token-xs: 0.25rem;
+    /* 4px  */
+    --radius-token-sm: 0.5rem;
+    /* 8px  */
+    --radius-token-md: 0.6875rem;
+    /* 11px */
+    --radius-token-lg: 0.875rem;
+    /* 14px */
+    --radius-token-xl: 1.125rem;
+    /* 18px */
+    --radius-token-2xl: 1.5rem;
+    /* 24px */
+    --radius-token-pill: 999px;
+
+    /* ==========================================================================
+     12. DENSITY  (the "compact" setting lives here)
+     To make the app roomier or tighter, change ONLY these values.
+     ========================================================================== */
+    --control-xs: 1.5rem;
+    /* 24px tiny icon buttons */
+    --control-sm: 1.75rem;
+    /* 28px small buttons, inline actions */
+    --control-md: 2.125rem;
+    /* 34px DEFAULT button / input / select */
+    --control-lg: 2.5rem;
+    /* 40px prominent forms */
+    --row-height: 2.5rem;
+    /* 40px table rows, stage headers, list rows */
+    --row-height-compact: 2rem;
+    /* 32px dense tables */
+    --card-padding: 0.875rem;
+    /* 14px */
+    --page-gap: 0.75rem;
+    /* 12px space between cards */
+    --page-padding: 1.25rem;
+    /* 20px */
+    --icon-size: 1rem;
+    /* 16px default icon */
+    --icon-size-sm: 0.8125rem;
+    /* 13px icons inside pills */
+
+    /* ==========================================================================
+     13. APP SHELL  (layout dimensions)
+     ========================================================================== */
+    --navbar-height: 3.5rem;
+    /* 56px */
+    --sidebar-width-collapsed: 3.5rem;
+    /* 56px icon rail */
+    --sidebar-width: 15rem;
+    /* 240px expanded */
+    --content-max-width: 73.75rem;
+    /* 1180px */
+    --aside-width: 18.75rem;
+    /* 300px right info column */
+
+    /* ==========================================================================
+     14. MOTION
+     Keep it short. Animate what the user just did (open, expand, confirm).
+     ========================================================================== */
+    --duration-fast: 120ms;
+    /* hover, focus */
+    --duration-base: 180ms;
+    /* expand/collapse, toggles */
+    --duration-slow: 320ms;
+    /* progress bars, dialogs */
+    --motion-ease: cubic-bezier(0.2, 0, 0, 1);
+
+    /* ==========================================================================
+     15. LAYERS (z-index)
+     ========================================================================== */
+    --z-sticky: 20;
+    /* navbar, table headers */
+    --z-sidebar: 30;
+    --z-dropdown: 40;
+    /* menus, popovers, tooltips */
+    --z-overlay: 50;
+    /* dim layer */
+    --z-dialog: 60;
+    --z-toast: 70;
+}
+
+/* ============================================================================
+   DARK MODE  ·  add data-theme="dark" to <html>
+   Only surfaces, text, borders, soft tints and shadows change. Brand colours
+   stay the same. Follow the OS setting with this one-liner on app start:
+     document.documentElement.dataset.theme =
+       matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+   ========================================================================== */
+:root[data-theme="dark"] {
+    color-scheme: dark;
+
+    --canvas: #0e1526;
+    --surface: #16203a;
+    --surface-raised: #1b2745;
+    --surface-soft: #131c33;
+    --surface-secondary: #1f2a47;
+    --surface-muted: #1f2a47;
+    --surface-muted-light: #182240;
+    --overlay: rgb(3 6 14 / 65%);
+
+    --text: #eef0f8;
+    --text-primary: #eef0f8;
+    --text-secondary: #a3acc2;
+    --text-muted: #a3acc2;
+    --text-faint: #7d879f;
+    --ink: #eef0f8;
+    --link: #7ea3ff;
+
+    --primary-soft: #1b2c5c;
+    --primary-soft-light: #17244a;
+    --primary-soft-foreground: #a9c0ff;
+    --accent-soft: #2c1f52;
+    --accent-soft-light: #241a45;
+    --accent-soft-foreground: #cfb0fb;
+    --secondary: #eef0f8;
+    /* ink pill flips to light */
+    --secondary-hover: #dfe3f0;
+    --secondary-active: #cfd5e6;
+    --secondary-foreground: #12172a;
+
+    --success: #2bb59d;
+    --success-soft: #0f3a34;
+    --success-soft-foreground: #8de0cf;
+    --warning: #e59a2b;
+    --warning-soft: #3b2b0c;
+    --warning-soft-foreground: #f2c377;
+    --destructive: #ea6570;
+    --destructive-soft: #3d1a1f;
+    --destructive-soft-foreground: #f5a6ad;
+    --info-soft: #1b2c5c;
+    --info-soft-foreground: #a9c0ff;
+
+    --border: #26314f;
+    --border-soft: #1f2a47;
+    --border-strong: #3a4766;
+    --border-hover: #33405f;
+    --border-active: #3d5bb5;
+    --ring-active: 0 0 0 3px var(--primary-soft);
+
+    --shadow-card-value: 0 1px 2px rgb(0 0 0 / 30%);
+    --shadow-float-value: 0 12px 30px rgb(0 0 0 / 45%);
+    --shadow-popover-value: 0 10px 24px rgb(0 0 0 / 45%);
+    --shadow-dialog-value: 0 20px 55px rgb(0 0 0 / 55%);
 }

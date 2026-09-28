@@ -1,9 +1,8 @@
-import { Bell, Building2, Settings2 } from 'lucide-react'
+import { Bell, Settings2 } from 'lucide-react'
 
 import { getLabSettingsSectionLabel, type LabSettingsSection } from '../domain/labSettings'
 
-const sections: { id: LabSettingsSection; icon: typeof Building2 }[] = [
-  { id: 'profile', icon: Building2 },
+const sections: { id: LabSettingsSection; icon: typeof Settings2 }[] = [
   { id: 'operations', icon: Settings2 },
   { id: 'notifications', icon: Bell },
 ]
@@ -20,7 +19,7 @@ export function LabSettingsSidebar({ selectedSection, onSelect }: { selectedSect
           <button
             key={id}
             type="button"
-            className={`flex items-center gap-2 rounded-sm px-2 py-1 text-start text-sm font-medium transition-colors ${selectedSection === id ? 'bg-secondary text-secondary-foreground' : 'text-secondary hover:bg-surface-muted hover:text-text'}`}
+            className={`flex items-center gap-2 rounded-sm px-2 py-1 text-start text-sm font-medium transition-colors ${selectedSection === id ? 'bg-accent text-accent-foreground' : 'text-secondary hover:bg-neutral-100 hover:text-text'}`}
             onClick={() => onSelect(id)}
             aria-current={selectedSection === id ? 'page' : undefined}
           >

@@ -3,6 +3,7 @@ import { useMemo, useState } from "react";
 
 import { Badge } from "../../../shared/ui/Badge";
 import { Button } from "../../../shared/ui/Button";
+import { AppHeader, AppHeaderActions } from "../../../shared/ui/AppHeader";
 import { Card } from "../../../shared/ui/Card";
 import {
   Dialog,
@@ -215,25 +216,19 @@ export function ApplianceWorkflowTemplatesPage() {
 
   return (
     <Page size="full">
-      <Card className="gap-2 md:flex-row md:items-center md:justify-between">
-        <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-base font-semibold uppercase text-primary-hover">
-              Workflow templates
-            </h1>
-          </div>
-          <p className="mt-1 text-sm text-text-muted">
-            Define reusable production steps for every appliance type in your
-            lab.
-          </p>
-        </div>
-        <Button
-          onClick={() => setIsCreateWorkflowOpen(true)}
-          disabled={!selectedAppliance}
-        >
-          <Plus /> Add workflow
-        </Button>
-      </Card>
+      <AppHeader
+        title="Workflow templates"
+        description="Define reusable production steps for every appliance type in your lab."
+      >
+        <AppHeaderActions>
+          <Button
+            onClick={() => setIsCreateWorkflowOpen(true)}
+            disabled={!selectedAppliance}
+          >
+            <Plus /> Add workflow
+          </Button>
+        </AppHeaderActions>
+      </AppHeader>
 
       <div className="grid gap-3 lg:grid-cols-[15rem_minmax(0,1fr)]">
         <Card className="h-fit gap-2">

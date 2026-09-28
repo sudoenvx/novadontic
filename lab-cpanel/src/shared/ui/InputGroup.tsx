@@ -7,12 +7,12 @@ import { Input } from "./Input"
 import { Textarea } from "./Textarea"
 
 const inputGroupVariants = cva(
-  "group/input-group relative flex h-7 w-full min-w-0 items-center rounded-sm border border-border bg-surface focus-within:bg-neutral-100 transition-colors outline-none  focus-within:border-neutral-400  disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 group-data-[disabled=true]/input-group:border-disabled-background group-data-[disabled=true]/input-group:bg-disabled-background in-data-[slot=combobox-content]:focus-within:border-inherit in-data-[slot=combobox-content]:focus-within:ring-0 has-data-[align=block-end]:rounded-sm has-data-[align=block-start]:rounded-sm has-[[data-slot][aria-invalid=true]]:border-destructive has-[[data-slot][aria-invalid=true]]:border-2 has-[textarea]:rounded-sm has-[>[data-align=block-end]]:h-auto has-[>[data-align=block-end]]:flex-col has-[>[data-align=block-start]]:h-auto has-[>[data-align=block-start]]:flex-col has-[>textarea]:h-auto dark:bg-surface-soft/30 dark:has-[[data-slot][aria-invalid=true]]:ring-destructive/40 has-[>[data-align=block-end]]:[&>input]:pt-3 has-[>[data-align=block-start]]:[&>input]:pb-3 has-[>[data-align=inline-end]]:[&>input]:pr-l.5 has-[>[data-align=inline-start]]:pr-1.5 overflow-hidden",
+  "group/input-group relative flex h-7 w-full min-w-0 items-center rounded-sm border border-border bg-surface focus-within:bg-neutral-50 transition-colors outline-none  focus-within:border-neutral-400  disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 group-data-[disabled=true]/input-group:border-disabled-background group-data-[disabled=true]/input-group:bg-disabled-background in-data-[slot=combobox-content]:focus-within:border-inherit in-data-[slot=combobox-content]:focus-within:ring-0 has-data-[align=block-end]:rounded-sm has-data-[align=block-start]:rounded-sm has-[[data-slot][aria-invalid=true]]:border-destructive has-[[data-slot][aria-invalid=true]]:border-2 has-[textarea]:rounded-sm has-[>[data-align=block-end]]:h-auto has-[>[data-align=block-end]]:flex-col has-[>[data-align=block-start]]:h-auto has-[>[data-align=block-start]]:flex-col has-[>textarea]:h-auto dark:bg-surface-soft/30 dark:has-[[data-slot][aria-invalid=true]]:ring-destructive/40 has-[>[data-align=block-end]]:[&>input]:pt-3 has-[>[data-align=block-start]]:[&>input]:pb-3 has-[>[data-align=inline-end]]:[&>input]:pr-l.5 has-[>[data-align=inline-start]]:pr-1.5 overflow-hidden",
   {
     variants: {
       variant: {
         outline: "border border-border bg-surface dark:bg-surface-soft/30",
-        neutral: "border border-transparent bg-neutral-100 dark:bg-surface-soft/20",
+        neutral: "border border-transparent bg-neutral-50 dark:bg-surface-soft/20",
       },
       size: {
         default: "h-8 text-sm [&>input]:px-2 [&>input]:py-1 [&>textarea]:px-2 [&>textarea]:py-1",

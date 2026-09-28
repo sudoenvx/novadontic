@@ -3,6 +3,7 @@ import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import { Button } from '../../../shared/ui/Button'
+import { AppHeader, AppHeaderActions } from '../../../shared/ui/AppHeader'
 import { Card } from '../../../shared/ui/Card'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '../../../shared/ui/InputGroup'
 import { Page } from '../../../shared/ui/Page'
@@ -35,19 +36,15 @@ export function AppliancesPage() {
 
   return (
     <Page size="full">
-      <Card className="gap-3 md:flex-row md:items-center md:justify-between">
-        <div>
-          <h1 className="text-base font-semibold uppercase text-primary-hover">Appliances &amp; fields</h1>
-          <p className="text-sm text-text-muted">Groups let you organize related fields; each field controls its own type, default, and options.</p>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
+      <AppHeader title="Appliances & fields" description="Groups let you organize related fields; each field controls its own type, default, and options.">
+        <AppHeaderActions>
           <InputGroup className="w-64" variant="neutral">
             <InputGroupAddon><Search /></InputGroupAddon>
             <InputGroupInput value={searchTerm} onChange={(event) => setSearchTerm(event.target.value)} placeholder="Search appliances" aria-label="Search appliances" />
           </InputGroup>
           <Button onClick={() => setIsCreateOpen(true)}><Plus /> Add appliance type</Button>
-        </div>
-      </Card>
+        </AppHeaderActions>
+      </AppHeader>
 
       {visibleAppliances.length > 0 ? (
         <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">

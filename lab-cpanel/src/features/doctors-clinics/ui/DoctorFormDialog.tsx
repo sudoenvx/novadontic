@@ -1,6 +1,7 @@
 import { useState, type FormEvent, type ReactNode } from 'react'
 
 import { Button } from '../../../shared/ui/Button'
+import { Checkbox } from '../../../shared/ui/Checkbox'
 import {
   Dialog,
   DialogContent,
@@ -19,7 +20,7 @@ import {
   SelectValue,
 } from '../../../shared/ui/Select'
 import type { Clinic } from '../domain/clinic'
-import type { Doctor } from '../domain/doctor'
+import type { Doctor, DoctorSource } from '../domain/doctor'
 
 const NO_CLINIC = '__no_clinic__'
 
@@ -31,6 +32,7 @@ export type DoctorFormValues = {
   country: string
   phoneNumber: string
   isActive: boolean
+  source: DoctorSource
   clinicId?: string
 }
 
@@ -81,7 +83,8 @@ export function DoctorFormDialog({
       address: values.address.trim(),
       country: values.country.trim(),
       phoneNumber: values.phoneNumber.trim(),
-      clinicId: values.clinicId || undefined,
+      source: values.source,
+      clinicId: values.source === 'clinic' ? values.clinicId || undefined : undefined,
     }
 
     if (
@@ -111,7 +114,7 @@ export function DoctorFormDialog({
             <DialogDescription>
               {isEditing
                 ? 'Update the doctor profile and clinic access.'
-                : 'Invite a doctor and assign them to one of your clinics.'}
+                : 'Invite a doctor from a clinic or through your clinic portal.'}
             </DialogDescription>
           </DialogHeader>
 
@@ -168,34 +171,55 @@ export function DoctorFormDialog({
                 placeholder="Egypt"
               />
             </Field>
-            <Field label="Clinic (optional)" htmlFor="doctor-clinic">
+            <Field label="Added via" htmlFor="doctor-source">
               <Select
-                value={values.clinicId || NO_CLINIC}
-                onValueChange={(value) =>
-                  updateValue('clinicId', value === NO_CLINIC ? undefined : value ?? undefined)
-                }
+                items={{ clinic: 'Clinic', portal: 'Website / portal' }}
+                value={values.source}
+                onValueChange={(value) => {
+                  const source = (value ?? 'clinic') as DoctorSource
+                  updateValue('source', source)
+                  if (source === 'portal') updateValue('clinicId', undefined)
+                }}
               >
-                <SelectTrigger id="doctor-clinic" className="w-full" size="default">
-                  <SelectValue placeholder="No clinic assigned" />
+                <SelectTrigger id="doctor-source" className="w-full" size="default">
+                  <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value={NO_CLINIC}>No clinic assigned</SelectItem>
-                  {clinics.map((clinic) => (
-                    <SelectItem key={clinic.id} value={clinic.id}>
-                      {clinic.name}
-                    </SelectItem>
-                  ))}
+                  <SelectItem value="clinic">Clinic</SelectItem>
+                  <SelectItem value="portal">Website / portal</SelectItem>
                 </SelectContent>
               </Select>
             </Field>
+            {values.source === 'clinic' && (
+              <Field label="Clinic (optional)" htmlFor="doctor-clinic">
+                <Select
+                  items={[{ value: NO_CLINIC, label: 'No clinic assigned' }, ...clinics.map((clinic) => ({ value: clinic.id, label: clinic.name }))]}
+                  value={values.clinicId || NO_CLINIC}
+                  onValueChange={(value) =>
+                    updateValue('clinicId', value === NO_CLINIC ? undefined : value ?? undefined)
+                  }
+                >
+                  <SelectTrigger id="doctor-clinic" className="w-full" size="default">
+                    <SelectValue placeholder="No clinic assigned" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value={NO_CLINIC}>No clinic assigned</SelectItem>
+                    {clinics.map((clinic) => (
+                      <SelectItem key={clinic.id} value={clinic.id}>
+                        {clinic.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </Field>
+            )}
           </div>
 
           <label className="flex items-center gap-2 text-sm text-text">
-            <input
-              type="checkbox"
+            <Checkbox
               checked={values.isActive}
-              onChange={(event) => updateValue('isActive', event.currentTarget.checked)}
-              className="size-4 accent-primary"
+              onCheckedChange={(checked) => updateValue('isActive', checked)}
+              aria-label="Doctor is active"
             />
             Doctor is active
           </label>
@@ -227,6 +251,7 @@ function getInitialValues(doctor: Doctor | undefined, initialClinicId: string): 
     country: doctor?.country ?? '',
     phoneNumber: doctor?.phoneNumber ?? '',
     isActive: doctor?.isActive ?? true,
+    source: doctor?.source ?? (doctor?.clinicId || initialClinicId ? 'clinic' : 'portal'),
     clinicId: doctor?.clinicId ?? initialClinicId,
   }
 }

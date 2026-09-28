@@ -1,4 +1,4 @@
-import { Building2, ClipboardList, Home, Settings, SlidersHorizontal, Workflow } from 'lucide-react'
+import { Building2, ClipboardList, FileText, Home, Settings, ShieldCheck, SlidersHorizontal, Stethoscope, UsersRound, Workflow } from 'lucide-react'
 import { NavLink, useLocation } from 'react-router-dom'
 
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../../shared/ui/Tooltip'
@@ -6,10 +6,15 @@ import { AppUserMenu } from './AppUserMenu'
 
 const navigationItems = [
   { label: 'Dashboard', path: '/', icon: Home, end: true },
-  { label: 'Case pipeline', path: '/cases', icon: ClipboardList },
-  { label: 'Doctors & clinics', path: '/doctors-clinics', icon: Building2 },
+  { label: 'Cases', path: '/cases', icon: ClipboardList },
+  { label: 'Doctors', path: '/doctors', icon: Stethoscope },
+  { label: 'Clinics', path: '/clinics', icon: Building2 },
   { label: 'Appliances & fields', path: '/appliances', icon: SlidersHorizontal },
   { label: 'Workflow templates', path: '/appliance-workflow-templates', icon: Workflow },
+  { label: 'Policies & terms', path: '/policies', icon: FileText },
+  { label: 'Lab profile', path: '/lab-profile', icon: Building2 },
+  { label: 'Staff', path: '/staff', icon: UsersRound },
+  { label: 'Roles & permissions', path: '/roles-permissions', icon: ShieldCheck },
   { label: 'Lab settings', path: '/settings', icon: Settings },
 ];
 
@@ -32,7 +37,7 @@ export function AppSidebar() {
                         to={path}
                         end={end}
                         aria-label={label}
-                        className={`grid size-8 place-items-center rounded-sm transition-colors ${isActive ? 'bg-primary text-primary-foreground' : 'text-secondary hover:bg-surface-muted hover:text-text'}`}
+                        className={`grid size-8 place-items-center rounded-sm transition-colors ${isActive ? 'bg-primary text-primary-foreground' : 'text-secondary hover:bg-neutral-100 hover:text-text'}`}
                       />
                     }
                   >

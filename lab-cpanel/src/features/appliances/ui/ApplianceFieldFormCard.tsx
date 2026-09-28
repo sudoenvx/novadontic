@@ -101,7 +101,11 @@ export function ApplianceFieldFormCard({
 
         <div className="grid gap-3 md:grid-cols-2">
           <Field label="Field type">
-            <Select value={type} onValueChange={(value) => setType((value ?? 'text') as ApplianceFieldType)}>
+            <Select
+              items={Object.fromEntries(fieldTypes.map((fieldType) => [fieldType.value, fieldType.label]))}
+              value={type}
+              onValueChange={(value) => setType((value ?? 'text') as ApplianceFieldType)}
+            >
               <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
               <SelectContent>{fieldTypes.map((fieldType) => <SelectItem key={fieldType.value} value={fieldType.value}>{fieldType.label}</SelectItem>)}</SelectContent>
             </Select>

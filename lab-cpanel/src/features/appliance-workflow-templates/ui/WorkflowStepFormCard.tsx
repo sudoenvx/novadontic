@@ -55,7 +55,11 @@ export function WorkflowStepFormCard({ step, onSave, onCancel }: WorkflowStepFor
             <Input id="workflow-step-name" value={name} onChange={(event) => setName(event.target.value)} placeholder="e.g. Printing" autoFocus />
           </Field>
           <Field label="Step type">
-            <Select value={kind} onValueChange={(value) => setKind((value ?? 'production') as WorkflowStepKind)}>
+            <Select
+              items={{ production: 'Production', quality: 'Quality check', shipping: 'Shipping' }}
+              value={kind}
+              onValueChange={(value) => setKind((value ?? 'production') as WorkflowStepKind)}
+            >
               <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="production">Production</SelectItem>

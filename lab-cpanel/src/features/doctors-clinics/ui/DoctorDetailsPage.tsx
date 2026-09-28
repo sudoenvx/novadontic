@@ -32,7 +32,7 @@ export function DoctorDetailsPage() {
       <Page size="full">
         <div className="rounded-md bg-surface px-4 py-10 text-center">
           <p className="text-sm font-semibold text-text">Doctor not found</p>
-          <Button className="mt-3" onClick={() => navigate('/doctors-clinics')}>
+          <Button className="mt-3" onClick={() => navigate('/doctors')}>
             Back to doctors
           </Button>
         </div>
@@ -46,7 +46,7 @@ export function DoctorDetailsPage() {
     doctorDetailsFixtures.find((item) => item.doctorId === doctor.id) ??
     createDoctorDetails(doctor)
 
-  return <DoctorDetailsView clinic={clinic} details={details} doctor={doctor} onBack={() => navigate('/doctors-clinics')} />
+  return <DoctorDetailsView clinic={clinic} details={details} doctor={doctor} onBack={() => navigate('/doctors')} />
 }
 
 function DoctorDetailsView({

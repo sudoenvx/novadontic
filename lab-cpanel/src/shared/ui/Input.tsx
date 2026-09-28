@@ -10,17 +10,20 @@ const inputVariants = cva(
       size: {
         default: "h-8 px-2 py-0.5 text-sm md:text-xs/relaxed",
         xs: "h-6.5 px-1.5 py-0.5 text-xs",
-        sm: "h-7 px-2 py-0.5 text-sm md:text-xs/relaxed",
+        sm: "h-6.5 px-2 py-0.5 text-sm md:text-xs/relaxed",
         md: "h-9 px-3 py-1.5 text-sm",
         lg: "h-11 px-4 py-2 text-base",
       },
 
       variant: {
-
+        "outline": "bg-transparent!",
+        "neutral": "bg-neutral-50 focus:bg-neutral-100",
+        "bottom-border": "border-b-3 border-b-neutral-300"
       }
     },
     defaultVariants: {
       size: "sm",
+      variant: "neutral"
     },
   },
 )
@@ -28,13 +31,13 @@ const inputVariants = cva(
 type InputProps = Omit<React.ComponentProps<"input">, "size"> &
   VariantProps<typeof inputVariants>
 
-function Input({ className, type, size, ...props }: InputProps) {
+function Input({ className, variant ,type, size, ...props }: InputProps) {
   return (
     <InputPrimitive
       type={type}
       data-slot="input"
       className={cn(
-        inputVariants({ size }),
+        inputVariants({ size, variant }),
         className
       )}
       {...props}

@@ -7,11 +7,11 @@ export function Table({ className, ...props }: HTMLAttributes<HTMLTableElement>)
 }
 
 export function TableHeader({ className, ...props }: HTMLAttributes<HTMLTableSectionElement>) {
-  return <thead className={cn('bg-muted text-text-muted', className)} {...props} />
+  return <thead className={cn('bg-neutral-200 text-text-muted', className)} {...props} />
 }
 
 export function TableBody({ className, ...props }: HTMLAttributes<HTMLTableSectionElement>) {
-  return <tbody className={cn('[&_tr>td]:border-b [&_tr>td]:border-border-soft [&_tr:hover>td]:bg-neutral-50', className)} {...props} />
+  return <tbody className={cn('[&_tr>td]:border-t [&_tr>td]:border-border-soft [&_tr:hover>td]:bg-neutral-50', className)} {...props} />
 }
 
 export const TableRow = React.forwardRef<HTMLTableRowElement, HTMLAttributes<HTMLTableRowElement>>(

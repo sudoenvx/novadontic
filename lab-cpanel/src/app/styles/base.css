@@ -5,7 +5,7 @@
 html {
   min-width: 320px;
   scroll-behavior: smooth;
-  scrollbar-gutter: stable;
+  /* scrollbar-gutter: stable; */
 }
 
 body {

@@ -1,4 +1,5 @@
 import { Card, CardHeader, CardTitle } from '../../../shared/ui/Card'
+import { getCaseBillingRuleLabel } from '../domain/caseCategory'
 import type { ReactNode } from 'react'
 import type { CasePipelineCase } from '../domain/casePipeline'
 
@@ -13,6 +14,10 @@ export function CasePipelineSidebarDetails({ caseItem }: { caseItem: CasePipelin
       <InfoCard title="Case meta">
         <Detail label="Patient code" value={caseItem.patientCode} />
         <Detail label="Type" value={caseItem.caseType} />
+        {caseItem.categoryName && <Detail label="Category" value={caseItem.categoryName} />}
+        {caseItem.workflowName && <Detail label="Workflow" value={caseItem.workflowName} />}
+        {caseItem.priceRule && <Detail label="Price" value={getCaseBillingRuleLabel(caseItem.priceRule)} />}
+        {caseItem.billable !== undefined && <Detail label="Billing" value={caseItem.billable ? 'Billable' : 'Not billable'} />}
         <Detail label="Units" value={caseItem.units ? `${caseItem.units} items` : 'Pending'} />
         <Detail label="Due" value={caseItem.dueDate} emphasis={caseItem.status !== 'On track'} />
         <Detail label="Priority" value={caseItem.priority} emphasis={caseItem.priority === 'Rush'} />

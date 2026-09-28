@@ -19,6 +19,7 @@ export type DataTableColumn<TData> = {
 }
 
 export type DataTableProps<TData> = {
+  children?: ReactNode
   columns: DataTableColumn<TData>[]
   data: TData[]
   title?: ReactNode

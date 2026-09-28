@@ -19,7 +19,7 @@ function Card({
       data-variant={variant}
       data-disabled={disabled || undefined}
       className={cn(
-        "group/card flex flex-col overflow-hidden rounded-md bg-surface text-sm text-ink",
+        "group/card flex flex-col overflow-hidden  rounded-md bg-surface text-sm text-ink",
         "data-[disabled]:pointer-events-none data-[disabled]:opacity-70",
         "[--card-spacing:--spacing(3)] data-[size=xs]:[--card-spacing:--spacing(1.5)] data-[size=sm]:[--card-spacing:--spacing(2)] data-[size=md]:[--card-spacing:--spacing(4)]",
         "data-[variant=transparent]:border-transparent data-[variant=transparent]:bg-transparent",
@@ -57,7 +57,7 @@ function CardTitle({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="card-title"
       className={cn(
-        "text-brand-blue-dark uppercase text-md font-medium group-data-[size=sm]/card:text-md group-data-[size=xs]/card:text-md group-[&:not(:has([data-slot=card-description]))]/card-header:text-md",
+        "text-brand-blue-dark uppercase text-md font-medium group-data-[size=sm]/card:text-md group-data-[size=xs]/card:text-md group-[&:not(:has([data-slot=card-description]))]/card-header:text-sm",
         className
       )}
       {...props}

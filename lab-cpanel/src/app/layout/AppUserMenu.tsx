@@ -6,8 +6,10 @@ import {
   LayoutDashboard,
   LogOut,
   Settings,
+  ShieldCheck,
   SlidersHorizontal,
   UserRound,
+  UsersRound,
   Workflow,
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
@@ -63,8 +65,9 @@ export function AppUserMenu({ compact = false, onSignOut }: AppUserMenuProps) {
         <DropdownMenuGroup>
           <DropdownMenuLabel>Workspace</DropdownMenuLabel>
           <DropdownMenuItem onClick={() => navigate('/')}><LayoutDashboard /> Dashboard</DropdownMenuItem>
-          <DropdownMenuItem onClick={() => navigate('/cases')}><ClipboardList /> Case pipeline</DropdownMenuItem>
-          <DropdownMenuItem onClick={() => navigate('/doctors-clinics')}><Building2 /> Doctors &amp; clinics</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => navigate('/cases')}><ClipboardList /> Cases</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => navigate('/doctors')}><Building2 /> Doctors</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => navigate('/clinics')}><Building2 /> Clinics</DropdownMenuItem>
           <DropdownMenuItem onClick={() => navigate('/appliances')}><SlidersHorizontal /> Appliances &amp; fields</DropdownMenuItem>
           <DropdownMenuItem onClick={() => navigate('/appliance-workflow-templates')}><Workflow /> Workflow templates</DropdownMenuItem>
         </DropdownMenuGroup>
@@ -72,10 +75,13 @@ export function AppUserMenu({ compact = false, onSignOut }: AppUserMenuProps) {
         <DropdownMenuGroup>
           <DropdownMenuLabel>Account</DropdownMenuLabel>
           <DropdownMenuItem><UserRound /> Profile</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => navigate('/lab-profile')}><Building2 /> Lab profile</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => navigate('/staff')}><UsersRound /> Staff</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => navigate('/roles-permissions')}><ShieldCheck /> Roles &amp; permissions</DropdownMenuItem>
           <DropdownMenuItem onClick={() => navigate('/settings')}><Settings /> Settings</DropdownMenuItem>
           <DropdownMenuItem><Keyboard /> Keyboard shortcuts</DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem variant="destructive" onClick={onSignOut}><LogOut /> Log out</DropdownMenuItem>
+          <DropdownMenuItem variant="destructive" onClick={onSignOut ?? (() => navigate('/sign-in'))}><LogOut /> Log out</DropdownMenuItem>
         </DropdownMenuGroup>
       </DropdownMenuContent>
     </DropdownMenu>

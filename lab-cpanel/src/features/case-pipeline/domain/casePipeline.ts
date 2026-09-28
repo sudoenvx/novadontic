@@ -10,22 +10,26 @@ export type CasePipelineStatus = 'On track' | 'Due today' | 'Needs attention'
 export type CasePipelinePriority = 'Normal' | 'Rush'
 export type CasePipelineFilter = 'all' | 'active' | 'rush'
 export type ProductionStepStatus = 'completed' | 'active' | 'pending'
+export type CaseFieldValue = string | boolean | string[]
 
 export type CasePipelineFile = {
   id: string
   name: string
-  type: 'STL' | 'IMG' | 'PDF'
+  type: 'STL' | 'IMG' | 'PDF' | 'DOC'
   size: string
   uploadedBy: string
   uploadedAt: string
+  url?: string
 }
 
 export type CaseProductionStep = {
   id: string
-  name: CasePipelineStage
+  name: string
+  description?: string
   status: ProductionStepStatus
   files: CasePipelineFile[]
   technician?: string
+  technicians?: string[]
 }
 
 export type CaseActivityItem = {
@@ -45,13 +49,23 @@ export type CasePipelineCase = {
   doctorName: string
   request: string
   caseType: string
+  applianceId?: string
+  workflowTemplateId?: string
+  categoryId?: string
+  priceRule?: import('./caseCategory').CaseBillingRule
+  billable?: boolean
+  originalCaseId?: string
+  remakeReason?: string
+  caseFieldValues?: Record<string, CaseFieldValue>
+  categoryName?: string
+  workflowName?: string
   arch: string
-  allergy: string
   units: number
   status: CasePipelineStatus
   priority: CasePipelinePriority
   stage: CasePipelineStage
   dueDate: string
+  turnaroundDays?: number
   createdAt: string
   productionSteps: CaseProductionStep[]
   activities: CaseActivityItem[]

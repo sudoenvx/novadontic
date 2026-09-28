@@ -1,4 +1,4 @@
-import { LayoutDashboard } from 'lucide-react'
+import { SlidersHorizontal } from 'lucide-react'
 
 import { Badge } from '../../../shared/ui/Badge'
 import { Card } from '../../../shared/ui/Card'
@@ -46,7 +46,7 @@ export function ApplianceCard({ appliance, onOpen, onToggle }: ApplianceCardProp
             }`}
             aria-hidden="true"
           >
-            <LayoutDashboard size={19} />
+            <SlidersHorizontal size={19} />
           </span>
           <div className="min-w-0">
             <h2 className="truncate text-sm font-semibold text-text" title={appliance.name}>

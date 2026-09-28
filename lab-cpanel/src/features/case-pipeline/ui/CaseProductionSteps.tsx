@@ -88,7 +88,11 @@ function ProductionStep({
         ))}
         <div className="grid gap-1.5 sm:grid-cols-[auto_minmax(0,16rem)_auto] sm:items-center">
           <span className="text-xs text-text-muted">Assigned technician</span>
-          <Select value={step.technician ?? 'unassigned'} onValueChange={(value) => onAssignTechnician(value ?? 'unassigned')}>
+          <Select
+            items={{ unassigned: 'Unassigned', 'Mina S.': 'Mina S.', 'Ahmed R.': 'Ahmed R.', 'Dina Amer': 'Dina Amer' }}
+            value={step.technician ?? 'unassigned'}
+            onValueChange={(value) => onAssignTechnician(value ?? 'unassigned')}
+          >
             <SelectTrigger size="default" className="w-full">
               <SelectValue placeholder="Assign technician" />
             </SelectTrigger>

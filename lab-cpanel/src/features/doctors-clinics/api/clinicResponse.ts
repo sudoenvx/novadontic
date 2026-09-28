@@ -1,7 +1,1 @@
-export type ClinicResponse = {
-  id: string
-  name: string
-  address: string
-  phone: string
-  email: string
-}
+export type { ClinicResponse } from '../../clinics/api/clinicResponse'

@@ -1,14 +1,9 @@
 export type LabSettingsSection =
-  | 'profile'
   | 'operations'
   | 'notifications'
 
 export type LabSettings = {
-  labName: string
-  email: string
-  phoneNumber: string
-  country: string
-  address: string
+  defaultCaseTurnaroundDays: number
   allowClinicPortal: boolean
   requireCaseApproval: boolean
   notifyNewCase: boolean
@@ -19,7 +14,6 @@ export type LabSettings = {
 
 export function getLabSettingsSectionLabel(section: LabSettingsSection) {
   const labels: Record<LabSettingsSection, string> = {
-    profile: 'Lab profile',
     operations: 'Operations',
     notifications: 'Notifications',
   }
