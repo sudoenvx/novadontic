@@ -1,50 +1,46 @@
 import { Card, CardHeader, CardTitle } from '../../../shared/ui/Card'
-import { DescriptionList, type DescriptionListItem } from '../../../shared/ui/DescriptionList'
+import {
+  DescriptionItem,
+  DescriptionItemDescription,
+  DescriptionItemTitle,
+  DescriptionList,
+} from '../../../shared/ui/DescriptionList'
 import { getCaseBillingRuleLabel } from '../domain/caseCategory'
 import type { ReactNode } from 'react'
 import type { CasePipelineCase } from '../domain/casePipeline'
 
 export function CasePipelineSidebarDetails({ caseItem }: { caseItem: CasePipelineCase }) {
-  const doctorClinicItems: DescriptionListItem[] = [
-    { id: 'doctor', title: 'Doctor', description: caseItem.doctorName },
-    { id: 'clinic', title: 'Clinic', description: caseItem.clinicName },
-    { id: 'request', title: 'Request', description: caseItem.request },
-  ]
-  const caseMetaItems: DescriptionListItem[] = [
-    { id: 'patient-code', title: 'Patient code', description: caseItem.patientCode },
-    { id: 'type', title: 'Type', description: caseItem.caseType },
-    ...(caseItem.categoryName
-      ? [{ id: 'category', title: 'Category', description: caseItem.categoryName }]
-      : []),
-    ...(caseItem.workflowName
-      ? [{ id: 'workflow', title: 'Workflow', description: caseItem.workflowName }]
-      : []),
-    ...(caseItem.priceRule
-      ? [{ id: 'price', title: 'Price', description: getCaseBillingRuleLabel(caseItem.priceRule) }]
-      : []),
-    ...(caseItem.billable !== undefined
-      ? [{ id: 'billing', title: 'Billing', description: caseItem.billable ? 'Billable' : 'Not billable' }]
-      : []),
-    { id: 'units', title: 'Units', description: caseItem.units ? `${caseItem.units} items` : 'Pending' },
-    {
-      id: 'due',
-      title: 'Due',
-      description: <span className={caseItem.status !== 'On track' ? 'font-semibold text-warning' : undefined}>{caseItem.dueDate}</span>,
-    },
-    {
-      id: 'priority',
-      title: 'Priority',
-      description: <span className={caseItem.priority === 'Rush' ? 'font-semibold text-destructive' : undefined}>{caseItem.priority}</span>,
-    },
-  ]
-
   return (
     <aside className="grid gap-2 lg:sticky lg:top-3 lg:self-start">
       <InfoCard title="Doctor & clinic">
-        <DescriptionList items={doctorClinicItems} />
+        <DescriptionList>
+          <DescriptionItem><DescriptionItemTitle>Doctor</DescriptionItemTitle><DescriptionItemDescription>{caseItem.doctorName}</DescriptionItemDescription></DescriptionItem>
+          <DescriptionItem><DescriptionItemTitle>Clinic</DescriptionItemTitle><DescriptionItemDescription>{caseItem.clinicName}</DescriptionItemDescription></DescriptionItem>
+          <DescriptionItem><DescriptionItemTitle>Request</DescriptionItemTitle><DescriptionItemDescription>{caseItem.request}</DescriptionItemDescription></DescriptionItem>
+        </DescriptionList>
       </InfoCard>
       <InfoCard title="Case meta">
-        <DescriptionList items={caseMetaItems} />
+        <DescriptionList>
+          <DescriptionItem><DescriptionItemTitle>Patient code</DescriptionItemTitle><DescriptionItemDescription>{caseItem.patientCode}</DescriptionItemDescription></DescriptionItem>
+          <DescriptionItem><DescriptionItemTitle>Type</DescriptionItemTitle><DescriptionItemDescription>{caseItem.caseType}</DescriptionItemDescription></DescriptionItem>
+          {caseItem.categoryName && <DescriptionItem><DescriptionItemTitle>Category</DescriptionItemTitle><DescriptionItemDescription>{caseItem.categoryName}</DescriptionItemDescription></DescriptionItem>}
+          {caseItem.workflowName && <DescriptionItem><DescriptionItemTitle>Workflow</DescriptionItemTitle><DescriptionItemDescription>{caseItem.workflowName}</DescriptionItemDescription></DescriptionItem>}
+          {caseItem.priceRule && <DescriptionItem><DescriptionItemTitle>Price</DescriptionItemTitle><DescriptionItemDescription>{getCaseBillingRuleLabel(caseItem.priceRule)}</DescriptionItemDescription></DescriptionItem>}
+          {caseItem.billable !== undefined && <DescriptionItem><DescriptionItemTitle>Billing</DescriptionItemTitle><DescriptionItemDescription>{caseItem.billable ? 'Billable' : 'Not billable'}</DescriptionItemDescription></DescriptionItem>}
+          <DescriptionItem><DescriptionItemTitle>Units</DescriptionItemTitle><DescriptionItemDescription>{caseItem.units ? `${caseItem.units} items` : 'Pending'}</DescriptionItemDescription></DescriptionItem>
+          <DescriptionItem>
+            <DescriptionItemTitle>Due</DescriptionItemTitle>
+            <DescriptionItemDescription className={caseItem.status !== 'On track' ? 'font-semibold text-warning' : undefined}>
+              {caseItem.dueDate}
+            </DescriptionItemDescription>
+          </DescriptionItem>
+          <DescriptionItem>
+            <DescriptionItemTitle>Priority</DescriptionItemTitle>
+            <DescriptionItemDescription className={caseItem.priority === 'Rush' ? 'font-semibold text-destructive' : undefined}>
+              {caseItem.priority}
+            </DescriptionItemDescription>
+          </DescriptionItem>
+        </DescriptionList>
       </InfoCard>
     </aside>
   )

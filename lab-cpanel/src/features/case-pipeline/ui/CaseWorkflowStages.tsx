@@ -5,9 +5,12 @@ import {
   ChevronDown,
   Clock,
   Download,
+  File,
   FileCode,
   FileText,
   Image as ImageIcon,
+  Pencil,
+  Save,
   Trash2,
   Upload,
   UserCheck,
@@ -15,18 +18,20 @@ import {
   Users,
   X,
 } from 'lucide-react'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 
 import { Badge, type BadgeTone } from '../../../shared/ui/Badge'
 import { Button } from '../../../shared/ui/Button'
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '../../../shared/ui/Dialog'
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '../../../shared/ui/AlertDialog'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -34,17 +39,10 @@ import {
   DropdownMenuTrigger,
 } from '../../../shared/ui/DropdownMenu'
 import { Input } from '../../../shared/ui/Input'
-import { Label } from '../../../shared/ui/Label'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '../../../shared/ui/Select'
 import { toast } from '../../../shared/ui/Toast'
 import { workflowTemplateFixtures } from '../../appliance-workflow-templates/data/workflowTemplates'
 import { staffFixtures } from '../../staff/data/staff'
+import { casePipelineStages } from '../domain/casePipeline'
 import type {
   CasePipelineCase,
   CasePipelineFile,
@@ -79,9 +77,25 @@ function getFileIcon(type: CasePipelineFile['type']) {
     case 'PDF':
       return <FileText size={14} className="text-destructive shrink-0" />
     case 'DOC':
-    default:
       return <FileCode size={14} className="text-text-secondary shrink-0" />
+    case 'OTHER':
+      return <File size={14} className="text-text-muted shrink-0" />
   }
+}
+
+function getFileType(fileName: string): CasePipelineFile['type'] {
+  const extension = fileName.split('.').pop()?.toLowerCase()
+
+  if (['stl', 'ply', 'obj', '3mf'].includes(extension ?? '')) return 'STL'
+  if (['png', 'jpg', 'jpeg', 'webp', 'gif', 'bmp', 'tif', 'tiff'].includes(extension ?? '')) return 'IMG'
+  if (extension === 'pdf') return 'PDF'
+  if (['doc', 'docx', 'txt', 'rtf', 'xls', 'xlsx', 'csv'].includes(extension ?? '')) return 'DOC'
+  return 'OTHER'
+}
+
+function formatFileSize(size: number) {
+  if (size < 1024 * 1024) return `${Math.max(1, Math.round(size / 1024))} KB`
+  return `${(size / (1024 * 1024)).toFixed(1)} MB`
 }
 
 export function CaseWorkflowStages({
@@ -118,22 +132,19 @@ export function CaseWorkflowStages({
   }, [caseItem.productionSteps, caseItem.workflowTemplateId, caseItem.applianceId, caseItem.id])
 
   const [steps, setSteps] = useState<CaseProductionStep[]>(initialSteps)
-
-  // Keep steps synced when caseItem changes
-  useEffect(() => {
-    if (caseItem.productionSteps && caseItem.productionSteps.length > 0) {
-      setSteps(caseItem.productionSteps)
-    }
-  }, [caseItem.productionSteps])
+  const [statusConfirmation, setStatusConfirmation] = useState<{
+    stepId: string
+    status: 'active' | 'completed'
+  }>()
 
   // Determine the active stage ID
   const activeStepId = useMemo(() => {
+    const activeStep = steps.find((step) => step.status === 'active')
     const matchingCurrent = steps.find(
-      (s) =>
-        s.name.toLowerCase() === caseItem.stage.toLowerCase() ||
-        s.status === 'active',
+      (step) => step.name.toLowerCase() === caseItem.stage.toLowerCase(),
     )
-    return matchingCurrent?.id ?? steps[0]?.id ?? ''
+    const nextPending = steps.find((step) => step.status === 'pending')
+    return activeStep?.id ?? matchingCurrent?.id ?? nextPending?.id ?? steps[0]?.id ?? ''
   }, [steps, caseItem.stage])
 
   // Collapsible state: all collapsed by default EXCEPT the current stage
@@ -145,15 +156,12 @@ export function CaseWorkflowStages({
     return state
   })
 
-  // File upload dialog state
-  const [uploadDialogState, setUploadDialogState] = useState<{
+  const [uploadStepId, setUploadStepId] = useState('')
+  const [editingFile, setEditingFile] = useState<{
     stepId: string
-    isOpen: boolean
-  }>({ stepId: '', isOpen: false })
-
-  const [newFileName, setNewFileName] = useState('')
-  const [newFileType, setNewFileType] = useState<CasePipelineFile['type']>('STL')
-  const [newFileSize, setNewFileSize] = useState('2.4 MB')
+    fileId: string
+    name: string
+  }>()
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   function updateStepsAndPropagate(updated: CaseProductionStep[]) {
@@ -213,33 +221,81 @@ export function CaseWorkflowStages({
   }
 
   function handleStepStatusChange(stepId: string, nextStatus: ProductionStepStatus) {
-    const updated = steps.map((step) =>
-      step.id === stepId ? { ...step, status: nextStatus } : step,
-    )
+    const stepIndex = steps.findIndex((step) => step.id === stepId)
+    if (stepIndex === -1) return
+
+    const step = steps[stepIndex]
+    const updated = steps.map((item) => {
+      if (item.id === stepId) return { ...item, status: nextStatus }
+      if (nextStatus === 'active' && item.status === 'active') {
+        return { ...item, status: 'pending' as const }
+      }
+      return item
+    })
+    const shouldAdvance =
+      nextStatus === 'completed' &&
+      step.status !== 'completed' &&
+      (step.status === 'active' || step.id === activeStepId)
+    const nextStep = shouldAdvance ? updated[stepIndex + 1] : undefined
+    if (nextStep && nextStep.status !== 'completed') {
+      updated[stepIndex + 1] = { ...nextStep, status: 'active' }
+      setOpenStages((current) => ({
+        ...current,
+        [stepId]: false,
+        [nextStep.id]: true,
+      }))
+    } else if (nextStatus === 'active') {
+      setOpenStages((current) => ({ ...current, [stepId]: true }))
+    }
+
     updateStepsAndPropagate(updated)
 
-    const step = steps.find((s) => s.id === stepId)
+    const selectedStep = nextStep ?? step
     toast.add({
       title: `Stage marked as ${statusLabels[nextStatus]}`,
-      description: `${step?.name} is now ${statusLabels[nextStatus]}.`,
+      description: nextStep
+        ? `${step.name} is complete. ${nextStep.name} is now in progress.`
+        : `${step.name} is now ${statusLabels[nextStatus]}.`,
       type: 'success',
     })
 
-    if (nextStatus === 'active' && step && onUpdateStage) {
-      onUpdateStage(step.name as CasePipelineCase['stage'])
+    if (
+      selectedStep &&
+      (nextStatus === 'active' || nextStep) &&
+      casePipelineStages.includes(selectedStep.name as CasePipelineCase['stage'])
+    ) {
+      onUpdateStage?.(selectedStep.name as CasePipelineCase['stage'])
     }
   }
 
-  function handleAddFile(stepId: string) {
-    if (!newFileName.trim()) return
+  function requestStepStatusChange(
+    stepId: string,
+    nextStatus: 'active' | 'completed',
+  ) {
+    const step = steps.find((item) => item.id === stepId)
+    if (!step) return
 
+    const needsConfirmation =
+      (nextStatus === 'completed' && step.status !== 'completed') ||
+      (nextStatus === 'active' && step.status === 'completed')
+
+    if (needsConfirmation) {
+      setStatusConfirmation({ stepId, status: nextStatus })
+      return
+    }
+
+    handleStepStatusChange(stepId, nextStatus)
+  }
+
+  function handleAddFile(stepId: string, selectedFile: globalThis.File) {
     const newFile: CasePipelineFile = {
-      id: `file-${Date.now()}`,
-      name: newFileName.trim(),
-      type: newFileType,
-      size: newFileSize || '1.5 MB',
+      id: `file-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      name: selectedFile.name,
+      type: getFileType(selectedFile.name),
+      size: formatFileSize(selectedFile.size),
       uploadedBy: 'Current Lab User',
       uploadedAt: 'Today',
+      url: URL.createObjectURL(selectedFile),
     }
 
     const updated = steps.map((step) => {
@@ -257,8 +313,25 @@ export function CaseWorkflowStages({
       type: 'success',
     })
 
-    setNewFileName('')
-    setUploadDialogState({ stepId: '', isOpen: false })
+    setUploadStepId('')
+  }
+
+  function handleRenameFile(stepId: string, fileId: string) {
+    if (!editingFile?.name.trim()) return
+
+    const nextName = editingFile.name.trim()
+    const updated = steps.map((step) =>
+      step.id === stepId
+        ? {
+            ...step,
+            files: step.files.map((file) =>
+              file.id === fileId ? { ...file, name: nextName } : file,
+            ),
+          }
+        : step,
+    )
+    updateStepsAndPropagate(updated)
+    setEditingFile(undefined)
   }
 
   function handleDeleteFile(stepId: string, fileId: string, fileName: string) {
@@ -279,15 +352,16 @@ export function CaseWorkflowStages({
   }
 
   function handleDownloadFile(file: CasePipelineFile) {
-    const blob = new Blob([`Dummy contents for ${file.name}`], { type: 'text/plain' })
-    const url = URL.createObjectURL(blob)
+    const url = file.url ?? URL.createObjectURL(
+      new Blob([`Dummy contents for ${file.name}`], { type: 'text/plain' }),
+    )
     const anchor = document.createElement('a')
     anchor.href = url
     anchor.download = file.name
     document.body.appendChild(anchor)
     anchor.click()
     document.body.removeChild(anchor)
-    URL.revokeObjectURL(url)
+    if (!file.url) URL.revokeObjectURL(url)
 
     toast.add({
       title: 'Downloading file',
@@ -297,9 +371,25 @@ export function CaseWorkflowStages({
   }
 
   const completedCount = steps.filter((s) => s.status === 'completed').length
+  const confirmationStep = steps.find(
+    (step) => step.id === statusConfirmation?.stepId,
+  )
 
   return (
     <section className="grid gap-3" aria-label="Case workflow stages">
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".stl,.obj,.ply,.3mf,.pdf,.png,.jpg,.jpeg,.webp,.gif,.bmp,.tif,.tiff,.doc,.docx,.txt,.rtf,.xls,.xlsx,.csv"
+        className="hidden"
+        onChange={(event) => {
+          const selectedFile = event.currentTarget.files?.[0]
+          if (selectedFile && uploadStepId) {
+            handleAddFile(uploadStepId, selectedFile)
+          }
+          event.currentTarget.value = ''
+        }}
+      />
       {/* Section header */}
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
@@ -390,30 +480,42 @@ export function CaseWorkflowStages({
 
                 {/* Quick mark-done / re-open action — separated by left border */}
                 <div className="flex items-center gap-1 shrink-0 pl-2 border-l border-border-soft">
-                  {step.status !== 'completed' ? (
+                  {step.status === 'active' ? (
                     <Button
                       size="xs"
-                      variant="ghost"
+                      variant="soft"
                       onClick={(e) => {
                         e.stopPropagation()
-                        handleStepStatusChange(step.id, 'completed')
+                        requestStepStatusChange(step.id, 'completed')
                       }}
                     >
                       <Check className="text-success" />
                       <span>Mark done</span>
                     </Button>
-                  ) : (
+                  ) : step.status === 'completed' ? (
                     <Button
                       size="xs"
                       variant="ghost"
                       onClick={(e) => {
                         e.stopPropagation()
-                        handleStepStatusChange(step.id, 'active')
+                        requestStepStatusChange(step.id, 'active')
                       }}
                       className="text-text-muted"
                     >
                       <Clock />
                       <span>Re-open</span>
+                    </Button>
+                  ) : (
+                    <Button
+                      size="xs"
+                      variant="outline"
+                      onClick={(event) => {
+                        event.stopPropagation()
+                        handleStepStatusChange(step.id, 'active')
+                      }}
+                    >
+                      <Clock />
+                      <span>Start stage</span>
                     </Button>
                   )}
                 </div>
@@ -421,9 +523,8 @@ export function CaseWorkflowStages({
 
               {/* ── Stage body ── */}
               <Collapsible.Panel className="stage-body">
-
-                {/* 1. Technicians */}
-                <div className="grid gap-2">
+                <div className="grid gap-3">
+                <div className="grid content-start gap-2 border-b border-border-soft pb-3">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div className="flex items-center gap-1.5">
                       <Users size={13} className="text-primary" />
@@ -437,7 +538,7 @@ export function CaseWorkflowStages({
                         render={
                           <Button size="xs" variant="outline" className="gap-1">
                             <UserPlus size={12} />
-                            <span>Assign</span>
+                            <span>Assign technicians</span>
                           </Button>
                         }
                       />
@@ -489,13 +590,12 @@ export function CaseWorkflowStages({
                       ))}
                     </div>
                   ) : (
-                    <p className="text-xs text-text-muted italic">
-                      No technicians assigned yet. Click "Assign" to allocate staff.
+                    <p className="text-xs text-text-muted">
+                      No technicians assigned yet.
                     </p>
                   )}
                 </div>
 
-                {/* 2. Files */}
                 <div className="grid gap-2">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div className="flex items-center gap-1.5">
@@ -508,7 +608,10 @@ export function CaseWorkflowStages({
                     <Button
                       size="xs"
                       variant="outline"
-                      onClick={() => setUploadDialogState({ stepId: step.id, isOpen: true })}
+                      onClick={() => {
+                        setUploadStepId(step.id)
+                        fileInputRef.current?.click()
+                      }}
                     >
                       <Upload size={12} />
                       <span>Add file</span>
@@ -525,16 +628,62 @@ export function CaseWorkflowStages({
                           <div className="flex items-center gap-2.5 min-w-0">
                             {getFileIcon(file.type)}
                             <div className="min-w-0">
-                              <p className="text-sm font-medium text-text-primary truncate">
-                                {file.name}
-                              </p>
+                              {editingFile?.stepId === step.id && editingFile.fileId === file.id ? (
+                                <div className="flex items-center gap-1">
+                                  <Input
+                                    size="sm"
+                                    aria-label={`Rename ${file.name}`}
+                                    value={editingFile.name}
+                                    onChange={(event) =>
+                                      setEditingFile({ ...editingFile, name: event.target.value })
+                                    }
+                                    onKeyDown={(event) => {
+                                      if (event.key === 'Enter') {
+                                        event.preventDefault()
+                                        handleRenameFile(step.id, file.id)
+                                      }
+                                      if (event.key === 'Escape') setEditingFile(undefined)
+                                    }}
+                                    autoFocus
+                                  />
+                                  <Button
+                                    size="icon-sm"
+                                    variant="ghost"
+                                    aria-label="Save file name"
+                                    onClick={() => handleRenameFile(step.id, file.id)}
+                                  >
+                                    <Save />
+                                  </Button>
+                                  <Button
+                                    size="icon-sm"
+                                    variant="ghost"
+                                    aria-label="Cancel rename"
+                                    onClick={() => setEditingFile(undefined)}
+                                  >
+                                    <X />
+                                  </Button>
+                                </div>
+                              ) : (
+                                <p className="truncate text-sm font-medium text-text-primary">
+                                  {file.name}
+                                </p>
+                              )}
                               <p className="text-xs text-text-muted">
-                                {file.size} · {file.uploadedBy} · {file.uploadedAt}
+                                {file.type} · {file.size} · {file.uploadedBy} · {file.uploadedAt}
                               </p>
                             </div>
                           </div>
 
                           <div className="flex items-center gap-0.5">
+                            <Button
+                              size="icon-sm"
+                              variant="ghost"
+                              onClick={() => setEditingFile({ stepId: step.id, fileId: file.id, name: file.name })}
+                              title={`Rename ${file.name}`}
+                              aria-label={`Rename ${file.name}`}
+                            >
+                              <Pencil />
+                            </Button>
                             <Button
                               size="icon-sm"
                               variant="ghost"
@@ -559,178 +708,66 @@ export function CaseWorkflowStages({
                       ))}
                     </div>
                   ) : (
-                    <div className="empty-state">
+                    <div className="empty-state grid justify-items-center gap-1.5 py-4">
                       <p className="text-sm">No files uploaded for this stage yet.</p>
                       <Button
                         size="xs"
-                        variant="ghost"
-                        onClick={() => setUploadDialogState({ stepId: step.id, isOpen: true })}
-                        className="mt-1.5 text-primary"
+                        variant="link"
+                        onClick={() => {
+                          setUploadStepId(step.id)
+                          fileInputRef.current?.click()
+                        }}
+                        className="h-auto px-1 py-0 text-primary"
                       >
-                        + Upload CAD / Scan / Document
+                        <Upload size={12} />
+                        <span>Upload CAD, scan or document</span>
                       </Button>
                     </div>
                   )}
                 </div>
-
-                {/* 3. Status controls + proceed */}
-                <div className="flex flex-wrap items-center justify-between gap-2 pt-0.5 border-t border-border-soft">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs text-text-secondary">Stage status:</span>
-                    <div className="segmented">
-                      {(['pending', 'active', 'completed'] as ProductionStepStatus[]).map((st) => (
-                        <button
-                          key={st}
-                          type="button"
-                          className="capitalize"
-                          aria-pressed={step.status === st}
-                          onClick={() => handleStepStatusChange(step.id, st)}
-                        >
-                          {statusLabels[st]}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {index < steps.length - 1 && step.status === 'completed' && (
-                    <Button
-                      size="xs"
-                      variant="soft"
-                      onClick={() => {
-                        const nextStep = steps[index + 1]
-                        if (nextStep) {
-                          handleStepStatusChange(nextStep.id, 'active')
-                          setOpenStages((cur) => ({ ...cur, [nextStep.id]: true }))
-                        }
-                      }}
-                    >
-                      <span>Proceed to {steps[index + 1]?.name}</span>
-                    </Button>
-                  )}
                 </div>
               </Collapsible.Panel>
             </Collapsible.Root>
           )
         })}
       </div>
-
-      {/* ── Add File Dialog ── */}
-      <Dialog
-        open={uploadDialogState.isOpen}
-        onOpenChange={(open) =>
-          setUploadDialogState((cur) => ({ ...cur, isOpen: open }))
-        }
+      <AlertDialog
+        open={Boolean(statusConfirmation)}
+        onOpenChange={(open) => {
+          if (!open) setStatusConfirmation(undefined)
+        }}
       >
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Add file to stage</DialogTitle>
-            <DialogDescription>
-              Attach a production file, 3D model, scan, or photo.
-            </DialogDescription>
-          </DialogHeader>
-
-          <form
-            onSubmit={(e) => {
-              e.preventDefault()
-              handleAddFile(uploadDialogState.stepId)
-            }}
-            className="grid gap-3 py-2"
-          >
-            <div className="grid gap-1">
-              <Label htmlFor="file-name" className="text-xs font-semibold">
-                File name <span className="text-destructive">*</span>
-              </Label>
-              <Input
-                id="file-name"
-                value={newFileName}
-                onChange={(e) => setNewFileName(e.target.value)}
-                placeholder="e.g. upper_aligner_tray_04.stl"
-                autoFocus
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div className="grid gap-1">
-                <Label className="text-xs font-semibold">File type</Label>
-                <Select
-                  items={[
-                    { value: 'STL', label: 'STL (3D Model / Scan)' },
-                    { value: 'PDF', label: 'PDF (Prescription / Setup)' },
-                    { value: 'IMG', label: 'IMG (Photo / Bite Image)' },
-                    { value: 'DOC', label: 'DOC (Worksheet / Notes)' },
-                  ]}
-                  value={newFileType}
-                  onValueChange={(val) =>
-                    setNewFileType((val ?? 'STL') as CasePipelineFile['type'])
-                  }
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="STL">STL (3D Model / Scan)</SelectItem>
-                    <SelectItem value="PDF">PDF (Prescription / Setup)</SelectItem>
-                    <SelectItem value="IMG">IMG (Photo / Bite Image)</SelectItem>
-                    <SelectItem value="DOC">DOC (Worksheet / Notes)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="grid gap-1">
-                <Label htmlFor="file-size" className="text-xs font-semibold">
-                  Approx size
-                </Label>
-                <Input
-                  id="file-size"
-                  value={newFileSize}
-                  onChange={(e) => setNewFileSize(e.target.value)}
-                  placeholder="e.g. 5.4 MB"
-                />
-              </div>
-            </div>
-
-            {/* Drop zone / browse */}
-            <div className="empty-state cursor-pointer" onClick={() => fileInputRef.current?.click()}>
-              <input
-                ref={fileInputRef}
-                type="file"
-                className="hidden"
-                onChange={(e) => {
-                  const file = e.target.files?.[0]
-                  if (file) {
-                    setNewFileName(file.name)
-                    const ext = file.name.split('.').pop()?.toUpperCase()
-                    if (ext === 'STL' || ext === 'PLY' || ext === 'OBJ') setNewFileType('STL')
-                    else if (ext === 'PDF') setNewFileType('PDF')
-                    else if (ext === 'JPG' || ext === 'PNG' || ext === 'JPEG') setNewFileType('IMG')
-                    setNewFileSize(`${(file.size / (1024 * 1024)).toFixed(1)} MB`)
-                  }
-                }}
-              />
-              <Button type="button" variant="neutral" size="sm" className="pointer-events-none">
-                <Upload size={13} />
-                <span>Browse local file</span>
-              </Button>
-              <p className="text-xs text-text-muted mt-1.5">
-                Supports .stl, .obj, .ply, .pdf, .jpg, .png
-              </p>
-            </div>
-
-            <DialogFooter className="pt-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setUploadDialogState({ stepId: '', isOpen: false })}
-              >
-                Cancel
-              </Button>
-              <Button type="submit" disabled={!newFileName.trim()}>
-                Add to stage
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
+        <AlertDialogContent size="sm">
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {statusConfirmation?.status === 'completed'
+                ? 'Mark stage as done?'
+                : 'Reopen this stage?'}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {statusConfirmation?.status === 'completed'
+                ? `Mark ${confirmationStep?.name} as complete and move the workflow forward?`
+                : `Reopen ${confirmationStep?.name} and make it the active stage?`}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              variant="solid"
+              onClick={() => {
+                if (!statusConfirmation) return
+                handleStepStatusChange(
+                  statusConfirmation.stepId,
+                  statusConfirmation.status,
+                )
+                setStatusConfirmation(undefined)
+              }}
+            >
+              {statusConfirmation?.status === 'completed' ? 'Mark done' : 'Reopen stage'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </section>
   )
 }

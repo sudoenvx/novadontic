@@ -66,7 +66,7 @@ function SortableHeader<TData>({
     <button
       type="button"
       className={cn(
-        'group inline-flex items-center gap-1 text-start text-inherit transition-colors duration-(--duration-fast)',
+        'group/sort-header inline-flex items-center gap-1 text-start text-inherit transition-colors duration-(--duration-fast)',
         isActive ? 'text-text-primary' : 'hover:text-text-primary',
       )}
       onClick={() => onSortChange({ columnId: column.id, direction: nextDirection })}
@@ -83,7 +83,7 @@ function SortableHeader<TData>({
         <ArrowUpDown
           size={12}
           aria-hidden="true"
-          className="text-text-secondary opacity-50 transition-[color,opacity] duration-(--duration-fast) group-hover:text-text-primary group-hover:opacity-100"
+          className="text-text-secondary opacity-50 transition-[color,opacity] duration-(--duration-fast) group-hover/sort-header:text-text-primary group-hover/sort-header:opacity-100"
         />
       )}
     </button>

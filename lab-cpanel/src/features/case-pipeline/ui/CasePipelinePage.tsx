@@ -4,7 +4,7 @@ import { useLocation, useParams } from 'react-router-dom'
 import { toast } from '../../../shared/ui/Toast'
 import { Page } from '../../../shared/ui/Page'
 import { casePipelineFixtures } from '../data/cases'
-import { getNextStage, getPreviousStage } from '../domain/casePipeline'
+import { getPreviousStage } from '../domain/casePipeline'
 import type {
   CasePipelineCase,
   CasePipelineStage,
@@ -75,12 +75,12 @@ export function CasePipelinePage() {
         <main className="grid min-w-0 gap-3.5">
           <CasePipelineHeader
             caseItem={selectedCase}
-            onMoveForward={() => moveSelectedCase(getNextStage(selectedCase.stage))}
             onToggleRush={handleToggleRush}
             onSendBack={() => moveSelectedCase(getPreviousStage(selectedCase.stage))}
           />
 
           <CaseWorkflowStages
+            key={selectedCase.id}
             caseItem={selectedCase}
             onUpdateSteps={(steps) =>
               updateSelectedCase((caseItem) => ({

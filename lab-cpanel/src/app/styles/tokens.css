@@ -32,7 +32,8 @@
   /* ==========================================================================
      1. BRAND  (the only place raw brand colours live)
      ========================================================================== */
-  --brand-blue: #2f6bff;
+  /* --brand-blue: #2f6bff; */
+  --brand-blue: #2c64ef;
   --brand-blue-dark: #1f4fd1;      /* text on pale blue, pressed states */
   --brand-violet: #8b3ff2;
   --brand-violet-dark: #6a26c4;

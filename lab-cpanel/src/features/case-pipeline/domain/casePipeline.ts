@@ -15,7 +15,7 @@ export type CaseFieldValue = string | boolean | string[]
 export type CasePipelineFile = {
   id: string
   name: string
-  type: 'STL' | 'IMG' | 'PDF' | 'DOC'
+  type: 'STL' | 'IMG' | 'PDF' | 'DOC' | 'OTHER'
   size: string
   uploadedBy: string
   uploadedAt: string

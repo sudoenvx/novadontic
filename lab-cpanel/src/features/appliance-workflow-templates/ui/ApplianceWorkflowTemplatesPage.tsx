@@ -399,7 +399,12 @@ export function ApplianceWorkflowTemplatesPage() {
                       <div key={step.id} className="grid gap-2">
                         {dragOverIndex === index &&
                           draggedStepId !== step.id && (
-                            <WorkflowStepPlaceholder />
+                            <div
+                              onDragOver={(event) => handleStepDragOver(event, index)}
+                              onDrop={(event) => handleStepDrop(event, index)}
+                            >
+                              <WorkflowStepPlaceholder />
+                            </div>
                           )}
                         <WorkflowStepRow
                           step={step}
@@ -425,7 +430,16 @@ export function ApplianceWorkflowTemplatesPage() {
                       </div>
                     ))}
                     {dragOverIndex === selectedWorkflow.steps.length && (
-                      <WorkflowStepPlaceholder />
+                      <div
+                        onDragOver={(event) =>
+                          handleStepDragOver(event, selectedWorkflow.steps.length)
+                        }
+                        onDrop={(event) =>
+                          handleStepDrop(event, selectedWorkflow.steps.length)
+                        }
+                      >
+                        <WorkflowStepPlaceholder />
+                      </div>
                     )}
                   </div>
                 ) : (

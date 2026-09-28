@@ -15,7 +15,7 @@ export function SignInPage() {
 
   return (
     <main className="min-h-dvh bg-canvas lg:grid lg:grid-cols-[minmax(0,0.8fr)_minmax(28rem,0.9fr)]">
-      <section className="hidden min-h-dvh flex-col justify-between border-e border-border bg-primary-soft-light px-8 py-7 lg:flex xl:px-12">
+      <section className="hidden min-h-dvh flex-col justify-between border-e border-border bg-surface px-8 py-7 lg:flex xl:px-12">
         <a href="/" aria-label="Novadontic home" className="flex w-fit items-center gap-3">
           <img src="/images/novadontic_icon.png" alt="" className="size-9" />
           <img src="/images/novadontic_wordmark.png" alt="Novadontic" className="h-6 w-auto" />
@@ -31,7 +31,7 @@ export function SignInPage() {
           </p>
           <div className="mt-8 grid gap-4 border-t border-border-active pt-5">
             <div className="flex items-start gap-3">
-              <span className="grid size-9 shrink-0 place-items-center rounded-sm bg-surface text-primary shadow-card">
+              <span className="grid size-9 shrink-0 place-items-center rounded-sm bg-primary-soft text-text-primary shadow-card">
                 <Workflow size={18} aria-hidden="true" />
               </span>
               <div>
@@ -40,7 +40,7 @@ export function SignInPage() {
               </div>
             </div>
             <div className="flex items-start gap-3">
-              <span className="grid size-9 shrink-0 place-items-center rounded-sm bg-surface text-success shadow-card">
+              <span className="grid size-9 shrink-0 place-items-center rounded-sm bg-success-soft text-success shadow-card">
                 <ShieldCheck size={18} aria-hidden="true" />
               </span>
               <div>

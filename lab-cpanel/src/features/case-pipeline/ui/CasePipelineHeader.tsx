@@ -1,21 +1,18 @@
-import { Check, Flag, RotateCcw } from 'lucide-react'
+import { Flag, RotateCcw } from 'lucide-react'
 
 import { Badge } from '../../../shared/ui/Badge'
 import { Button } from '../../../shared/ui/Button'
 import { Card } from '../../../shared/ui/Card'
-import { getNextStage } from '../domain/casePipeline'
 import type { CasePipelineCase } from '../domain/casePipeline'
 
 type CasePipelineHeaderProps = {
   caseItem: CasePipelineCase
-  onMoveForward: () => void
   onToggleRush: () => void
   onSendBack: () => void
 }
 
 export function CasePipelineHeader({
   caseItem,
-  onMoveForward,
   onToggleRush,
   onSendBack,
 }: CasePipelineHeaderProps) {
@@ -87,13 +84,14 @@ export function CasePipelineHeader({
         </div>
 
         {/* Right: actions */}
-        <div className="flex flex-wrap items-center justify-end gap-1.5 shrink-0">
-          <Button variant="outline" onClick={onSendBack}>
+        <div className="flex shrink-0 flex-wrap items-center justify-end gap-1">
+          <Button size="xs" variant="outline" onClick={onSendBack}>
             <RotateCcw />
             <span>Send back</span>
           </Button>
 
           <Button
+            size="xs"
             variant={isRush ? 'danger' : 'outline'}
             onClick={onToggleRush}
           >
@@ -101,10 +99,6 @@ export function CasePipelineHeader({
             <span>{isRush ? 'Remove rush' : 'Mark as rush'}</span>
           </Button>
 
-          <Button onClick={onMoveForward} disabled={caseItem.stage === 'Delivered'}>
-            <Check />
-            <span>Move to {getNextStage(caseItem.stage)}</span>
-          </Button>
         </div>
       </div>
     </Card>

@@ -1,5 +1,5 @@
 import { formatForDisplay } from '@tanstack/react-hotkeys'
-import { Search } from 'lucide-react'
+import { Plus, Search } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 
 import { Brand } from '../../shared/ui/Brand'
@@ -19,6 +19,10 @@ export function AppTopbar({ context, onOpenCommandMenu }: AppTopbarProps) {
     <header className="sticky top-0 z-30 flex items-center justify-between gap-3 rounded-md bg-surface  p-2 shadow-card max-sm:flex-col max-sm:items-start max-sm:p-3">
       <Brand context={context} onClick={() => navigate('/')} />
       <div className="flex items-center gap-2 max-sm:w-full">
+        <Button size="sm" onClick={() => navigate('/cases/new')}>
+          <Plus />
+          <span>Create case</span>
+        </Button>
         <Button
           variant="transparent"
           size="sm"

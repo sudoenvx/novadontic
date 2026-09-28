@@ -61,7 +61,7 @@ export function StaffPage() {
         </PageHeaderActions>
       </PageHeader>
 
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
         <StaffMetric label="Active staff" value={activeCount} tone="text-primary" />
         <StaffMetric label="Suspended access" value={suspendedCount} tone="text-secondary" />
       </div>
