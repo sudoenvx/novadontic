@@ -26,7 +26,7 @@ export function DataTableHeader<TData>({
   return (
     <TableRow>
       {selectable && (
-        <TableHead className="w-10 px-2 text-center align-middle">
+        <TableHead className="w-10 px-3 text-center align-middle">
           <Checkbox
             checked={allRowsSelected}
             indeterminate={someRowsSelected}
@@ -36,7 +36,10 @@ export function DataTableHeader<TData>({
         </TableHead>
       )}
       {columns.map((column) => (
-        <TableHead key={column.id} className={`py-1.5 text-start text-text-muted text-sm uppercase ${column.headerClassName ?? ''}`}>
+        <TableHead
+          key={column.id}
+          className={cn('py-2 text-start text-xs font-bold text-text-secondary', column.headerClassName ?? '')}
+        >
           <SortableHeader column={column} sortState={sortState} onSortChange={onSortChange} />
         </TableHead>
       ))}
@@ -62,16 +65,31 @@ function SortableHeader<TData>({
   return (
     <button
       type="button"
-      className="inline-flex items-center gap-1 text-start text-inherit"
+      className={cn(
+        'group inline-flex items-center gap-1 text-start text-inherit transition-colors duration-(--duration-fast)',
+        isActive ? 'text-text-primary' : 'hover:text-text-primary',
+      )}
       onClick={() => onSortChange({ columnId: column.id, direction: nextDirection })}
       aria-label={`Sort by ${column.id}`}
     >
       <span>{column.header}</span>
       {isActive ? (
-        sortState.direction === 'asc' ? <ArrowUp size={13} aria-hidden="true" /> : <ArrowDown size={13} aria-hidden="true" />
+        sortState.direction === 'asc' ? (
+          <ArrowUp size={12} aria-hidden="true" className="text-primary" />
+        ) : (
+          <ArrowDown size={12} aria-hidden="true" className="text-primary" />
+        )
       ) : (
-        <ArrowUpDown size={13} aria-hidden="true" />
+        <ArrowUpDown
+          size={12}
+          aria-hidden="true"
+          className="text-text-secondary opacity-50 transition-[color,opacity] duration-(--duration-fast) group-hover:text-text-primary group-hover:opacity-100"
+        />
       )}
     </button>
   )
+}
+
+function cn(...classes: (string | undefined | null | false)[]) {
+  return classes.filter(Boolean).join(' ')
 }

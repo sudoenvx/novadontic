@@ -22,36 +22,63 @@ export function CasePipelineHeader({
   const isRush = caseItem.priority === 'Rush'
 
   return (
-    <Card  className="gap-3 border-t-4 rounded-t-sm border-t-accent">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-semibold normal-case text-text">{caseItem.id}</h1>
-          <p className="mt-1 text-sm text-secondary">
-            {caseItem.request} for {caseItem.patientName} · {caseItem.doctorName} · {caseItem.clinicName}
+    <Card className="gap-3 border-t-4 border-t-primary rounded-t-sm">
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        {/* Left: case identity */}
+        <div className="min-w-0">
+          <h1 className="text-2xl font-extrabold tracking-tight text-text-primary normal-case">
+            {caseItem.id}
+          </h1>
+          <p className="mt-0.5 text-sm text-text-secondary">
+            {caseItem.request} · {caseItem.patientName} · {caseItem.doctorName} · {caseItem.clinicName}
           </p>
+
+          {/* Status & identifier badges */}
           <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
+            {/* Pipeline stage */}
             <Badge tone={caseItem.stage === 'Delivered' ? 'success' : 'info'}>
               {caseItem.stage}
             </Badge>
+
+            {/* Case type */}
             <Badge tone="neutral">
               {caseItem.caseType}
             </Badge>
-            <Badge tone="accent">
-              {caseItem.categoryName ?? caseItem.categoryId ?? 'New case'}
-            </Badge>
+
+            {/* Appliance */}
+            {caseItem.applianceId && (
+              <Badge tone="neutral">
+                {caseItem.applianceId}
+              </Badge>
+            )}
+
+            {/* Case category */}
+            {(caseItem.categoryName ?? caseItem.categoryId) && (
+              <Badge tone="accent">
+                {caseItem.categoryName ?? caseItem.categoryId}
+              </Badge>
+            )}
+
+            {/* Rush flag — same row, right after category */}
             {isRush && (
-              <Badge tone="destructive" className="gap-1 inline-flex items-center">
-                <Flag size={11} className="shrink-0" aria-hidden="true" />
+              <Badge
+                tone="destructive"
+                className="inline-flex items-center gap-1"
+              >
+                {/* Icon fixed to 12px — matches icon-size-sm token */}
+                <Flag size={12} className="shrink-0" aria-hidden="true" />
                 <span>Rush</span>
               </Badge>
             )}
+
+            {/* Status (Needs attention / Due today / On track) */}
             <Badge
               tone={
                 caseItem.status === 'Needs attention'
                   ? 'destructive'
                   : caseItem.status === 'Due today'
-                  ? 'warning'
-                  : 'success'
+                    ? 'warning'
+                    : 'success'
               }
             >
               {caseItem.status}
@@ -59,23 +86,23 @@ export function CasePipelineHeader({
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center justify-end gap-1.5">
-          <Button variant="neutral" onClick={onSendBack}>
-            <RotateCcw size={13} className="shrink-0" />
+        {/* Right: actions */}
+        <div className="flex flex-wrap items-center justify-end gap-1.5 shrink-0">
+          <Button variant="outline" onClick={onSendBack}>
+            <RotateCcw />
             <span>Send back</span>
           </Button>
 
           <Button
-            variant={isRush ? 'destructive' : 'neutral'}
+            variant={isRush ? 'danger' : 'outline'}
             onClick={onToggleRush}
-            className="gap-1.5"
           >
-            <Flag size={13} className="shrink-0" />
+            <Flag />
             <span>{isRush ? 'Remove rush' : 'Mark as rush'}</span>
           </Button>
 
           <Button onClick={onMoveForward} disabled={caseItem.stage === 'Delivered'}>
-            <Check size={13} className="shrink-0" />
+            <Check />
             <span>Move to {getNextStage(caseItem.stage)}</span>
           </Button>
         </div>

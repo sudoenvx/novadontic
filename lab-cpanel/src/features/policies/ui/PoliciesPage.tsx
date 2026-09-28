@@ -11,7 +11,7 @@ import {
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-import { AppHeader, AppHeaderActions } from '../../../shared/ui/AppHeader'
+import { PageHeader, PageHeaderActions } from '../../../shared/ui/PageHeader'
 import { Badge } from '../../../shared/ui/Badge'
 import { Button } from '../../../shared/ui/Button'
 import { Card } from '../../../shared/ui/Card'
@@ -132,17 +132,17 @@ export function PoliciesPage() {
 
   return (
     <Page size="full" className="gap-3.5 max-w-7xl mx-auto">
-      <AppHeader
+      <PageHeader
         title="Lab Policies & Terms"
         description="Standard operating policies, warranty terms, remake rules, and turnaround schedules."
       >
-        <AppHeaderActions>
+        <PageHeaderActions>
           <Button onClick={() => setIsNewDialogOpen(true)} className="gap-1.5">
             <Plus size={14} />
             <span>Create Policy</span>
           </Button>
-        </AppHeaderActions>
-      </AppHeader>
+        </PageHeaderActions>
+      </PageHeader>
 
       {/* Stats Cards Row */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">

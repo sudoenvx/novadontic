@@ -12,12 +12,12 @@ export type BadgeProps = HTMLAttributes<HTMLSpanElement> & {
 }
 
 const toneClasses: Record<BadgeTone, string> = {
-  neutral: 'bg-surface-muted text-secondary',
+  neutral: 'bg-surface-muted text-text-secondary',
   info: 'bg-info-soft text-info-soft-foreground',
   success: 'bg-success-soft text-success-soft-foreground',
   warning: 'bg-warning-soft text-warning-soft-foreground',
-  destructive: 'bg-destructive-soft text-destructive',
-  accent: 'bg-accent-soft text-text',
+  destructive: 'bg-destructive-soft text-destructive-soft-foreground',
+  accent: 'bg-accent-soft text-accent-soft-foreground',
 }
 
 const sizeClasses: Record<BadgeSize, string> = {
@@ -44,7 +44,7 @@ export function Badge({
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1.5 rounded-xs font-medium uppercase',
+        'inline-flex max-w-full items-center gap-1.5 rounded-xs font-medium leading-tight',
         sizeClasses[size],
         toneClasses[tone],
         className,

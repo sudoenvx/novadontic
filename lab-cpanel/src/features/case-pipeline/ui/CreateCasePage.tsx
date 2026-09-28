@@ -1,7 +1,7 @@
 import { ArrowLeft, Plus } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 
-import { AppHeader, AppHeaderActions } from '../../../shared/ui/AppHeader'
+import { PageHeader, PageHeaderActions } from '../../../shared/ui/PageHeader'
 import { Button } from '../../../shared/ui/Button'
 import { Page } from '../../../shared/ui/Page'
 import { toast } from '../../../shared/ui/Toast'
@@ -66,12 +66,12 @@ export function CreateCasePage() {
 
   return (
     <Page size="full">
-      <AppHeader title="Create case" description="Set up the patient request and choose the production workflow for the lab team.">
-        <AppHeaderActions>
+      <PageHeader title="Create case" description="Set up the patient request and choose the production workflow for the lab team.">
+        <PageHeaderActions>
           <Button variant="neutral" onClick={() => navigate(-1)}><ArrowLeft /> Cancel</Button>
           <Button type="submit" form="create-case-form"><Plus /> Create case</Button>
-        </AppHeaderActions>
-      </AppHeader>
+        </PageHeaderActions>
+      </PageHeader>
       <CreateCaseForm cases={casePipelineFixtures} defaultTurnaroundDays={labSettings.defaultCaseTurnaroundDays} onCancel={() => navigate(-1)} onSubmit={handleSubmit} />
     </Page>
   )

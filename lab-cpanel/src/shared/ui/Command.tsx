@@ -3,7 +3,7 @@
 import * as React from "react"
 import { Command as CommandPrimitive } from "cmdk"
 import { cn } from "cn"
-import { CheckIcon, SearchIcon } from "lucide-react"
+import { SearchIcon } from "lucide-react"
 
 import {
   Dialog,
@@ -22,7 +22,7 @@ function Command({
     <CommandPrimitive
       data-slot="command"
       className={cn(
-        "flex size-full flex-col overflow-hidden rounded-xl! bg-surface p-1 text-ink",
+        "flex size-full flex-col overflow-hidden rounded-lg border border-border bg-surface p-1 text-text-primary shadow-card",
         className
       )}
       {...props}
@@ -52,7 +52,7 @@ function CommandDialog({
       </DialogHeader>
       <DialogContent
         className={cn(
-          "top-1/3 translate-y-0 overflow-hidden rounded-md! p-0",
+          "overflow-hidden rounded-lg p-0",
           className
         )}
         showCloseButton={showCloseButton}
@@ -123,7 +123,7 @@ function CommandGroup({
     <CommandPrimitive.Group
       data-slot="command-group"
       className={cn(
-        "overflow-hidden p-1 text-ink **:[[cmdk-group-heading]]:px-2 **:[[cmdk-group-heading]]:py-1.5 **:[[cmdk-group-heading]]:text-xs **:[[cmdk-group-heading]]:font-medium **:[[cmdk-group-heading]]:text-text-muted",
+        "overflow-hidden p-1 text-text-primary **:[[cmdk-group-heading]]:px-2 **:[[cmdk-group-heading]]:py-1.5 **:[[cmdk-group-heading]]:text-xs **:[[cmdk-group-heading]]:font-semibold **:[[cmdk-group-heading]]:text-text-secondary",
         className
       )}
       {...props}
@@ -138,7 +138,7 @@ function CommandSeparator({
   return (
     <CommandPrimitive.Separator
       data-slot="command-separator"
-      className={cn("-mx-1 h-px bg-divider", className)}
+      className={cn("-mx-1 h-px bg-border-soft", className)}
       {...props}
     />
   )
@@ -153,13 +153,12 @@ function CommandItem({
     <CommandPrimitive.Item
       data-slot="command-item"
       className={cn(
-        "group/command-item relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none in-data-[slot=dialog-content]:rounded-sm! data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50 data-selected:hover:bg-neutral-100 data-selected:text-ink [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 data-selected:*:[svg]:text-ink ",
+        "group/command-item relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm text-text-primary outline-hidden select-none aria-selected:bg-primary-soft aria-selected:text-primary-soft-foreground aria-disabled:pointer-events-none aria-disabled:opacity-50 in-data-[slot=dialog-content]:rounded-sm [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
         className
       )}
       {...props}
     >
       {children}
-      <CheckIcon className="ml-auto opacity-0 group-has-data-[slot=command-shortcut]/command-item:hidden group-data-[checked=true]/command-item:opacity-100" />
     </CommandPrimitive.Item>
   )
 }
@@ -172,7 +171,7 @@ function CommandShortcut({
     <span
       data-slot="command-shortcut"
       className={cn(
-        "ml-auto text-xs tracking-widest text-text-muted font-medium group-data-selected/command-item:text-ink",
+        "ms-auto font-mono text-xs text-text-faint group-aria-selected/command-item:text-primary-soft-foreground",
         className
       )}
       {...props}

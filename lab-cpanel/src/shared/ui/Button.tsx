@@ -2,67 +2,100 @@ import { Button as ButtonPrimitive } from "@base-ui/react/button"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "cn"
 
+/*
+ * BUTTON
+ * ---------------------------------------------------------------------------
+ * variant  default      gradient primary action: ONE per screen
+ *          solid        flat primary blue, when you need more than one
+ *          secondary    dark ink pill/button
+ *          outline      white + border: the everyday button ("Send back")
+ *          neutral      soft grey fill
+ *          soft         pale blue fill
+ *          accent       violet
+ *          ghost        no background, for toolbars and icon buttons
+ *          danger       pale red, turns solid on hover ("Remove rush")
+ *          destructive  solid red: confirm dialogs only
+ *          link         text link
+ * size     xs | sm | md (default) | lg | icon-xs | icon-sm | icon | icon-lg
+ *
+ * Heights come from --control-* in tokens.css. Sentence case only.
+ * Old names still work: transparent, neutral-muted, neutral-outline,
+ * size "default", size "md", size "icon-md": they map to the classes below.
+ */
+
+// Shared strings so the aliases can never drift from the real variants.
+const OUTLINE =
+  "border-border bg-surface text-text-primary hover:bg-surface-muted aria-expanded:bg-surface-muted"
+const NEUTRAL =
+  "bg-surface-muted text-text-primary hover:bg-border aria-expanded:bg-border"
+const GHOST =
+  "text-text-secondary hover:bg-surface-muted hover:text-text-primary aria-expanded:bg-surface-muted"
+
+const SIZE_MD =
+  "h-control-md px-3.5 text-sm has-data-[icon=inline-start]:ps-2.5 has-data-[icon=inline-end]:pe-2.5"
+const SIZE_ICON = "size-control-md p-0"
+
 const buttonVariants = cva(
-  "group/button inline-flex shrink-0 items-center justify-center rounded-md border border-transparent bg-clip-padding text-xs/relaxed font-medium! uppercase whitespace-nowrap transition-colors outline-none select-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30  disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-2 aria-invalid:ring-destructive/20 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+  "group/button inline-flex shrink-0 items-center justify-center gap-1.5 rounded-sm border border-transparent text-sm font-bold whitespace-nowrap transition-colors duration-(--duration-fast) select-none disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-(--icon-size)",
   {
     variants: {
       variant: {
-        transparent: "bg-transparent",
-        default: "bg-primary text-primary-foreground hover:bg-primary-hover",
-        outline: "bg-surface text-neutral-600 hover:text-neutral-700 border! border-neutral-600! hover:bg-neutral-50 aria-expanded:bg-neutral-100",
-        secondary: "bg-surface-muted text-ink hover:bg-neutral-300 aria-expanded:bg-neutral-200",
-        accent: "bg-accent text-accent-foreground hover:bg-accent-hover aria-expanded:bg-accent-hover",
-        ghost: "text-secondary hover:bg-surface-muted hover:text-text aria-expanded:bg-surface-muted",
-        destructive: "bg-destructive-soft text-destructive hover:bg-destructive hover:text-destructive-foreground",
+        default:
+          "bg-primary text-primary-foreground hover:bg-primary-hover aria-expanded:bg-primary-hover",
+        solid: "bg-primary text-primary-foreground hover:bg-primary-hover",
+        secondary:
+          "bg-secondary text-secondary-foreground hover:bg-secondary-hover",
+        outline: OUTLINE,
+        neutral: NEUTRAL,
+        soft: "bg-primary-soft text-primary-soft-foreground hover:bg-primary-soft-light",
+        accent: "bg-accent text-accent-foreground hover:bg-accent-hover",
+        ghost: GHOST,
+        danger:
+          "bg-destructive-soft text-destructive-soft-foreground hover:bg-destructive hover:text-destructive-foreground",
+        destructive:
+          "bg-destructive text-destructive-foreground hover:bg-destructive-hover",
         link: "text-primary underline-offset-4 hover:underline",
-        neutral: "bg-neutral-100 text-ink hover:bg-neutral-200 aria-expanded:bg-neutral-200",
 
-        "neutral-muted": "bg-neutral-200 text-ink hover:bg-neutral-300 aria-expanded:bg-neutral-200",
-        "neutral-outline": "bg-surface text-ink ring-1 ring-inset ring-neutral-300 hover:bg-neutral-100 aria-expanded:bg-neutral-100"
+        // Deprecated aliases, kept so existing call sites compile.
+        transparent: GHOST,
+        "neutral-muted": NEUTRAL,
+        "neutral-outline": OUTLINE,
       },
       size: {
-        // py-1.5 (6px) | px-3 (12px)
-        default: "h-6.5 px-2 text-xs gap-1 has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-3.5",
+        xs: "h-control-xs rounded-xs px-2 text-xs gap-1 has-data-[icon=inline-start]:ps-1.5 has-data-[icon=inline-end]:pe-1.5 [&_svg:not([class*='size-'])]:size-(--icon-size-sm)",
+        sm: "h-control-sm px-2.5 text-xs has-data-[icon=inline-start]:ps-2 has-data-[icon=inline-end]:pe-2 [&_svg:not([class*='size-'])]:size-(--icon-size-sm)",
+        md: SIZE_MD,
+        lg: "h-control-lg px-4.5 text-base has-data-[icon=inline-start]:ps-3.5 has-data-[icon=inline-end]:pe-3.5",
 
-        // py-0.5 (2px) | px-1 (4px)
-        xs: "h-6 px-2 rounded-sm text-[0.625rem]/none gap-1 has-data-[icon=inline-end]:pr-1 has-data-[icon=inline-start]:pl-1 [&_svg:not([class*='size-'])]:size-2.5",
+        "icon-xs":
+          "size-control-xs rounded-xs p-0 [&_svg:not([class*='size-'])]:size-(--icon-size-sm)",
+        "icon-sm":
+          "size-control-sm p-0 [&_svg:not([class*='size-'])]:size-(--icon-size-sm)",
+        icon: SIZE_ICON,
+        "icon-lg": "size-control-lg p-0",
 
-        // py-1 (4px) | px-2 (8px)
-        sm: "h-7 px-2 rounded-sm text-xs/none! gap-1 has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-3",
-
-        // py-1.5 (6px) | px-3 (12px)
-        md: "h-8 px-3 rounded-sm text-xs/none gap-1 has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2 [&_svg:not([class*='size-'])]:size-3.5",
-
-
-
-        // py-2 (8px) | px-4 (16px)
-        lg: "py-3 px-4 text-sm/none gap-1 has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2 [&_svg:not([class*='size-'])]:size-4",
-
-        // Icon variants retain square dimensions using aspect-square or matching padding
-        icon: "p-1.5 aspect-square [&_svg:not([class*='size-'])]:size-3.5",
-        "icon-xs": "p-0.5 rounded-sm aspect-square [&_svg:not([class*='size-'])]:size-2.5",
-        "icon-sm": "p-1 rounded-xs aspect-square [&_svg:not([class*='size-'])]:size-3",
-        "icon-md": "p-1.5 rounded-xs aspect-square [&_svg:not([class*='size-'])]:size-3.5",
-        "icon-lg": "p-2 rounded-xs aspect-square [&_svg:not([class*='size-'])]:size-4",
+        // Deprecated aliases
+        default: SIZE_MD,
+        "icon-md": SIZE_ICON,
       },
     },
     defaultVariants: {
       variant: "default",
-      size: "default",
+      size: "md",
     },
   }
 )
 
 function Button({
   className,
-  variant = "default",
-  size = "default",
+  variant,
+  size,
   ...props
 }: ButtonPrimitive.Props & VariantProps<typeof buttonVariants>) {
   return (
     <ButtonPrimitive
       data-slot="button"
-      className={cn(buttonVariants({ variant, size, className }))}
+      className={cn(buttonVariants({ variant, size }), className)}
       {...props}
     />
   )

@@ -43,18 +43,21 @@ export function RolePermissionsEditor({
       <CardHeader className="flex flex-row items-start justify-between gap-3">
         <div>
           <div className="flex flex-wrap items-center gap-2">
-            <CardTitle className="normal-case">{role.name}</CardTitle>
+            <CardTitle className="normal-case  gap-2 flex-center">
+              {role.name}
+              {
+            role.type === "system" && (
+              <Badge tone={"info"} className="uppercase">
+                System
+              </Badge>
+            )
+          }
+            </CardTitle>
           </div>
           <p className="mt-1 text-sm text-text-muted">{role.description}</p>
         </div>
         <div className="flex flex-wrap items-center justify-end gap-2">
-          {
-            role.type === "system" && (
-              <Badge size="md" tone={"info"}>
-                System Role
-              </Badge>
-            )
-          }
+          
           <Button variant="neutral" onClick={onEdit}>
             <Pencil /> Edit role
           </Button>

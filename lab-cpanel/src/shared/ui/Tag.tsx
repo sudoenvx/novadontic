@@ -8,14 +8,23 @@ type TagProps = HTMLAttributes<HTMLSpanElement> & {
 }
 
 const toneClasses: Record<TagTone, string> = {
-  neutral: 'bg-surface-muted text-secondary',
-  blue: 'bg-primary-soft text-primary-soft-foreground',
+  neutral: 'bg-surface-muted text-text-secondary',
+  blue: 'bg-info-soft text-info-soft-foreground',
   violet: 'bg-accent-soft text-accent-soft-foreground',
-  teal: 'bg-primary-soft text-primary-soft-foreground',
-  amber: 'bg-accent-soft text-accent-soft-foreground',
-  rose: 'bg-destructive-soft text-destructive',
+  teal: 'bg-success-soft text-success-soft-foreground',
+  amber: 'bg-warning-soft text-warning-soft-foreground',
+  rose: 'bg-destructive-soft text-destructive-soft-foreground',
 }
 
 export function Tag({ className, tone = 'neutral', ...props }: TagProps) {
-  return <span className={cn('inline-flex w-fit items-center rounded-sm px-2.5 py-1 text-sm font-bold leading-tight', toneClasses[tone], className)} {...props} />
+  return (
+    <span
+      className={cn(
+        'inline-flex w-fit max-w-full items-center gap-1.5 rounded-xs px-2 py-1 text-xs font-semibold leading-tight',
+        toneClasses[tone],
+        className,
+      )}
+      {...props}
+    />
+  )
 }

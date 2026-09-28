@@ -3,7 +3,7 @@ import { useMemo, useState } from "react";
 
 import { Badge } from "../../../shared/ui/Badge";
 import { Button } from "../../../shared/ui/Button";
-import { AppHeader, AppHeaderActions } from "../../../shared/ui/AppHeader";
+import { PageHeader, PageHeaderActions } from "../../../shared/ui/PageHeader";
 import { Card } from "../../../shared/ui/Card";
 import {
   Dialog,
@@ -216,19 +216,19 @@ export function ApplianceWorkflowTemplatesPage() {
 
   return (
     <Page size="full">
-      <AppHeader
+      <PageHeader
         title="Workflow templates"
         description="Define reusable production steps for every appliance type in your lab."
       >
-        <AppHeaderActions>
+        <PageHeaderActions>
           <Button
             onClick={() => setIsCreateWorkflowOpen(true)}
             disabled={!selectedAppliance}
           >
             <Plus /> Add workflow
           </Button>
-        </AppHeaderActions>
-      </AppHeader>
+        </PageHeaderActions>
+      </PageHeader>
 
       <div className="grid gap-3 lg:grid-cols-[15rem_minmax(0,1fr)]">
         <Card className="h-fit gap-2">

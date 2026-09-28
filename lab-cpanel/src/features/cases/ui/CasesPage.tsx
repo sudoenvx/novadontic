@@ -2,7 +2,7 @@ import { Plus } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-import { AppHeader, AppHeaderActions } from '../../../shared/ui/AppHeader'
+import { PageHeader, PageHeaderActions } from '../../../shared/ui/PageHeader'
 import { Button } from '../../../shared/ui/Button'
 import { Pagination } from '../../../shared/ui/Pagination'
 import { Page } from '../../../shared/ui/Page'
@@ -34,9 +34,9 @@ export function CasesPage() {
 
   return (
     <Page size="full" className="gap-3.5">
-      <AppHeader title="Cases" description="Search, filter, and open every case moving through the lab." >
-        <AppHeaderActions><Button onClick={() => navigate('/cases/new')}><Plus /> Create case</Button></AppHeaderActions>
-      </AppHeader>
+      <PageHeader title="Cases" description="Search, filter, and open every case moving through the lab." >
+        <PageHeaderActions><Button onClick={() => navigate('/cases/new')}><Plus /> Create case</Button></PageHeaderActions>
+      </PageHeader>
       <CaseFilters
         filters={filters}
         options={options}

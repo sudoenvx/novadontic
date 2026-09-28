@@ -3,46 +3,59 @@ import { Input as InputPrimitive } from "@base-ui/react/input"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "cn"
 
+/*
+ * INPUT
+ * ---------------------------------------------------------------------------
+ * variant  outline (default)  white + border
+ *          neutral            soft grey fill, turns white on focus
+ *          bottom-border      underline only
+ *          bare               no chrome; used inside <InputGroup>
+ * size     xs | sm | md (default) | lg      (heights = --control-*)
+ * Old size "default" still works (= md).
+ */
+const SIZE_MD = "h-control-md px-3 text-base"
+
 const inputVariants = cva(
-  "w-full min-w-0 rounded-sm transition-colors outline-none file:inline-flex file:border-0 file:bg-transparent file:font-semibold file:text-ink placeholder:text-text-muted border border-border focus-visible:bg-neutral-50  focus-visible:border-neutral-500 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-surface-muted aria-invalid:ring-2 aria-invalid:ring-destructive/20 autofill:transition-colors autofill:duration-[9999s] autofill:delay-[9999s]",
+  "w-full min-w-0 text-text-primary transition-colors duration-(--duration-fast) outline-none placeholder:text-text-faint file:inline-flex file:border-0 file:bg-transparent file:font-semibold file:text-text-primary disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 autofill:transition-colors autofill:duration-[9999s] autofill:delay-[9999s]",
   {
     variants: {
-      size: {
-        default: "h-8 px-2 py-0.5 text-sm md:text-xs/relaxed",
-        xs: "h-6.5 px-1.5 py-0.5 text-xs",
-        sm: "h-6.5 px-2 py-0.5 text-sm md:text-xs/relaxed",
-        md: "h-9 px-3 py-1.5 text-sm",
-        lg: "h-11 px-4 py-2 text-base",
-      },
-
       variant: {
-        "outline": "bg-transparent!",
-        "neutral": "bg-neutral-50 focus:bg-neutral-100",
-        "bottom-border": "border-b-3 border-b-neutral-300"
-      }
+        outline:
+          "rounded-sm border border-border bg-surface hover:border-border-strong focus-visible:border-primary focus-visible:ring-3 focus-visible:ring-focus/25 disabled:bg-surface-muted",
+        neutral:
+          "rounded-sm border border-transparent bg-surface-muted focus-visible:border-primary focus-visible:bg-surface focus-visible:ring-3 focus-visible:ring-focus/25",
+        "bottom-border":
+          "rounded-none border-0 border-b-2 border-b-border bg-transparent px-0 hover:border-b-border-strong focus-visible:border-b-primary",
+        bare: "rounded-none border-0 bg-transparent focus-visible:ring-0 aria-invalid:ring-0",
+      },
+      size: {
+        xs: "h-control-xs px-2 text-xs",
+        sm: "h-control-sm px-2.5 text-sm",
+        md: SIZE_MD,
+        lg: "h-control-lg px-3.5 text-base",
+        default: SIZE_MD, // deprecated alias of md
+      },
     },
     defaultVariants: {
-      size: "sm",
-      variant: "neutral"
+      variant: "outline",
+      size: "md",
     },
-  },
+  }
 )
 
 type InputProps = Omit<React.ComponentProps<"input">, "size"> &
   VariantProps<typeof inputVariants>
 
-function Input({ className, variant ,type, size, ...props }: InputProps) {
+function Input({ className, variant, size, type, ...props }: InputProps) {
   return (
     <InputPrimitive
       type={type}
       data-slot="input"
-      className={cn(
-        inputVariants({ size, variant }),
-        className
-      )}
+      className={cn(inputVariants({ variant, size }), className)}
       {...props}
     />
   )
 }
 
-export { Input }
+// eslint-disable-next-line react-refresh/only-export-components
+export { Input, inputVariants }

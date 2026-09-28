@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import { Button } from '../../../shared/ui/Button'
-import { AppHeader, AppHeaderActions } from '../../../shared/ui/AppHeader'
+import { PageHeader, PageHeaderActions } from '../../../shared/ui/PageHeader'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '../../../shared/ui/InputGroup'
 import { Page } from '../../../shared/ui/Page'
 import { toast } from '../../../shared/ui/Toast'
@@ -78,15 +78,15 @@ export function DoctorsPage() {
 
   return (
     <Page size="full">
-      <AppHeader title="Doctors" description="Manage doctor profiles, clinic links, and portal access.">
-        <AppHeaderActions>
+      <PageHeader title="Doctors" description="Manage doctor profiles, clinic links, and portal access.">
+        <PageHeaderActions>
           <InputGroup className="w-64" variant="outline">
             <InputGroupAddon><Search /></InputGroupAddon>
             <InputGroupInput value={searchTerm} onChange={(event) => setSearchTerm(event.currentTarget.value)} placeholder="Search doctors" aria-label="Search doctors" />
           </InputGroup>
           <Button onClick={() => setIsCreateOpen(true)}><Plus /> Add doctor</Button>
-        </AppHeaderActions>
-      </AppHeader>
+        </PageHeaderActions>
+      </PageHeader>
 
       <DoctorTable
         description="Doctors can be linked to a clinic or added through the website portal."

@@ -1,7 +1,7 @@
 import { Plus, ShieldCheck } from "lucide-react";
 import { useMemo, useState } from "react";
 
-import { AppHeader, AppHeaderActions } from "../../../shared/ui/AppHeader";
+import { PageHeader, PageHeaderActions } from "../../../shared/ui/PageHeader";
 import { Button } from "../../../shared/ui/Button";
 import { Card } from "../../../shared/ui/Card";
 import { Page } from "../../../shared/ui/Page";
@@ -92,11 +92,11 @@ export function RolesPermissionsPage() {
 
   return (
     <Page size="full" className="min-h-0 flex-1 lg:overflow-hidden">
-      <AppHeader
+      <PageHeader
         title="Roles & permissions"
         description="Control what each role can see and do across the lab workspace."
       >
-        <AppHeaderActions>
+        <PageHeaderActions>
           <Button
             onClick={() => {
               setEditingRole(undefined);
@@ -105,8 +105,8 @@ export function RolesPermissionsPage() {
           >
             <Plus /> Add role
           </Button>
-        </AppHeaderActions>
-      </AppHeader>
+        </PageHeaderActions>
+      </PageHeader>
 
       <div className="grid gap-3 lg:min-h-0 lg:flex-1 lg:grid-cols-[18rem_minmax(0,1fr)]">
         <RoleList

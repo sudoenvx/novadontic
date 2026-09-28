@@ -48,7 +48,10 @@ export function DataTableBody<TData>({
         })
       ) : (
         <TableRow>
-          <TableCell colSpan={columns.length + (selectable ? 1 : 0)} className="py-8 text-center text-text-muted">
+          <TableCell
+            colSpan={columns.length + (selectable ? 1 : 0)}
+            className="py-10 text-center text-sm text-text-muted"
+          >
             {emptyMessage}
           </TableCell>
         </TableRow>
@@ -80,12 +83,15 @@ function DataTableRow<TData>({
 }: DataTableRowProps<TData>) {
   const rowRef = useRef<HTMLTableRowElement>(null)
   const handleRowClick = useCallback(() => onRowClick?.(row), [onRowClick, row])
-  const activateRow = useCallback((event: globalThis.KeyboardEvent) => {
-    if (event.target !== event.currentTarget) return
-    event.preventDefault()
-    event.stopPropagation()
-    onRowClick?.(row)
-  }, [onRowClick, row])
+  const activateRow = useCallback(
+    (event: globalThis.KeyboardEvent) => {
+      if (event.target !== event.currentTarget) return
+      event.preventDefault()
+      event.stopPropagation()
+      onRowClick?.(row)
+    },
+    [onRowClick, row],
+  )
 
   useHotkey('Enter', activateRow, {
     enabled: onRowClick !== undefined,
@@ -103,12 +109,21 @@ function DataTableRow<TData>({
   return (
     <TableRow
       ref={rowRef}
-      className={onRowClick ? 'cursor-pointer' : undefined}
+      className={
+        onRowClick
+          ? 'cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset'
+          : undefined
+      }
       tabIndex={onRowClick ? 0 : undefined}
       onClick={onRowClick ? handleRowClick : undefined}
+      aria-selected={selectable ? selected : undefined}
+      data-selected={selected || undefined}
     >
       {selectable && (
-        <TableCell className="w-10 px-2 text-center align-middle" onClick={(event) => event.stopPropagation()}>
+        <TableCell
+          className="w-10 px-3 text-center align-middle"
+          onClick={(event) => event.stopPropagation()}
+        >
           <Checkbox
             checked={selected}
             onCheckedChange={() => onToggleRow(row, index)}

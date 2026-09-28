@@ -21,18 +21,17 @@ export function StatisticCard({
   return (
     <article
       className={cn(
-        'rounded-md bg-neutral-100 border border-border p-2',
-        featured && 'outline outline-accent text-accent-foreground',
+        'min-w-0 rounded-lg border border-border bg-surface p-2 shadow-card',
+        featured && 'ring ring-accent bg-accent-soft-light',
       )}
     >
       <div className="flex items-center justify-between gap-2">
-        <p className={cn('text-sm text-text-muted')}>
-          {label}
-        </p>
+        <p className="min-w-0 text-sm font-semibold text-text-secondary">{label}</p>
         {icon && (
           <span
             className={cn(
-              'flex h-5 w-5 shrink-0 items-center justify-center rounded-md text-text-muted',
+              'grid size-8 shrink-0 place-items-center rounded-md bg-primary-soft-light text-primary',
+              featured && 'bg-accent-soft text-text',
               tone === 'destructive' && 'text-destructive',
             )}
           >
@@ -42,20 +41,14 @@ export function StatisticCard({
       </div>
       <p
         className={cn(
-          'mt-1 text-2xl font-semibold leading-tight text-text',
+          'mt-2 wrap-break-word text-2xl font-extrabold leading-tight tracking-tight text-text-primary tabular',
           tone === 'destructive' && 'text-destructive',
         )}
       >
         {value}
       </p>
       {detail && (
-        <p
-          className={cn(
-            'mt-1! text-sm text-text-muted',
-          )}
-        >
-          {detail}
-        </p>
+        <p className="mt-1 text-xs text-text-secondary">{detail}</p>
       )}
     </article>
   )

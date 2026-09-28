@@ -1,8 +1,8 @@
-import { cn } from 'cn'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
-import React from 'react'
 
-interface PaginationProps {
+import { Button } from './Button'
+
+type PaginationProps = {
   currentPage: number
   totalPages: number
   totalItems: number
@@ -14,77 +14,62 @@ export function Pagination({
   currentPage,
   totalPages,
   onPageChange,
+  totalItems,
+  perPage,
 }: PaginationProps) {
-  const pages = buildPageSequence(currentPage, totalPages)
+  const itemCount = Math.max(0, totalItems)
+  const pageSize = Math.max(1, perPage)
+  const pageCount = Math.max(0, totalPages)
+  const page = Math.min(Math.max(1, currentPage), Math.max(1, pageCount))
+  const startItem = itemCount === 0 ? 0 : (page - 1) * pageSize + 1
+  const endItem = Math.min(page * pageSize, itemCount)
+  const pages = buildPageSequence(page, pageCount)
 
   return (
-    <div dir="ltr" className="flex items-center justify-between">
-      {/* <span className="text-[12px] text-text-muted">
-        showing {start} – { end} of {totalItems} records
-      </span> */}
-
-      <div className="flex items-center gap-1">
-        {/* "السابق" (previous) visually points toward the start of reading (right) in RTL */}
-        <PgBtn
-          onClick={() => onPageChange(currentPage - 1)}
-          disabled={currentPage === 1}
-          title="الصفحة السابقة"
-        >
-          <ChevronLeft size={13} />
-        </PgBtn>
-
-        {pages.map((p, i) =>
-          p === '…' ? (
-            <span key={`dots-${i}`} className="text-[12px] text-text-muted px-1">…</span>
+    <nav aria-label="Pagination" className="flex flex-wrap items-center justify-between gap-2">
+      <p className="text-xs text-text-secondary tabular">
+        Showing {startItem}-{endItem} of {itemCount}
+      </p>
+      {pageCount > 0 && (
+        <div dir="ltr" className="flex items-center gap-1">
+          <Button
+            type="button"
+            variant="neutral"
+            size="icon-sm"
+            aria-label="Previous page"
+            disabled={page <= 1}
+            onClick={() => onPageChange(page - 1)}
+          >
+            <ChevronLeft aria-hidden="true" />
+          </Button>
+          {pages.map((pageNumber, index) => pageNumber === '…' ? (
+            <span key={`ellipsis-${index}`} aria-hidden="true" className="px-1 text-xs text-text-faint">…</span>
           ) : (
-            <PgBtn
-              key={p}
-              active={p === currentPage}
-              onClick={() => onPageChange(p as number)}
+            <Button
+              key={pageNumber}
+              type="button"
+              variant={pageNumber === page ? 'soft' : 'neutral'}
+              size="icon-sm"
+              aria-label={`Page ${pageNumber}`}
+              aria-current={pageNumber === page ? 'page' : undefined}
+              onClick={() => onPageChange(pageNumber)}
             >
-              {p}
-            </PgBtn>
-          )
-        )}
-
-        {/* "التالي" (next) visually points toward the end of reading (left) in RTL */}
-        <PgBtn
-          onClick={() => onPageChange(currentPage + 1)}
-          disabled={currentPage === totalPages}
-          title="الصفحة التالية"
-        >
-          <ChevronRight size={13} />
-        </PgBtn>
-      </div>
-    </div>
-  )
-}
-
-function PgBtn({
-  children, onClick, disabled, active, title,
-}: {
-  children: React.ReactNode
-  onClick?: () => void
-  disabled?: boolean
-  active?: boolean
-  title?: string
-}) {
-  return (
-    <button
-      onClick={onClick}
-      disabled={disabled}
-      title={title}
-      className={cn(
-        'min-w-6 h-6 px-1.5 rounded-xs text-sm tabular-nums',
-        'transition-colors flex items-center justify-center font-mono font-medium!',
-        active
-          ? 'bg-primary border-primary text-primary-foreground'
-          : 'bg-muted  text-text hover:bg-neutral-300 hover:text-text hover:border-border-strong',
-        disabled && 'opacity-40 cursor-not-allowed pointer-events-none',
+              {pageNumber}
+            </Button>
+          ))}
+          <Button
+            type="button"
+            variant="neutral"
+            size="icon-sm"
+            aria-label="Next page"
+            disabled={page >= pageCount}
+            onClick={() => onPageChange(page + 1)}
+          >
+            <ChevronRight aria-hidden="true" />
+          </Button>
+        </div>
       )}
-    >
-      {children}
-    </button>
+    </nav>
   )
 }
 

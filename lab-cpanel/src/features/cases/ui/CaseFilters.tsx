@@ -1,9 +1,7 @@
 import { Search, X, RotateCcw } from 'lucide-react'
-import { useMemo } from 'react'
 
-import { Badge } from '../../../shared/ui/Badge'
 import { Button } from '../../../shared/ui/Button'
-import { FilterTabs, FilterTabsList, FilterTab } from '../../../shared/ui/FilterTabs'
+import { Tag } from '../../../shared/ui/Tag'
 import {
   InputGroup,
   InputGroupAddon,
@@ -40,45 +38,6 @@ export function CaseFilters({
   onChange,
   onReset,
 }: CaseFiltersProps) {
-  // Preset selector (Quick tab)
-  const currentPreset = useMemo(() => {
-    if (filters.status === 'Needs attention') return 'needs_attention'
-    if (filters.status === 'Due today') return 'due_today'
-    if (filters.priority === 'Rush') return 'rush'
-    if (filters.stage !== 'all' && filters.stage !== 'Delivered') return 'active_stages'
-    if (
-      filters.applianceType === 'all' &&
-      filters.category === 'all' &&
-      filters.clinicName === 'all' &&
-      filters.stage === 'all' &&
-      filters.priority === 'all' &&
-      filters.status === 'all'
-    ) {
-      return 'all'
-    }
-    return 'custom'
-  }, [filters])
-
-  function handlePresetChange(preset: string) {
-    if (preset === 'all') {
-      onChange({
-        ...filters,
-        applianceType: 'all',
-        category: 'all',
-        clinicName: 'all',
-        stage: 'all',
-        priority: 'all',
-        status: 'all',
-      })
-    } else if (preset === 'needs_attention') {
-      onChange({ ...filters, status: 'Needs attention' })
-    } else if (preset === 'due_today') {
-      onChange({ ...filters, status: 'Due today' })
-    } else if (preset === 'rush') {
-      onChange({ ...filters, priority: 'Rush' })
-    }
-  }
-
   function updateFilter<Key extends keyof CaseListFilters>(
     key: Key,
     value: CaseListFilters[Key],
@@ -86,112 +45,65 @@ export function CaseFilters({
     onChange({ ...filters, [key]: value })
   }
 
-  const hasActiveFilters = Boolean(
-    filters.searchTerm.trim() ||
-      filters.applianceType !== 'all' ||
-      filters.category !== 'all' ||
-      filters.clinicName !== 'all' ||
-      filters.stage !== 'all' ||
-      filters.priority !== 'all' ||
-      filters.status !== 'all',
-  )
+  const activeFilterChips: Array<{ id: string; label: string; onRemove: () => void }> = []
 
-  const activeFilterChips = useMemo(() => {
-    const chips: Array<{ id: string; label: string; onRemove: () => void }> = []
-
-    if (filters.searchTerm.trim()) {
-      chips.push({
-        id: 'search',
-        label: `Search: "${filters.searchTerm}"`,
-        onRemove: () => updateFilter('searchTerm', ''),
-      })
-    }
-    if (filters.applianceType !== 'all') {
-      chips.push({
-        id: 'appliance',
-        label: `Appliance: ${filters.applianceType}`,
-        onRemove: () => updateFilter('applianceType', 'all'),
-      })
-    }
-    if (filters.category !== 'all') {
-      chips.push({
-        id: 'category',
-        label: `Category: ${filters.category}`,
-        onRemove: () => updateFilter('category', 'all'),
-      })
-    }
-    if (filters.clinicName !== 'all') {
-      chips.push({
-        id: 'clinic',
-        label: `Clinic: ${filters.clinicName}`,
-        onRemove: () => updateFilter('clinicName', 'all'),
-      })
-    }
-    if (filters.stage !== 'all') {
-      chips.push({
-        id: 'stage',
-        label: `Stage: ${filters.stage}`,
-        onRemove: () => updateFilter('stage', 'all'),
-      })
-    }
-    if (filters.priority !== 'all') {
-      chips.push({
-        id: 'priority',
-        label: `Priority: ${filters.priority}`,
-        onRemove: () => updateFilter('priority', 'all'),
-      })
-    }
-    if (filters.status !== 'all') {
-      chips.push({
-        id: 'status',
-        label: `Status: ${filters.status}`,
-        onRemove: () => updateFilter('status', 'all'),
-      })
-    }
-
-    return chips
-  }, [filters])
+  if (filters.searchTerm.trim()) {
+    activeFilterChips.push({
+      id: 'search',
+      label: `Search: "${filters.searchTerm}"`,
+      onRemove: () => updateFilter('searchTerm', ''),
+    })
+  }
+  if (filters.applianceType !== 'all') {
+    activeFilterChips.push({
+      id: 'appliance',
+      label: `Appliance: ${filters.applianceType}`,
+      onRemove: () => updateFilter('applianceType', 'all'),
+    })
+  }
+  if (filters.category !== 'all') {
+    activeFilterChips.push({
+      id: 'category',
+      label: `Category: ${filters.category}`,
+      onRemove: () => updateFilter('category', 'all'),
+    })
+  }
+  if (filters.clinicName !== 'all') {
+    activeFilterChips.push({
+      id: 'clinic',
+      label: `Clinic: ${filters.clinicName}`,
+      onRemove: () => updateFilter('clinicName', 'all'),
+    })
+  }
+  if (filters.stage !== 'all') {
+    activeFilterChips.push({
+      id: 'stage',
+      label: `Stage: ${filters.stage}`,
+      onRemove: () => updateFilter('stage', 'all'),
+    })
+  }
+  if (filters.priority !== 'all') {
+    activeFilterChips.push({
+      id: 'priority',
+      label: `Priority: ${filters.priority}`,
+      onRemove: () => updateFilter('priority', 'all'),
+    })
+  }
+  if (filters.status !== 'all') {
+    activeFilterChips.push({
+      id: 'status',
+      label: `Status: ${filters.status}`,
+      onRemove: () => updateFilter('status', 'all'),
+    })
+  }
 
   return (
     <div className="grid gap-2.5">
-      {/* Quick Preset Filter Tabs */}
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <FilterTabs
-          value={currentPreset === 'custom' ? undefined : currentPreset}
-          onValueChange={handlePresetChange}
-        >
-          <FilterTabsList>
-            <FilterTab value="all">All cases</FilterTab>
-            <FilterTab value="needs_attention" color="#ef4444">
-              Needs attention
-            </FilterTab>
-            <FilterTab value="due_today" color="#f59e0b">
-              Due today
-            </FilterTab>
-            <FilterTab value="rush" color="#8b5cf6">
-              Rush priority
-            </FilterTab>
-          </FilterTabsList>
-        </FilterTabs>
-
-        {hasActiveFilters && (
-          <Button
-            variant="ghost"
-            size="xs"
-            onClick={onReset}
-            className="text-text-muted hover:text-text h-7 gap-1"
-          >
-            <RotateCcw size={13} />
-            <span>Reset filters</span>
-          </Button>
-        )}
-      </div>
-
       {/* Main Filter Controls Bar */}
       <div className="flex flex-wrap items-center gap-2">
         {/* Search Input */}
-        <div className="min-w-[220px] flex-1">
-          <InputGroup size="sm" variant="outline">
+        <div className="min-w-55 flex-1">
+          <InputGroup variant="outline">
             <InputGroupAddon align="inline-start">
               <Search size={14} className="text-text-muted" />
             </InputGroupAddon>
@@ -215,7 +127,7 @@ export function CaseFilters({
         </div>
 
         {/* Appliance Dropdown Filter */}
-        <div className="w-[140px]">
+        <div className="w-35">
           <Select
             items={[
               { value: 'all', label: 'All appliances' },
@@ -246,7 +158,7 @@ export function CaseFilters({
         </div>
 
         {/* Category Dropdown Filter */}
-        <div className="w-[140px]">
+        <div className="w-35">
           <Select
             items={[
               { value: 'all', label: 'All categories' },
@@ -276,8 +188,32 @@ export function CaseFilters({
           </Select>
         </div>
 
+        {/* Clinic Dropdown Filter */}
+        <div className="w-35">
+          <Select
+            items={[
+              { value: 'all', label: 'All clinics' },
+              ...options.clinics.map((clinic) => ({ value: clinic, label: clinic })),
+            ]}
+            value={filters.clinicName}
+            onValueChange={(value) => updateFilter('clinicName', value ?? 'all')}
+          >
+            <SelectTrigger className="w-full text-xs">
+              <span className="truncate">
+                {filters.clinicName === 'all' ? 'Clinic: All' : `Clinic: ${filters.clinicName}`}
+              </span>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All clinics</SelectItem>
+              {options.clinics.map((clinic) => (
+                <SelectItem key={clinic} value={clinic}>{clinic}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
         {/* Stage Dropdown Filter */}
-        <div className="w-[140px]">
+        <div className="w-35">
           <Select
             items={[
               { value: 'all', label: 'All stages' },
@@ -308,7 +244,7 @@ export function CaseFilters({
         </div>
 
         {/* Priority Filter */}
-        <div className="w-[130px]">
+        <div className="w-32.5">
           <Select
             items={[
               { value: 'all', label: 'All priorities' },
@@ -334,7 +270,7 @@ export function CaseFilters({
         </div>
 
         {/* Status Filter */}
-        <div className="w-[140px]">
+        <div className="w-35">
           <Select
             items={[
               { value: 'all', label: 'All statuses' },
@@ -364,28 +300,36 @@ export function CaseFilters({
 
       {/* Active Filter Chips Row */}
       {activeFilterChips.length > 0 && (
-        <div className="flex flex-wrap items-center gap-1.5 pt-1">
-          <span className="text-2xs font-medium text-text-muted uppercase tracking-wider mr-1">
-            Active:
+        <div className="flex flex-wrap items-center gap-2 border-t border-border-soft pt-2" aria-label="Active case filters">
+          <span className="text-xs font-semibold text-text-secondary">
+            Active filters
           </span>
           {activeFilterChips.map((chip) => (
-            <Badge
+            <Tag
               key={chip.id}
               tone="neutral"
-              className="group/chip inline-flex items-center gap-1 py-0.5 px-2 text-2xs transition-colors hover:bg-neutral-200 cursor-pointer"
-              onClick={chip.onRemove}
+              className="gap-1 py-0.5 pe-0.5"
             >
-              <span>{chip.label}</span>
-              <X
-                size={11}
-                className="text-text-muted group-hover/chip:text-text transition-colors"
-                aria-hidden="true"
-              />
-            </Badge>
+              <span className="wrap-break-word">{chip.label}</span>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-xs"
+                className="size-5 min-w-5 rounded-xs"
+                aria-label={`Remove ${chip.label} filter`}
+                onClick={chip.onRemove}
+              >
+                <X size={12} aria-hidden="true" />
+              </Button>
+            </Tag>
           ))}
-          <span className="text-2xs text-text-muted ml-auto">
+          <span className="ms-auto text-xs text-text-secondary">
             {totalCount} matching case{totalCount === 1 ? '' : 's'}
           </span>
+          <Button type="button" variant="ghost" size="xs" onClick={onReset}>
+            <RotateCcw size={13} aria-hidden="true" />
+            Reset
+          </Button>
         </div>
       )}
     </div>

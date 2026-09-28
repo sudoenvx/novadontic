@@ -6,63 +6,78 @@ import { Button } from "./Button"
 import { Input } from "./Input"
 import { Textarea } from "./Textarea"
 
+/*
+ * INPUT GROUP: one bordered box holding an input plus addons.
+ *
+ *   <InputGroup>
+ *     <InputGroupAddon><SearchIcon /></InputGroupAddon>
+ *     <InputGroupInput placeholder="Search" />
+ *     <InputGroupAddon align="inline-end"><InputGroupButton>Go</InputGroupButton></InputGroupAddon>
+ *   </InputGroup>
+ *
+ * variant  outline (default) | neutral        size  xs | sm | md (default) | lg
+ * Set data-disabled="true" on <InputGroup> to grey the whole group out.
+ */
 const inputGroupVariants = cva(
-  "group/input-group relative flex h-7 w-full min-w-0 items-center rounded-sm border border-border bg-surface focus-within:bg-neutral-50 transition-colors outline-none  focus-within:border-neutral-400  disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 group-data-[disabled=true]/input-group:border-disabled-background group-data-[disabled=true]/input-group:bg-disabled-background in-data-[slot=combobox-content]:focus-within:border-inherit in-data-[slot=combobox-content]:focus-within:ring-0 has-data-[align=block-end]:rounded-sm has-data-[align=block-start]:rounded-sm has-[[data-slot][aria-invalid=true]]:border-destructive has-[[data-slot][aria-invalid=true]]:border-2 has-[textarea]:rounded-sm has-[>[data-align=block-end]]:h-auto has-[>[data-align=block-end]]:flex-col has-[>[data-align=block-start]]:h-auto has-[>[data-align=block-start]]:flex-col has-[>textarea]:h-auto dark:bg-surface-soft/30 dark:has-[[data-slot][aria-invalid=true]]:ring-destructive/40 has-[>[data-align=block-end]]:[&>input]:pt-3 has-[>[data-align=block-start]]:[&>input]:pb-3 has-[>[data-align=inline-end]]:[&>input]:pr-l.5 has-[>[data-align=inline-start]]:pr-1.5 overflow-hidden",
+  [
+    "group/input-group relative flex w-full min-w-0 items-center overflow-hidden rounded-sm border transition-colors duration-(--duration-fast) outline-none",
+    // the control fills the box; its own chrome is removed (Input variant="bare")
+    "[&>input]:h-full [&>input]:flex-1",
+    // focus + error live on the wrapper, not the inner control
+    "focus-within:border-primary focus-within:ring-3 focus-within:ring-focus/25",
+    "has-[[data-slot][aria-invalid=true]]:border-destructive has-[[data-slot][aria-invalid=true]]:ring-3 has-[[data-slot][aria-invalid=true]]:ring-destructive/20",
+    "data-[disabled=true]:pointer-events-none data-[disabled=true]:cursor-not-allowed data-[disabled=true]:opacity-50",
+    // addons above/below the input stack vertically and let the box grow
+    "has-[>[data-align=block-start]]:h-auto has-[>[data-align=block-start]]:flex-col has-[>[data-align=block-end]]:h-auto has-[>[data-align=block-end]]:flex-col has-[>textarea]:h-auto",
+    "has-[>[data-align=block-start]]:[&>input]:pb-3 has-[>[data-align=block-end]]:[&>input]:pt-3",
+  ],
   {
     variants: {
       variant: {
-        outline: "border border-border bg-surface dark:bg-surface-soft/30",
-        neutral: "border border-transparent bg-neutral-50 dark:bg-surface-soft/20",
+        outline: "border-border bg-surface hover:border-border-strong",
+        neutral:
+          "border-transparent bg-surface-muted focus-within:bg-surface",
       },
       size: {
-        default: "h-8 text-sm [&>input]:px-2 [&>input]:py-1 [&>textarea]:px-2 [&>textarea]:py-1",
-        xs: "h-6 text-xs [&>input]:px-1.5 [&>input]:py-0.5 [&>textarea]:px-1.5 [&>textarea]:py-0.5",
-        sm: "h-7 text-sm [&>input]:px-2 [&>input]:py-1 [&>textarea]:px-2 [&>textarea]:py-1",
-        md: "h-9 text-sm [&>input]:px-3 [&>input]:py-2 [&>textarea]:px-3 [&>textarea]:py-2",
-        lg: "h-11 text-base [&>input]:px-4 [&>input]:py-3 [&>textarea]:px-4 [&>textarea]:py-3",
+        xs: "h-control-xs text-xs [&>input]:px-1.5 [&>textarea]:px-1.5 [&>textarea]:py-1",
+        sm: "h-control-sm text-sm [&>input]:px-2 [&>textarea]:px-2 [&>textarea]:py-1.5",
+        md: "h-control-md text-base [&>input]:px-2.5 [&>textarea]:px-2.5 [&>textarea]:py-2",
+        lg: "h-control-lg text-base [&>input]:px-3.5 [&>textarea]:px-3.5 [&>textarea]:py-2.5",
       },
     },
     defaultVariants: {
-      size: "sm",
-      variant: "neutral",
+      variant: "outline",
+      size: "md",
     },
   }
 )
 
-interface InputGroupProps
-  extends React.ComponentProps<"div">,
-    VariantProps<typeof inputGroupVariants> {
-      size?: "xs" | "sm" | "md" | "lg"
-      variant?: "outline" | "neutral"
-    }
-
-function InputGroup({ size, variant, className, ...props }: InputGroupProps) {
+function InputGroup({
+  size,
+  variant,
+  className,
+  ...props
+}: React.ComponentProps<"div"> & VariantProps<typeof inputGroupVariants>) {
   return (
     <div
       data-slot="input-group"
       role="group"
-      className={cn(
-        inputGroupVariants({ size, variant }),
-        className
-      )}
+      className={cn(inputGroupVariants({ size, variant }), className)}
       {...props}
     />
   )
 }
 
 const inputGroupAddonVariants = cva(
-  "flex h-auto cursor-text items-center justify-center gap-1 py-1.5 text-xs/relaxed font-medium text-text-muted select-none group-data-[disabled=true]/input-group:opacity-50 **:data-[slot=kbd]:rounded-[calc(var(--radius-sm)-2px)] **:data-[slot=kbd]:bg-transparent group-data-[disabled=true]/input-group:bg-disabled-background **:data-[slot=kbd]:px-1 **:data-[slot=kbd]:text-[0.625rem] [&>svg:not([class*='size-'])]:size-3.5",
+  "flex h-auto cursor-text items-center justify-center gap-1 py-1.5 text-sm font-medium text-text-secondary select-none **:data-[slot=kbd]:rounded-xs **:data-[slot=kbd]:bg-transparent **:data-[slot=kbd]:px-1 **:data-[slot=kbd]:text-2xs [&>svg:not([class*='size-'])]:size-(--icon-size-sm)",
   {
     variants: {
       align: {
         "inline-start":
-          "order-first pl-1.5 has-[>button]:ml-[-0.275rem] has-[>kbd]:ml-[-0.275rem]",
-        "inline-end":
-          "order-last pr-1.5 has-[>button]:mr-[-0.275rem] has-[>kbd]:mr-[-0.275rem]",
-        "block-start":
-          "order-first w-full justify-start px-2 pt-2 group-has-[>input]/input-group:pt-2 [.border-b]:pb-2",
-        "block-end":
-          "order-last w-full justify-start px-2 pb-2 group-has-[>input]/input-group:pb-2 [.border-t]:pt-2",
+          "order-first ps-2 has-[>button]:-ms-1 has-[>kbd]:-ms-1",
+        "inline-end": "order-last pe-2 has-[>button]:-me-1 has-[>kbd]:-me-1",
+        "block-start": "order-first w-full justify-start px-2 pt-2 [.border-b]:pb-2",
+        "block-end": "order-last w-full justify-start px-2 pb-2 [.border-t]:pt-2",
       },
     },
     defaultVariants: {
@@ -83,32 +98,19 @@ function InputGroupAddon({
       data-align={align}
       className={cn(inputGroupAddonVariants({ align }), className)}
       onClick={(e) => {
-        if ((e.target as HTMLElement).closest("button")) {
-          return
-        }
-        e.currentTarget.parentElement?.querySelector("input")?.focus()
+        // clicking the addon focuses the field, unless the click hit a button
+        if ((e.target as HTMLElement).closest("button")) return
+        e.currentTarget.parentElement
+          ?.querySelector<HTMLElement>("input, textarea")
+          ?.focus()
       }}
       {...props}
     />
   )
 }
 
-const inputGroupButtonVariants = cva(
-  "flex items-center gap-2 rounded-sm text-xs/relaxed shadow-none",
-  {
-    variants: {
-      size: {
-        xs: "h-5 gap-1 rounded-[calc(var(--radius-sm)-2px)] px-1 [&>svg:not([class*='size-'])]:size-3",
-        sm: "gap-1",
-        "icon-xs": "size-6 p-0 has-[>svg]:p-0",
-        "icon-sm": "size-7 p-0 has-[>svg]:p-0",
-      },
-    },
-    defaultVariants: {
-      size: "xs",
-    },
-  }
-)
+/** Buttons inside a group reuse <Button>; only these sizes fit the box. */
+type InputGroupButtonSize = "xs" | "sm" | "icon-xs" | "icon-sm"
 
 function InputGroupButton({
   className,
@@ -116,16 +118,17 @@ function InputGroupButton({
   variant = "ghost",
   size = "xs",
   ...props
-}: Omit<React.ComponentProps<typeof Button>, "size" | "type"> &
-  VariantProps<typeof inputGroupButtonVariants> & {
-    type?: "button" | "submit" | "reset"
-  }) {
+}: Omit<React.ComponentProps<typeof Button>, "size" | "type"> & {
+  size?: InputGroupButtonSize
+  type?: "button" | "submit" | "reset"
+}) {
   return (
     <Button
       type={type}
       data-size={size}
       variant={variant}
-      className={cn(inputGroupButtonVariants({ size }), className)}
+      size={size}
+      className={cn("shadow-none", className)}
       {...props}
     />
   )
@@ -135,7 +138,7 @@ function InputGroupText({ className, ...props }: React.ComponentProps<"span">) {
   return (
     <span
       className={cn(
-        "flex items-center gap-2 text-xs/relaxed text-secondary [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4",
+        "flex items-center gap-2 text-sm text-text-secondary [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-(--icon-size)",
         className
       )}
       {...props}
@@ -150,13 +153,8 @@ function InputGroupInput({
   return (
     <Input
       data-slot="input-group-control"
-      className={cn(
-        "h-full flex-1 rounded-none border-0 bg-transparent shadow-none ring-0 focus-visible:ring-0 aria-invalid:ring-0 dark:bg-transparent",
-        // Fixes the autofill background layout distortion cleanly
-        "autofill:transition-colors autofill:duration-[9999s] autofill:delay-[9999s]",
-
-        className
-      )}
+      variant="bare"
+      className={cn("flex-1", className)}
       {...props}
     />
   )
@@ -170,7 +168,7 @@ function InputGroupTextarea({
     <Textarea
       data-slot="input-group-control"
       className={cn(
-        "flex-1 resize-none rounded-none border-0 bg-transparent py-2 shadow-none ring-0 focus-visible:ring-0 aria-invalid:ring-0 dark:bg-transparent",
+        "flex-1 resize-none rounded-none border-0 bg-transparent shadow-none ring-0 focus-visible:ring-0 aria-invalid:ring-0",
         className
       )}
       {...props}

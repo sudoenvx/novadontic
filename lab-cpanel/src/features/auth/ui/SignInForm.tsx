@@ -1,93 +1,95 @@
-import { Eye, EyeOff } from "lucide-react";
-import { useState, type FormEvent } from "react";
+import { Eye, EyeOff } from 'lucide-react'
+import { useId, useState, type FormEvent } from 'react'
 
-import { Button } from "../../../shared/ui/Button";
-import { Checkbox } from "../../../shared/ui/Checkbox";
-import { Input } from "../../../shared/ui/Input";
-import { Label } from "../../../shared/ui/Label";
-import type { LabSignInValues } from "../domain/auth";
-import { validateLabSignIn } from "../domain/auth";
+import { Button } from '../../../shared/ui/Button'
+import { Checkbox } from '../../../shared/ui/Checkbox'
+import { Input } from '../../../shared/ui/Input'
+import { Label } from '../../../shared/ui/Label'
+import type { LabSignInValues } from '../domain/auth'
+import { validateLabSignIn } from '../domain/auth'
 
 type SignInFormProps = {
   onSubmit: (values: LabSignInValues) => void;
-};
+}
 
 const initialValues: LabSignInValues = {
   email: "",
   password: "",
   rememberDevice: true,
-};
+}
 
 export function SignInForm({ onSubmit }: SignInFormProps) {
-  const [values, setValues] = useState(initialValues);
-  const [error, setError] = useState<string>();
-  const [notice, setNotice] = useState<string>();
-  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+  const [values, setValues] = useState(initialValues)
+  const [error, setError] = useState<string>()
+  const [notice, setNotice] = useState<string>()
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false)
+  const emailId = useId()
+  const passwordId = useId()
+  const rememberDeviceId = useId()
 
   function updateValue<Key extends keyof LabSignInValues>(
     key: Key,
     value: LabSignInValues[Key],
   ) {
-    setValues((current) => ({ ...current, [key]: value }));
-    setError(undefined);
-    setNotice(undefined);
+    setValues((current) => ({ ...current, [key]: value }))
+    setError(undefined)
+    setNotice(undefined)
   }
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const validationError = validateLabSignIn(values);
+    event.preventDefault()
+    const validationError = validateLabSignIn(values)
 
     if (validationError) {
-      setError(validationError);
-      return;
+      setError(validationError)
+      return
     }
 
     onSubmit({
       ...values,
       email: values.email.trim().toLowerCase(),
-    });
+    })
   }
 
   return (
-    <form className="grid gap-3" onSubmit={handleSubmit} noValidate>
+    <form className="grid gap-4" onSubmit={handleSubmit} noValidate>
       <div className="grid gap-1.5">
-        <Label htmlFor="sign-in-email">Email</Label>
+        <Label htmlFor={emailId}>Email</Label>
         <Input
-          size="default"
-          variant={"outline"}
-          id="sign-in-email"
+          id={emailId}
           type="email"
           value={values.email}
-          onChange={(event) => updateValue("email", event.currentTarget.value)}
+          onChange={(event) => updateValue('email', event.currentTarget.value)}
           placeholder="name@yourlab.com"
           autoComplete="email"
           autoFocus
+          aria-invalid={Boolean(error)}
         />
       </div>
 
       <div className="grid gap-1.5">
-        <Label htmlFor="sign-in-password">Password</Label>
+        <Label htmlFor={passwordId}>Password</Label>
         <div className="relative">
           <Input
-            size="default"
-            variant={"outline"}
-            id="sign-in-password"
+            id={passwordId}
             type={isPasswordVisible ? "text" : "password"}
             value={values.password}
             onChange={(event) =>
-              updateValue("password", event.currentTarget.value)
+              updateValue('password', event.currentTarget.value)
             }
             placeholder="Enter your password"
             autoComplete="current-password"
-            className="pr-9"
+            className="pe-10"
+            aria-invalid={Boolean(error)}
           />
           <Button
             type="button"
-            variant="transparent"
+            variant="ghost"
             size="icon-sm"
-            className="absolute top-1/2 right-1 -translate-y-1/2 text-text-muted hover:text-text"
+            className="absolute end-1 top-1/2 -translate-y-1/2"
             onClick={() => setIsPasswordVisible((visible) => !visible)}
             aria-label={isPasswordVisible ? "Hide password" : "Show password"}
+            aria-pressed={isPasswordVisible}
           >
             {isPasswordVisible ? <EyeOff /> : <Eye />}
           </Button>
@@ -95,23 +97,23 @@ export function SignInForm({ onSubmit }: SignInFormProps) {
       </div>
 
       <div className="flex items-center justify-between gap-3">
-        <label className="flex items-center gap-2 text-xs text-secondary">
+        <Label htmlFor={rememberDeviceId} className="cursor-pointer gap-2 text-xs font-medium text-text-secondary">
           <Checkbox
+            id={rememberDeviceId}
             checked={values.rememberDevice}
             onCheckedChange={(checked) =>
-              updateValue("rememberDevice", checked === true)
+              updateValue('rememberDevice', checked === true)
             }
-            aria-label="Remember this device"
           />
           Remember this device
-        </label>
+        </Label>
         <Button
           type="button"
           variant="link"
           className="normal-case"
           onClick={() => {
-            setError(undefined);
-            setNotice("Contact your lab administrator to reset your password.");
+            setError(undefined)
+            setNotice('Contact your lab administrator to reset your password.')
           }}
         >
           Forgot password?
@@ -119,19 +121,19 @@ export function SignInForm({ onSubmit }: SignInFormProps) {
       </div>
 
       {error && (
-        <p className="text-xs text-destructive" role="alert">
+        <p className="text-xs text-destructive" role="alert" aria-live="assertive">
           {error}
         </p>
       )}
       {notice && (
-        <p className="text-xs text-secondary" role="status">
+        <p className="text-xs text-text-secondary" role="status" aria-live="polite">
           {notice}
         </p>
       )}
 
-      <Button type="submit" size="md" className="mt-1 w-full">
+      <Button type="submit" size="lg" className="mt-1 w-full">
         Sign in
       </Button>
     </form>
-  );
+  )
 }

@@ -9,7 +9,7 @@ const sections: { id: LabSettingsSection; icon: typeof Settings2 }[] = [
 
 export function LabSettingsSidebar({ selectedSection, onSelect }: { selectedSection: LabSettingsSection; onSelect: (section: LabSettingsSection) => void }) {
   return (
-    <aside className="grid h-fit gap-1 rounded-md bg-surface p-2">
+    <aside className="grid h-fit gap-1 rounded-md bg-surface p-2 border border-border">
       <div className="px-1 mb-1">
         <p className="text-xs font-semibold uppercase tracking-wide text-text-muted">Lab settings</p>
         <p className="mt-1 text-xs text-text-muted">Manage your workspace.</p>
@@ -19,7 +19,7 @@ export function LabSettingsSidebar({ selectedSection, onSelect }: { selectedSect
           <button
             key={id}
             type="button"
-            className={`flex items-center gap-2 rounded-sm px-2 py-1 text-start text-sm font-medium transition-colors ${selectedSection === id ? 'bg-accent text-accent-foreground' : 'text-secondary hover:bg-neutral-100 hover:text-text'}`}
+            className={`flex items-center gap-2 rounded-sm px-2 py-1 text-start text-sm font-medium transition-colors ${selectedSection === id ? 'bg-secondary text-secondary-foreground' : 'text-secondary hover:bg-neutral-100 hover:text-text'}`}
             onClick={() => onSelect(id)}
             aria-current={selectedSection === id ? 'page' : undefined}
           >

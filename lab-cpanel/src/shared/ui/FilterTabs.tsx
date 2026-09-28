@@ -5,14 +5,14 @@ import type { ComponentProps, ReactNode } from 'react'
 import { cn } from 'cn'
 
 const filterTabVariants = cva(
-  'inline-flex shrink-0 items-center gap-1.5 rounded-xs py-1 px-2.5 text-xs font-medium uppercase transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue/30 disabled:pointer-events-none disabled:opacity-50 [&_svg:not([class*=\'size-\'])]:size-3',
+  'inline-flex shrink-0 items-center gap-1.5 rounded-sm px-2.5 py-1.5 text-xs font-semibold normal-case leading-tight text-text-secondary transition-colors focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-focus/25 disabled:pointer-events-none disabled:opacity-50 [&_svg:not([class*=\'size-\'])]:size-3.5',
   {
     variants: {
       variant: {
         default:
-          'bg-neutral-100 text-text-muted hover:bg-neutral-200 data-pressed:bg-primary data-pressed:text-primary-foreground',
+          'bg-surface-muted-light hover:bg-surface-muted data-pressed:bg-primary-soft data-pressed:text-primary-soft-foreground',
         accent:
-          'bg-accent-soft text-accent-soft-foreground hover:bg-accent/80 data-pressed:bg-accent data-pressed:text-accent-foreground',
+          'bg-accent-soft-light text-accent-soft-foreground hover:bg-accent-soft data-pressed:bg-accent data-pressed:text-accent-foreground',
       },
     },
     defaultVariants: {
@@ -93,7 +93,7 @@ function FilterTabContent({
         />
       )}
       {children}
-      {count !== undefined && <span className="text-sm font-mono">({count})</span>}
+      {count !== undefined && <span className="font-mono text-2xs tabular">({count})</span>}
     </>
   )
 }
@@ -110,7 +110,7 @@ export function FilterTab({
     <Toggle
       {...props}
       data-slot="filter-tab"
-      className={cn(filterTabVariants({ variant }), className, "font-medium!")}
+      className={cn(filterTabVariants({ variant }), className)}
     >
       <FilterTabContent color={color} count={count}>
         {children}
@@ -129,14 +129,15 @@ export function FilterTabAction({
   color,
   count,
   variant,
+  type = 'button',
   ...props
 }: FilterTabActionProps) {
   return (
     <button
       {...props}
-      type={props.type ?? 'button'}
+      type={type}
       data-slot="filter-tab-action"
-      className={cn(filterTabVariants({ variant }), className, "font-medium!")}
+      className={cn(filterTabVariants({ variant }), className)}
     >
       <FilterTabContent color={color} count={count}>
         {children}

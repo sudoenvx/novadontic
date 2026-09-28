@@ -1,35 +1,64 @@
 import * as React from "react"
+import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "cn"
+
+/*
+ * CARD
+ * ---------------------------------------------------------------------------
+ *   <Card>
+ *     <CardHeader>
+ *       <CardTitle>Doctor &amp; clinic</CardTitle>
+ *       <CardDescription>Optional line</CardDescription>
+ *       <CardAction><Button size="sm" variant="outline">Edit</Button></CardAction>
+ *     </CardHeader>
+ *     <CardContent>…</CardContent>
+ *     <CardFooter>…</CardFooter>
+ *   </Card>
+ *
+ * variant  default      white, 1px border (the standard card)
+ *          transparent  no fill, no border (layout wrapper)
+ *          window       white frame with a tinted inner content pane
+ * size     xs | sm | default | md     → inner padding + gap (--card-spacing)
+ * Titles are ink, sentence case. Never link-blue, never uppercase.
+ */
+const cardVariants = cva(
+  "group/card flex flex-col gap-(--card-spacing) overflow-hidden rounded-lg border p-(--card-spacing) text-base text-text-primary data-[disabled]:pointer-events-none data-[disabled]:opacity-70",
+  {
+    variants: {
+      variant: {
+        default: "border-border bg-surface shadow-card",
+        transparent: "border-transparent bg-transparent",
+        window: "border-border bg-surface shadow-card",
+      },
+      size: {
+        xs: "[--card-spacing:--spacing(2)]",
+        sm: "[--card-spacing:--spacing(3)]",
+        default: "[--card-spacing:var(--card-padding)]",
+        md: "[--card-spacing:--spacing(5)]",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+      size: "default",
+    },
+  }
+)
 
 function Card({
   className,
-  size = "sm",
-  variant = "default",
+  size,
+  variant,
   disabled = false,
   ...props
-}: React.ComponentProps<"div"> & {
-  size?: "default" | "sm" | "md" | "xs"
-  variant?: "default" | "transparent" | "window"
-  disabled?: boolean
-}) {
+}: React.ComponentProps<"div"> &
+  VariantProps<typeof cardVariants> & { disabled?: boolean }) {
   return (
     <div
       data-slot="card"
-      data-size={size}
-      data-variant={variant}
+      data-size={size ?? "default"}
+      data-variant={variant ?? "default"}
       data-disabled={disabled || undefined}
-      className={cn(
-        "group/card flex flex-col overflow-hidden  rounded-md bg-surface text-sm text-ink",
-        "data-[disabled]:pointer-events-none data-[disabled]:opacity-70",
-        "[--card-spacing:--spacing(3)] data-[size=xs]:[--card-spacing:--spacing(1.5)] data-[size=sm]:[--card-spacing:--spacing(2)] data-[size=md]:[--card-spacing:--spacing(4)]",
-        "data-[variant=transparent]:border-transparent data-[variant=transparent]:bg-transparent",
-        // Added: Extra inner container spacing for the window layout so the nested elements don't hit the outer border
-        "p-(--card-spacing)", 
-        "gap-(--card-spacing)", 
-        "data-[variant=window]:p-(--card-spacing)", 
-        "*:[img:first-child]:rounded-t-lg *:[img:last-child]:rounded-b-lg",
-        className
-      )}
+      className={cn(cardVariants({ size, variant }), className)}
       {...props}
     />
   )
@@ -40,11 +69,7 @@ function CardHeader({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="card-header"
       className={cn(
-        "group/card-header @container/card-header grid auto-rows-min items-start gap-0.5 rounded-t-lg  has-data-[slot=card-action]:grid-cols-[1fr_auto] has-data-[slot=card-description]:grid-rows-[auto_auto]",
-        // "[.border-b]:pb-(--card-spacing)",
-        // "border-b border-border",
-        // Added: Override top corner rounding if nested inside a window layout padding
-        "group-data-[variant=window]/card:bg-surface group-data-[variant=window]/card:rounded-lg",
+        "group/card-header @container/card-header grid auto-rows-min items-start gap-0.5 has-data-[slot=card-action]:grid-cols-[1fr_auto] has-data-[slot=card-description]:grid-rows-[auto_auto]",
         className
       )}
       {...props}
@@ -57,7 +82,7 @@ function CardTitle({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="card-title"
       className={cn(
-        "text-brand-blue-dark uppercase text-md font-medium group-data-[size=sm]/card:text-md group-data-[size=xs]/card:text-md group-[&:not(:has([data-slot=card-description]))]/card-header:text-sm",
+        "text-md font-extrabold tracking-tight text-text-primary group-data-[size=xs]/card:text-base",
         className
       )}
       {...props}
@@ -70,7 +95,7 @@ function CardDescription({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="card-description"
       className={cn(
-        "text-sm group-data-[size=xs]/card:text-2xs text-text-muted",
+        "text-sm text-text-secondary group-data-[size=xs]/card:text-xs",
         className
       )}
       {...props}
@@ -96,10 +121,8 @@ function CardContent({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="card-content"
       className={cn(
-        "",
-        // Updated: Added rounded corners and removed the top-padding killer for the window variant
-        "group-data-[variant=window]/card:bg-surface-muted/50 group-data-[variant=window]/card:rounded-sm",
-        // "group-has-data-[slot=card-header]/card:group-data-[variant=default]/card:pt-0", 
+        // window variant: content sits on a tinted pane inside the frame
+        "group-data-[variant=window]/card:rounded-md group-data-[variant=window]/card:bg-surface-muted/50 group-data-[variant=window]/card:p-(--card-spacing)",
         className
       )}
       {...props}
@@ -111,12 +134,7 @@ function CardFooter({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="card-footer"
-      className={cn(
-        "flex items-center rounded-b-lg ",
-        // Added: Override bottom corners rounding for window layouts
-        "group-data-[variant=window]/card:bg-surface group-data-[variant=window]/card:rounded-lg group-data-[variant=window]/card:border-t-0",
-        className
-      )}
+      className={cn("flex items-center gap-2", className)}
       {...props}
     />
   )
@@ -124,6 +142,8 @@ function CardFooter({ className, ...props }: React.ComponentProps<"div">) {
 
 export {
   Card,
+  // eslint-disable-next-line react-refresh/only-export-components
+  cardVariants,
   CardHeader,
   CardFooter,
   CardTitle,

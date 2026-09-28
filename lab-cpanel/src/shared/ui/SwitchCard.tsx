@@ -1,3 +1,6 @@
+import { useId } from 'react'
+
+import { Field, FieldContent, FieldDescription, FieldLabel } from './field'
 import { Switch } from './Switch'
 
 type SwitchCardProps = {
@@ -9,13 +12,32 @@ type SwitchCardProps = {
 }
 
 export function SwitchCard({ checked, description, disabled, onCheckedChange, title }: SwitchCardProps) {
+  const titleId = useId()
+  const descriptionId = useId()
+  const switchId = useId()
+
   return (
-    <label className="flex items-center justify-between gap-3 rounded-sm bg-surface-muted/60 px-2 py-2">
-      <span className="grid gap-0.5">
-        <span className="text-sm font-medium text-text">{title}</span>
-        <span className="text-xs text-text-muted">{description}</span>
-      </span>
-      <Switch checked={checked} disabled={disabled} onCheckedChange={onCheckedChange} aria-label={title} />
-    </label>
+    <Field
+      orientation="horizontal"
+      data-disabled={disabled || undefined}
+      className="items-start gap-3"
+    >
+      <FieldContent className="min-w-0 gap-0.5">
+        <FieldLabel htmlFor={switchId} id={titleId} className="cursor-pointer text-sm font-semibold text-text-primary">
+          {title}
+        </FieldLabel>
+        <FieldDescription id={descriptionId} className="text-xs text-text-secondary">
+          {description}
+        </FieldDescription>
+      </FieldContent>
+      <Switch
+        checked={checked}
+        disabled={disabled}
+        onCheckedChange={onCheckedChange}
+        id={switchId}
+        aria-labelledby={titleId}
+        aria-describedby={descriptionId}
+      />
+    </Field>
   )
 }

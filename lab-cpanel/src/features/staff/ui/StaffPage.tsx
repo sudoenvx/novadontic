@@ -2,7 +2,7 @@ import { Plus, Search } from 'lucide-react'
 import { useMemo, useState } from 'react'
 
 import { Button } from '../../../shared/ui/Button'
-import { AppHeader, AppHeaderActions } from '../../../shared/ui/AppHeader'
+import { PageHeader, PageHeaderActions } from '../../../shared/ui/PageHeader'
 import { Card } from '../../../shared/ui/Card'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '../../../shared/ui/InputGroup'
 import { Page } from '../../../shared/ui/Page'
@@ -51,17 +51,17 @@ export function StaffPage() {
 
   return (
     <Page size="full">
-      <AppHeader title="Staff" description="Manage the people who operate your lab workspace.">
-        <AppHeaderActions>
+      <PageHeader title="Staff" description="Manage the people who operate your lab workspace.">
+        <PageHeaderActions>
           <InputGroup className="w-64" variant="outline">
             <InputGroupAddon><Search /></InputGroupAddon>
             <InputGroupInput value={searchTerm} onChange={(event) => setSearchTerm(event.currentTarget.value)} placeholder="Search staff" aria-label="Search staff" />
           </InputGroup>
           <Button onClick={() => { setEditingStaff(undefined); setIsFormOpen(true) }}><Plus /> Add staff</Button>
-        </AppHeaderActions>
-      </AppHeader>
+        </PageHeaderActions>
+      </PageHeader>
 
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
         <StaffMetric label="Active staff" value={activeCount} tone="text-primary" />
         <StaffMetric label="Suspended access" value={suspendedCount} tone="text-secondary" />
       </div>

@@ -2,7 +2,7 @@ import { Plus, Search } from 'lucide-react'
 import { useMemo, useState } from 'react'
 
 import { Button } from '../../../shared/ui/Button'
-import { AppHeader, AppHeaderActions } from '../../../shared/ui/AppHeader'
+import { PageHeader, PageHeaderActions } from '../../../shared/ui/PageHeader'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '../../../shared/ui/InputGroup'
 import { Page } from '../../../shared/ui/Page'
 import { toast } from '../../../shared/ui/Toast'
@@ -35,15 +35,15 @@ export function ClinicsPage() {
 
   return (
     <Page size="full">
-      <AppHeader title="Clinics" description="Manage clinic contacts and the doctors linked to each clinic.">
-        <AppHeaderActions>
+      <PageHeader title="Clinics" description="Manage clinic contacts and the doctors linked to each clinic.">
+        <PageHeaderActions>
           <InputGroup className="w-64" variant="outline">
             <InputGroupAddon><Search /></InputGroupAddon>
             <InputGroupInput value={searchTerm} onChange={(event) => setSearchTerm(event.currentTarget.value)} placeholder="Search clinics" aria-label="Search clinics" />
           </InputGroup>
           <Button onClick={() => setIsCreateOpen(true)}><Plus /> Add clinic</Button>
-        </AppHeaderActions>
-      </AppHeader>
+        </PageHeaderActions>
+      </PageHeader>
 
       <ClinicTable clinics={visibleClinics} getDoctorCount={getDoctorCount} title={`All clinics (${visibleClinics.length})`} />
 

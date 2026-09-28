@@ -64,17 +64,23 @@ const statusLabels: Record<ProductionStepStatus, string> = {
   pending: 'Pending',
 }
 
+const statusTone: Record<ProductionStepStatus, BadgeTone> = {
+  completed: 'success',
+  active: 'info',
+  pending: 'neutral',
+}
+
 function getFileIcon(type: CasePipelineFile['type']) {
   switch (type) {
     case 'STL':
-      return <Boxes size={16} className="text-primary" />
+      return <Boxes size={14} className="text-primary shrink-0" />
     case 'IMG':
-      return <ImageIcon size={16} className="text-accent" />
+      return <ImageIcon size={14} className="text-accent shrink-0" />
     case 'PDF':
-      return <FileText size={16} className="text-destructive" />
+      return <FileText size={14} className="text-destructive shrink-0" />
     case 'DOC':
     default:
-      return <FileCode size={16} className="text-secondary" />
+      return <FileCode size={14} className="text-text-secondary shrink-0" />
   }
 }
 
@@ -273,7 +279,6 @@ export function CaseWorkflowStages({
   }
 
   function handleDownloadFile(file: CasePipelineFile) {
-    // Trigger download of dummy blob content
     const blob = new Blob([`Dummy contents for ${file.name}`], { type: 'text/plain' })
     const url = URL.createObjectURL(blob)
     const anchor = document.createElement('a')
@@ -291,97 +296,100 @@ export function CaseWorkflowStages({
     })
   }
 
+  const completedCount = steps.filter((s) => s.status === 'completed').length
+
   return (
-    <section className="grid gap-3" aria-label="Case Workflow Stages">
+    <section className="grid gap-3" aria-label="Case workflow stages">
+      {/* Section header */}
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
-          <h2 className="text-base font-bold text-text">Workflow Stages</h2>
-          <p className="text-xs text-text-muted">
-            Track stage execution, multi-technician assignments, and files as defined in the workflow template.
+          <h2 className="text-base font-extrabold tracking-tight text-text-primary">
+            Workflow stages
+          </h2>
+          <p className="mt-0.5 text-sm text-text-secondary">
+            Track stage execution, technician assignments, and files.
           </p>
         </div>
-        <Badge tone="accent">
-          {steps.filter((s) => s.status === 'completed').length} of {steps.length} Stages Completed
+        <Badge tone={completedCount === steps.length ? 'success' : 'info'}>
+          {completedCount} of {steps.length} stages completed
         </Badge>
       </div>
 
-      <div className="grid gap-2.5">
+      {/* Stage list */}
+      <div className="grid gap-2">
         {steps.map((step, index) => {
           const isOpen = openStages[step.id] ?? false
+          const isActive = step.status === 'active' || step.id === activeStepId
           const assignedTechs = step.technicians ?? (step.technician ? [step.technician] : [])
-          const isCurrentActive = step.status === 'active' || step.id === activeStepId
 
           return (
             <Collapsible.Root
               key={step.id}
               open={isOpen}
               onOpenChange={() => toggleStage(step.id)}
-              className={`overflow-hidden rounded-md border transition-all ${isCurrentActive
-                ? 'bg-surface  ring-1 ring-accent  '
-                : 'border-border bg-neutral-50 border-border'
-                }`}
+              className={[
+                'stage overflow-hidden transition-all',
+                isActive ? 'is-open' : '',
+              ].join(' ')}
             >
-              {/* Stage Header */}
+              {/* ── Stage header ── */}
               <div
-                className={`flex flex-wrap items-center justify-between gap-2 p-1.5 transition-colors ${isCurrentActive ? 'bg-neutral-100' : 'hover:bg-neutral-100'
-                  }`}
+                className={[
+                  'stage-head justify-between',
+                  isActive ? 'bg-primary-soft/40' : 'hover:bg-surface-muted/60',
+                ].join(' ')}
               >
-                <Collapsible.Trigger className="group flex min-w-0 flex-1 items-center gap-3 text-left focus-visible:outline-2 focus-visible:outline-primary rounded-sm">
-                  {/* Step Index & Status Icon */}
+                <Collapsible.Trigger className="group flex min-w-0 flex-1 items-center gap-3 text-left focus-visible:outline-2 focus-visible:outline-primary rounded-xs">
+                  {/* Step number / status node */}
                   <span
-                    className={`grid size-6 shrink-0 place-items-center rounded-sm font-mono text-xs font-bold transition-colors ${step.status === 'completed'
-                      ? 'bg-success-soft text-success-soft-foreground'
-                      : step.status === 'active'
-                        ? 'bg-primary-soft text-primary-soft-foreground'
-                        : 'bg-neutral-200 text-text-muted'
-                      }`}
+                    className={[
+                      'step-node shrink-0 font-mono text-xs font-extrabold transition-colors',
+                      step.status === 'completed' ? 'is-done' : step.status === 'active' ? 'is-now' : '',
+                    ].join(' ')}
                   >
-                    {step.status === 'completed' ? (
-                      <Check size={14} />
-                    ) : (
-                      index + 1
-                    )}
+                    {step.status === 'completed' ? <Check size={12} /> : index + 1}
                   </span>
 
+                  {/* Name + description */}
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="font-semibold text-text text-sm truncate">
+                      <span className="text-sm font-semibold text-text-primary truncate">
                         {step.name}
                       </span>
+                      <Badge tone={statusTone[step.status]} className="text-xs">
+                        {statusLabels[step.status]}
+                      </Badge>
                     </div>
                     {step.description && (
-                      <p className="text-2xs text-text-muted truncate mt-0.5">
+                      <p className="text-xs text-text-secondary truncate mt-0.5">
                         {step.description}
                       </p>
                     )}
                   </div>
 
-                  {/* Badges preview in header */}
-                  <div className="flex items-center gap-2 shrink-0 text-2xs text-text-muted">
+                  {/* Mini summary chips */}
+                  <div className="hidden sm:flex items-center gap-1.5 shrink-0 text-xs text-text-muted">
                     {assignedTechs.length > 0 && (
-                      <div className="hidden sm:flex items-center gap-1 bg-neutral-100 px-2 py-0.5 rounded-sm">
-                        <Users size={12} className="text-text-muted" />
-                        <span className="font-medium text-text">
-                          {assignedTechs.length} {assignedTechs.length === 1 ? 'tech' : 'techs'}
-                        </span>
-                      </div>
+                      <span className="pill">
+                        <Users size={11} />
+                        {assignedTechs.length}
+                      </span>
                     )}
                     {step.files.length > 0 && (
-                      <div className="hidden sm:flex items-center gap-1 bg-neutral-100 px-2 py-0.5 rounded-sm">
-                        <FileCode size={12} className="text-text-muted" />
-                        <span className="font-medium text-text">{step.files.length} files</span>
-                      </div>
+                      <span className="pill">
+                        <FileCode size={11} />
+                        {step.files.length}
+                      </span>
                     )}
                     <ChevronDown
-                      size={16}
-                      className={`text-text-muted transition-transform duration-150 ${isOpen ? 'rotate-180' : ''
-                        }`}
+                      size={15}
+                      className={`text-text-muted transition-transform duration-(--duration-base) ${isOpen ? 'rotate-180' : ''}`}
                     />
                   </div>
                 </Collapsible.Trigger>
 
-                {/* Quick status actions on header */}
-                <div className="flex items-center gap-1.5 shrink-0 pl-2 border-l border-border-soft">
+                {/* Quick mark-done / re-open action — separated by left border */}
+                <div className="flex items-center gap-1 shrink-0 pl-2 border-l border-border-soft">
                   {step.status !== 'completed' ? (
                     <Button
                       size="xs"
@@ -390,9 +398,8 @@ export function CaseWorkflowStages({
                         e.stopPropagation()
                         handleStepStatusChange(step.id, 'completed')
                       }}
-                      className="gap-1 text-2xs"
                     >
-                      <Check size={12} className="text-success" />
+                      <Check className="text-success" />
                       <span>Mark done</span>
                     </Button>
                   ) : (
@@ -403,34 +410,34 @@ export function CaseWorkflowStages({
                         e.stopPropagation()
                         handleStepStatusChange(step.id, 'active')
                       }}
-                      className="gap-1 text-2xs text-text-muted"
+                      className="text-text-muted"
                     >
-                      <Clock size={12} />
+                      <Clock />
                       <span>Re-open</span>
                     </Button>
                   )}
                 </div>
               </div>
 
-              {/* Stage Body (Uncollapsed Content) */}
-              <Collapsible.Panel className="border-t border-border bg-surface p-2 grid gap-3.5 text-xs">
-                {/* 1. Technicians Multi-Assignment Section */}
-                <>
-                                    <div className="flex flex-wrap items-center justify-between gap-2">
+              {/* ── Stage body ── */}
+              <Collapsible.Panel className="stage-body">
+
+                {/* 1. Technicians */}
+                <div className="grid gap-2">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
                     <div className="flex items-center gap-1.5">
-                      <Users size={14} className="text-primary" />
-                      <span className="font-semibold text-text text-xs">
-                        Assigned Technicians ({assignedTechs.length})
+                      <Users size={13} className="text-primary" />
+                      <span className="text-xs font-semibold text-text-primary">
+                        Assigned technicians ({assignedTechs.length})
                       </span>
                     </div>
 
-                    {/* Multi-technician assignment dropdown */}
                     <DropdownMenu>
                       <DropdownMenuTrigger
                         render={
-                          <Button size="xs" variant="neutral" className="gap-1 text-2xs">
+                          <Button size="xs" variant="outline" className="gap-1">
                             <UserPlus size={12} />
-                            <span>Assign Technicians</span>
+                            <span>Assign</span>
                           </Button>
                         }
                       />
@@ -443,16 +450,16 @@ export function CaseWorkflowStages({
                               <DropdownMenuItem
                                 key={staff.id}
                                 onClick={() => handleAssignTechnician(step.id, staff.name)}
-                                className="flex items-center justify-between py-1.5 text-xs"
+                                className="flex items-center justify-between py-1.5 text-sm"
                               >
                                 <div className="flex items-center gap-2">
-                                  <span className="grid size-5 place-items-center rounded-full bg-neutral-200 text-3xs font-semibold uppercase">
-                                    {staff.name.slice(0, 2)}
+                                  <span className="avatar size-6 text-2xs">
+                                    {staff.name.slice(0, 2).toUpperCase()}
                                   </span>
                                   <span>{staff.name}</span>
                                 </div>
                                 {isAssigned && (
-                                  <UserCheck size={14} className="text-success shrink-0" />
+                                  <UserCheck size={13} className="text-success shrink-0" />
                                 )}
                               </DropdownMenuItem>
                             )
@@ -461,80 +468,73 @@ export function CaseWorkflowStages({
                     </DropdownMenu>
                   </div>
 
-                  {/* Assigned Technicians Chips */}
                   {assignedTechs.length > 0 ? (
-                    <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                    <div className="flex flex-wrap items-center gap-1.5">
                       {assignedTechs.map((techName) => (
-                        <Badge
+                        <span
                           key={techName}
-                          tone="neutral"
-                          className="group/tech inline-flex items-center gap-1.5 py-1 px-2.5 bg-surface border border-border text-xs"
+                          className="inline-flex items-center gap-1.5 rounded-sm border border-border bg-surface px-2 py-0.5 text-xs font-medium text-text-primary"
                         >
                           <span className="size-1.5 rounded-full bg-success" />
-                          <span className="font-medium text-text">{techName}</span>
+                          {techName}
                           <button
                             type="button"
                             onClick={() => handleRemoveTechnician(step.id, techName)}
                             className="text-text-muted hover:text-destructive transition-colors ml-0.5"
                             aria-label={`Unassign ${techName}`}
                           >
-                            <X size={12} />
+                            <X size={11} />
                           </button>
-                        </Badge>
+                        </span>
                       ))}
                     </div>
                   ) : (
-                    <p className="text-2xs text-text-muted italic">
-                      No technicians assigned to this stage yet. Click "Assign Technicians" to allocate staff.
+                    <p className="text-xs text-text-muted italic">
+                      No technicians assigned yet. Click "Assign" to allocate staff.
                     </p>
                   )}
-                </>
+                </div>
 
-                {/* 2. Stage Files Section */}
-                <>
+                {/* 2. Files */}
+                <div className="grid gap-2">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div className="flex items-center gap-1.5">
-                      <FileCode size={14} className="text-primary" />
-                      <span className="font-semibold text-text text-xs">
-                        Stage Files ({step.files.length})
+                      <FileCode size={13} className="text-primary" />
+                      <span className="text-xs font-semibold text-text-primary">
+                        Stage files ({step.files.length})
                       </span>
                     </div>
 
                     <Button
                       size="xs"
-                      variant="neutral"
-                      onClick={() =>
-                        setUploadDialogState({ stepId: step.id, isOpen: true })
-                      }
-                      className="gap-1 text-2xs"
+                      variant="outline"
+                      onClick={() => setUploadDialogState({ stepId: step.id, isOpen: true })}
                     >
                       <Upload size={12} />
-                      <span>Add File to Stage</span>
+                      <span>Add file</span>
                     </Button>
                   </div>
 
-                  {/* Files List */}
                   {step.files.length > 0 ? (
                     <div className="grid gap-1.5">
                       {step.files.map((file) => (
                         <div
                           key={file.id}
-                          className="group/file flex flex-wrap items-center justify-between gap-2 rounded-sm border border-border bg-neutral-50 px-2 py-1 transition-colors hover:bg-neutral-50"
+                          className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-border bg-surface px-3 py-1.5 transition-colors hover:bg-surface-soft"
                         >
                           <div className="flex items-center gap-2.5 min-w-0">
                             {getFileIcon(file.type)}
                             <div className="min-w-0">
-                              <p className="font-medium text-text text-xs truncate">
+                              <p className="text-sm font-medium text-text-primary truncate">
                                 {file.name}
                               </p>
-                              <p className="text-3xs text-text-muted">
-                                {file.size} · Uploaded by {file.uploadedBy} ({file.uploadedAt})
+                              <p className="text-xs text-text-muted">
+                                {file.size} · {file.uploadedBy} · {file.uploadedAt}
                               </p>
                             </div>
                           </div>
 
-                          {/* File Actions */}
-                          <div className="flex items-center gap-1">
+                          <div className="flex items-center gap-0.5">
                             <Button
                               size="icon-sm"
                               variant="ghost"
@@ -542,54 +542,52 @@ export function CaseWorkflowStages({
                               title={`Download ${file.name}`}
                               aria-label={`Download ${file.name}`}
                             >
-                              <Download size={13} />
+                              <Download />
                             </Button>
                             <Button
                               size="icon-sm"
                               variant="ghost"
                               onClick={() => handleDeleteFile(step.id, file.id, file.name)}
-                              className="text-destructive hover:text-destructive"
+                              className="text-destructive hover:text-destructive hover:bg-destructive-soft"
                               title={`Delete ${file.name}`}
                               aria-label={`Delete ${file.name}`}
                             >
-                              <Trash2 size={13} />
+                              <Trash2 />
                             </Button>
                           </div>
                         </div>
                       ))}
                     </div>
                   ) : (
-                    <div className="rounded-sm border border-dashed border-border p-4 text-center text-2xs text-text-muted">
-                      <p>No files uploaded for this stage yet.</p>
+                    <div className="empty-state">
+                      <p className="text-sm">No files uploaded for this stage yet.</p>
                       <Button
                         size="xs"
                         variant="ghost"
-                        onClick={() =>
-                          setUploadDialogState({ stepId: step.id, isOpen: true })
-                        }
+                        onClick={() => setUploadDialogState({ stepId: step.id, isOpen: true })}
                         className="mt-1.5 text-primary"
                       >
                         + Upload CAD / Scan / Document
                       </Button>
                     </div>
                   )}
-                </>
+                </div>
 
-                {/* 3. Stage Progression Controls */}
-                <div className="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-border-soft">
+                {/* 3. Status controls + proceed */}
+                <div className="flex flex-wrap items-center justify-between gap-2 pt-0.5 border-t border-border-soft">
                   <div className="flex items-center gap-2">
-                    <span className="text-2xs text-text-muted">Stage Status:</span>
-                    <div className="flex items-center gap-1">
+                    <span className="text-xs text-text-secondary">Stage status:</span>
+                    <div className="segmented">
                       {(['pending', 'active', 'completed'] as ProductionStepStatus[]).map((st) => (
-                        <Button
+                        <button
                           key={st}
-                          size="xs"
-                          variant={step.status === st ? 'default' : 'neutral'}
+                          type="button"
+                          className="capitalize"
+                          aria-pressed={step.status === st}
                           onClick={() => handleStepStatusChange(step.id, st)}
-                          className="capitalize text-3xs"
                         >
                           {statusLabels[st]}
-                        </Button>
+                        </button>
                       ))}
                     </div>
                   </div>
@@ -597,7 +595,7 @@ export function CaseWorkflowStages({
                   {index < steps.length - 1 && step.status === 'completed' && (
                     <Button
                       size="xs"
-                      variant="neutral"
+                      variant="soft"
                       onClick={() => {
                         const nextStep = steps[index + 1]
                         if (nextStep) {
@@ -605,7 +603,6 @@ export function CaseWorkflowStages({
                           setOpenStages((cur) => ({ ...cur, [nextStep.id]: true }))
                         }
                       }}
-                      className="gap-1 text-2xs"
                     >
                       <span>Proceed to {steps[index + 1]?.name}</span>
                     </Button>
@@ -617,7 +614,7 @@ export function CaseWorkflowStages({
         })}
       </div>
 
-      {/* Add File Dialog */}
+      {/* ── Add File Dialog ── */}
       <Dialog
         open={uploadDialogState.isOpen}
         onOpenChange={(open) =>
@@ -626,9 +623,9 @@ export function CaseWorkflowStages({
       >
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Add File to Stage</DialogTitle>
+            <DialogTitle>Add file to stage</DialogTitle>
             <DialogDescription>
-              Upload or attach a production file, 3D model, scan, or photo.
+              Attach a production file, 3D model, scan, or photo.
             </DialogDescription>
           </DialogHeader>
 
@@ -637,11 +634,11 @@ export function CaseWorkflowStages({
               e.preventDefault()
               handleAddFile(uploadDialogState.stepId)
             }}
-            className="grid gap-3 py-2 text-xs"
+            className="grid gap-3 py-2"
           >
             <div className="grid gap-1">
-              <Label htmlFor="file-name" className="text-2xs font-semibold">
-                File Name <span className="text-destructive">*</span>
+              <Label htmlFor="file-name" className="text-xs font-semibold">
+                File name <span className="text-destructive">*</span>
               </Label>
               <Input
                 id="file-name"
@@ -654,7 +651,7 @@ export function CaseWorkflowStages({
 
             <div className="grid grid-cols-2 gap-3">
               <div className="grid gap-1">
-                <Label className="text-2xs font-semibold">File Type</Label>
+                <Label className="text-xs font-semibold">File type</Label>
                 <Select
                   items={[
                     { value: 'STL', label: 'STL (3D Model / Scan)' },
@@ -667,7 +664,7 @@ export function CaseWorkflowStages({
                     setNewFileType((val ?? 'STL') as CasePipelineFile['type'])
                   }
                 >
-                  <SelectTrigger className="w-full text-xs">
+                  <SelectTrigger className="w-full">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -680,8 +677,8 @@ export function CaseWorkflowStages({
               </div>
 
               <div className="grid gap-1">
-                <Label htmlFor="file-size" className="text-2xs font-semibold">
-                  Approx Size
+                <Label htmlFor="file-size" className="text-xs font-semibold">
+                  Approx size
                 </Label>
                 <Input
                   id="file-size"
@@ -692,7 +689,8 @@ export function CaseWorkflowStages({
               </div>
             </div>
 
-            <div className="rounded-sm border border-dashed border-border bg-neutral-50 p-3 text-center">
+            {/* Drop zone / browse */}
+            <div className="empty-state cursor-pointer" onClick={() => fileInputRef.current?.click()}>
               <input
                 ref={fileInputRef}
                 type="file"
@@ -709,16 +707,11 @@ export function CaseWorkflowStages({
                   }
                 }}
               />
-              <Button
-                type="button"
-                variant="neutral"
-                onClick={() => fileInputRef.current?.click()}
-                className="gap-1.5"
-              >
+              <Button type="button" variant="neutral" size="sm" className="pointer-events-none">
                 <Upload size={13} />
-                <span>Browse Local File</span>
+                <span>Browse local file</span>
               </Button>
-              <p className="text-3xs text-text-muted mt-1.5">
+              <p className="text-xs text-text-muted mt-1.5">
                 Supports .stl, .obj, .ply, .pdf, .jpg, .png
               </p>
             </div>
@@ -726,15 +719,13 @@ export function CaseWorkflowStages({
             <DialogFooter className="pt-2">
               <Button
                 type="button"
-                variant="neutral"
-                onClick={() =>
-                  setUploadDialogState({ stepId: '', isOpen: false })
-                }
+                variant="outline"
+                onClick={() => setUploadDialogState({ stepId: '', isOpen: false })}
               >
                 Cancel
               </Button>
               <Button type="submit" disabled={!newFileName.trim()}>
-                Add to Stage
+                Add to stage
               </Button>
             </DialogFooter>
           </form>
