@@ -263,63 +263,117 @@
 
 /* ============================================================================
    DARK MODE  ·  add data-theme="dark" to <html>
-   Only surfaces, text, borders, soft tints and shadows change. Brand colours
-   stay the same. Follow the OS setting with this one-liner on app start:
+   ----------------------------------------------------------------------------
+   Rebuilt from scratch around one rule: the base is a low-saturation
+   charcoal, NOT a saturated navy-blue. A tinted dark background (the old
+   #0e1526/#161c33 stack) keeps a hue active across the whole screen, which
+   is a big part of what makes a dark theme tiring to read for a long
+   session. Brand color is now reserved for where it's meant to be seen —
+   buttons, links, the gradient, soft tag tints — not the furniture.
+
+   Also fixed: --primary/--accent are lightened + slightly desaturated here
+   (the light-mode values go dull against near-black), and every hover/
+   active state now LIGHTENS instead of darkening — the original file's
+   color-mix(...,black) hover formula was still active in dark mode, which
+   made buttons harder to see the moment you touched them.
+
+   Follow the OS setting with this one-liner on app start:
      document.documentElement.dataset.theme =
        matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
    ========================================================================== */
 :root[data-theme="dark"] {
   color-scheme: dark;
 
-  --canvas: #0e1526;
-  --surface: #16203a;
-  --surface-raised: #1b2745;
-  --surface-soft: #131c33;
-  --surface-secondary: #1f2a47;
-  --surface-muted: #1f2a47;
-  --surface-muted-light: #182240;
-  --overlay: rgb(3 6 14 / 65%);
+  /* ---- surfaces: neutral charcoal, real elevation steps ---- */
+  --canvas: #111318;
+  --surface: #191b22;
+  --surface-raised: #20232c;       /* popovers, menus, dialogs */
+  --surface-soft: #15171d;         /* subtle zebra / nested panels */
+  --surface-secondary: #1c1f28;
+  --surface-muted: #1c1f28;
+  --surface-muted-light: #171922;
+  --overlay: rgb(5 6 10 / 62%);
 
-  --text: #eef0f8;
-  --text-primary: #eef0f8;
-  --text-secondary: #a3acc2;
-  --text-muted: #a3acc2;
-  --text-faint: #7d879f;
-  --ink: #eef0f8;
-  --link: #7ea3ff;
+  /* ---- text: dimmed, never near-white ---- */
+  --text: #e7e8ee;
+  --text-primary: #e7e8ee;
+  --text-secondary: #9a9dad;
+  --text-muted: #9a9dad;
+  --text-faint: #6d7080;
+  --ink: #e7e8ee;
+  --link: #87a7f7;
 
-  --primary-soft: #1b2c5c;
-  --primary-soft-light: #17244a;
-  --primary-soft-foreground: #a9c0ff;
-  --accent-soft: #2c1f52;
-  --accent-soft-light: #241a45;
-  --accent-soft-foreground: #cfb0fb;
-  --secondary: #eef0f8;            /* ink pill flips to light */
-  --secondary-hover: #dfe3f0;
-  --secondary-active: #cfd5e6;
+  /* ---- primary (lightened + slightly desaturated blue) ---- */
+  --primary: #6690f5;
+  --primary-light: #a2bdf9;
+  --primary-hover: #87a7f7;        /* lighten on hover, not darken */
+  --primary-active: #a2bdf9;
+  --primary-foreground: #0d1117;
+  --primary-soft: #212a42;
+  --primary-soft-light: #1a2235;
+  --primary-soft-foreground: #aac2fb;
+
+  /* ---- accent (lightened + slightly desaturated violet) ---- */
+  --accent: #b189f0;
+  --accent-hover: #c2a2f4;
+  --accent-active: #d4b9f7;
+  --accent-foreground: #0d1117;
+  --accent-soft: #291f3d;
+  --accent-soft-light: #221934;
+  --accent-soft-foreground: #d3b8f7;
+
+  /* ---- secondary: the ink pill flips to light on dark ---- */
+  --secondary: #e7e8ee;
+  --secondary-hover: #d6d8e4;
+  --secondary-active: #c5c8d8;
   --secondary-foreground: #12172a;
 
-  --success: #2bb59d;
-  --success-soft: #0f3a34;
-  --success-soft-foreground: #8de0cf;
-  --warning: #e59a2b;
-  --warning-soft: #3b2b0c;
-  --warning-soft-foreground: #f2c377;
-  --destructive: #ea6570;
-  --destructive-soft: #3d1a1f;
-  --destructive-soft-foreground: #f5a6ad;
-  --info-soft: #1b2c5c;
-  --info-soft-foreground: #a9c0ff;
+  /* ---- status: same hues, softened so they don't read as neon ---- */
+  --success: #5fc3a8;
+  --success-hover: #7bd0ba;
+  --success-active: #97ddc9;
+  --success-foreground: #0d1117;
+  --success-soft: #172b26;
+  --success-soft-foreground: #9adfc9;
 
-  --border: #26314f;
-  --border-soft: #1f2a47;
-  --border-strong: #3a4766;
-  --border-hover: #33405f;
-  --border-active: #3d5bb5;
+  --warning: #e3ab5c;
+  --warning-hover: #ebbc7a;
+  --warning-active: #f0cc99;
+  --warning-foreground: #0d1117;
+  --warning-soft: #2c2314;
+  --warning-soft-foreground: #f0c988;
+
+  --destructive: #e8919a;
+  --destructive-hover: #edaaaf;
+  --destructive-active: #f2bdc3;
+  --destructive-foreground: #0d1117;
+  --destructive-soft: #2c1c1f;
+  --destructive-soft-foreground: #f3b4bb;
+
+  --info: var(--primary);
+  --info-hover: var(--primary-hover);
+  --info-active: var(--primary-active);
+  --info-foreground: var(--primary-foreground);
+  --info-soft: var(--primary-soft);
+  --info-soft-foreground: var(--primary-soft-foreground);
+
+  /* ---- borders & focus ---- */
+  --border: #2a2d38;
+  --border-soft: #212430;
+  --border-strong: #3c4051;
+  --border-hover: #333747;
+  --border-active: #3f5aa8;
+  --focus: var(--primary);
   --ring-active: 0 0 0 3px var(--primary-soft);
+  --ring-focus: 0 0 0 3px color-mix(in oklab, var(--primary) 30%, transparent);
 
+  /* ---- gradient follows the lightened brand pair above ---- */
+  --gradient-brand: linear-gradient(135deg, var(--primary), var(--accent));
+  --gradient-brand-hover: linear-gradient(135deg, var(--primary-hover), var(--accent-hover));
+
+  /* ---- shadows: deeper, since dark surfaces show contrast poorly otherwise ---- */
   --shadow-card-value: 0 1px 2px rgb(0 0 0 / 30%);
-  --shadow-float-value: 0 12px 30px rgb(0 0 0 / 45%);
-  --shadow-popover-value: 0 10px 24px rgb(0 0 0 / 45%);
-  --shadow-dialog-value: 0 20px 55px rgb(0 0 0 / 55%);
+  --shadow-float-value: 0 16px 34px rgb(0 0 0 / 40%);
+  --shadow-popover-value: 0 12px 26px rgb(0 0 0 / 42%);
+  --shadow-dialog-value: 0 24px 60px rgb(0 0 0 / 52%);
 }

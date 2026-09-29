@@ -182,7 +182,7 @@ export function DoctorsClinicsPage() {
       </div>
 
       {viewMode === 'clinics' ? (
-        <section className="grid gap-3 lg:grid-cols-[16rem_minmax(0,1fr)]">
+        <section className="grid min-w-0 gap-3 xl:grid-cols-[16rem_minmax(0,1fr)]">
           <ClinicList
             clinics={visibleClinics}
             doctors={doctors}

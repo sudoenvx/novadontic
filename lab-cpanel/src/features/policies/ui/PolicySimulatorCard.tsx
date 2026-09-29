@@ -70,7 +70,7 @@ export function PolicySimulatorCard({ policy }: PolicySimulatorCardProps) {
 
   if (policy.key !== 'remake_policy') {
     return (
-      <Card className="gap-2.5 bg-neutral-50/70 border-border text-xs">
+      <Card className="gap-2.5 border-border bg-surface-soft text-xs">
         <div className="flex items-center gap-2">
           <Sparkles size={15} className="text-primary" />
           <span className="font-semibold text-text">Policy Rule Checker</span>
@@ -87,7 +87,7 @@ export function PolicySimulatorCard({ policy }: PolicySimulatorCardProps) {
   }
 
   return (
-    <Card className="gap-3 border-primary/20 bg-neutral-50/50">
+    <Card className="gap-3 border-primary/20 bg-surface-soft">
       <CardHeader className="pb-0">
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-1.5 text-xs font-semibold">

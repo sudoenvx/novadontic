@@ -165,7 +165,7 @@ export function PolicyDetailsPage() {
                   key={pol.id}
                   onClick={() => navigate(`/policies/${pol.key}`)}
                   className={`flex flex-col items-start gap-0.5 py-1.5 ${
-                    pol.id === currentPolicy.id ? 'bg-neutral-100 font-medium' : ''
+                    pol.id === currentPolicy.id ? 'bg-surface-muted font-medium' : 'hover:bg-surface-muted'
                   }`}
                 >
                   <div className="flex items-center justify-between w-full">
@@ -253,7 +253,7 @@ export function PolicyDetailsPage() {
             <div className="flex items-center gap-1 font-mono">
               <Key size={12} className="text-primary" />
               <span className="font-semibold text-text">Unique Key:</span>
-              <code className="rounded-xs bg-neutral-100 px-1 py-0.5 text-primary">
+              <code className="rounded-xs bg-primary-soft px-1 py-0.5 text-primary-soft-foreground">
                 {currentPolicy.key}
               </code>
             </div>
@@ -264,7 +264,7 @@ export function PolicyDetailsPage() {
 
         {/* Metadata Badges Bar */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 border-t border-border-soft text-2xs">
-          <div className="rounded-sm bg-neutral-50 p-2 border border-border">
+          <div className="rounded-sm border border-border bg-surface-soft p-2">
             <span className="text-text-muted block text-3xs font-medium uppercase tracking-wider">
               Applicable Appliances
             </span>
@@ -272,7 +272,7 @@ export function PolicyDetailsPage() {
               {currentPolicy.applicableAppliances.join(', ')}
             </span>
           </div>
-          <div className="rounded-sm bg-neutral-50 p-2 border border-border">
+          <div className="rounded-sm border border-border bg-surface-soft p-2">
             <span className="text-text-muted block text-3xs font-medium uppercase tracking-wider">
               Target Accounts
             </span>
@@ -280,7 +280,7 @@ export function PolicyDetailsPage() {
               {currentPolicy.applicableAccounts.join(', ')}
             </span>
           </div>
-          <div className="rounded-sm bg-neutral-50 p-2 border border-border">
+          <div className="rounded-sm border border-border bg-surface-soft p-2">
             <span className="text-text-muted block text-3xs font-medium uppercase tracking-wider">
               Clinic Acknowledgement
             </span>
@@ -295,7 +295,7 @@ export function PolicyDetailsPage() {
               %)
             </span>
           </div>
-          <div className="rounded-sm bg-neutral-50 p-2 border border-border">
+          <div className="rounded-sm border border-border bg-surface-soft p-2">
             <span className="text-text-muted block text-3xs font-medium uppercase tracking-wider">
               Active Cases Covered
             </span>
@@ -307,9 +307,9 @@ export function PolicyDetailsPage() {
       </Card>
 
       {/* Main 2-Column Layout */}
-      <div className="grid gap-4 lg:grid-cols-[18rem_minmax(0,1fr)] items-start">
+      <div className="grid min-w-0 gap-4 xl:grid-cols-[18rem_minmax(0,1fr)] items-start">
         {/* Left Sticky Sidebar */}
-        <aside className="grid gap-3 lg:sticky lg:top-4 print:hidden">
+        <aside className="grid gap-3 xl:sticky xl:top-[calc(var(--navbar-height)+var(--page-gap))] print:hidden">
           {/* Table of Contents / Quick Jump */}
           <Card className="gap-2.5">
             <CardHeader className="pb-0">
@@ -344,8 +344,8 @@ export function PolicyDetailsPage() {
                     onClick={() => scrollToSection(section.key)}
                     className={`flex items-center justify-between text-left text-xs py-1.5 px-2 rounded-sm transition-colors ${
                       isActive
-                        ? 'bg-primary/10 text-primary font-medium'
-                        : 'text-secondary hover:bg-neutral-100 hover:text-text'
+                        ? 'bg-primary-soft text-primary-soft-foreground font-medium'
+                        : 'text-text-secondary hover:bg-surface-muted hover:text-text-primary'
                     }`}
                   >
                     <div className="flex items-center gap-1.5 truncate">
@@ -471,7 +471,7 @@ export function PolicyDetailsPage() {
                           ? 'bg-warning-soft border-warning-soft-foreground/20 text-warning-soft-foreground'
                           : section.callout.type === 'destructive'
                           ? 'bg-destructive-soft border-destructive-soft-foreground/20 text-destructive-soft-foreground'
-                          : 'bg-neutral-100 border-border text-text'
+                          : 'bg-surface-muted border-border text-text-primary'
                       }`}
                     >
                       <div className="flex items-center gap-1.5 font-semibold mb-1">
@@ -489,12 +489,12 @@ export function PolicyDetailsPage() {
                     {section.rules.map((rule) => (
                       <div
                         key={rule.id}
-                        className="group/rule rounded-sm border border-border bg-neutral-50/60 p-2.5 transition-colors hover:bg-neutral-50"
+                        className="group/rule rounded-sm border border-border bg-surface-soft/60 p-2.5 transition-colors hover:bg-surface-muted"
                       >
                         <div className="flex flex-wrap items-center justify-between gap-1.5 mb-1">
                           <div className="flex items-center gap-2 min-w-0">
                             {rule.code && (
-                              <code className="rounded-xs bg-neutral-200/70 px-1 py-0.2 font-mono text-3xs font-semibold text-text">
+                              <code className="rounded-xs bg-surface-muted px-1 py-0.2 font-mono text-3xs font-semibold text-text-primary">
                                 {rule.code}
                               </code>
                             )}
@@ -526,7 +526,7 @@ export function PolicyDetailsPage() {
                             {rule.tags.map((tag) => (
                               <span
                                 key={tag}
-                                className="text-3xs text-text-muted bg-neutral-200/50 px-1 rounded-xs"
+                                className="rounded-xs bg-surface-muted px-1 text-3xs text-text-muted"
                               >
                                 {tag}
                               </span>
@@ -541,13 +541,13 @@ export function PolicyDetailsPage() {
                   {section.table && (
                     <div className="mt-2 overflow-hidden rounded-sm border border-border bg-surface text-xs">
                       {section.table.title && (
-                        <div className="bg-neutral-100 px-3 py-1.5 text-2xs font-semibold text-text border-b border-border">
+                        <div className="border-b border-border bg-surface-muted px-3 py-1.5 text-2xs font-semibold text-text-primary">
                           {section.table.title}
                         </div>
                       )}
                       <div className="overflow-x-auto">
                         <table className="w-full text-left text-2xs">
-                          <thead className="bg-neutral-50 text-text-muted uppercase text-3xs font-semibold border-b border-border">
+                          <thead className="border-b border-border bg-surface-soft text-3xs font-semibold uppercase text-text-muted">
                             <tr>
                               {section.table.headers.map((header, idx) => (
                                 <th key={idx} className="px-3 py-2">
@@ -563,7 +563,7 @@ export function PolicyDetailsPage() {
                                 className={
                                   row.highlight
                                     ? 'bg-accent-soft/30 font-medium'
-                                    : 'hover:bg-neutral-50/50'
+                                    : 'hover:bg-surface-muted'
                                 }
                               >
                                 {row.values.map((val, cellIdx) => (
@@ -584,7 +584,7 @@ export function PolicyDetailsPage() {
           )}
 
           {/* Policy Document Footer / Compliance Sign-off */}
-          <Card className="gap-2 bg-neutral-50 text-2xs text-text-muted border-dashed">
+          <Card className="gap-2 border-dashed bg-surface-soft text-2xs text-text-muted">
             <div className="flex items-center justify-between">
               <span className="font-semibold text-text flex items-center gap-1.5">
                 <ShieldCheck size={14} className="text-success" />

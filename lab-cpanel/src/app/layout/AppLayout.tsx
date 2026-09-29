@@ -11,10 +11,18 @@ export function AppLayout() {
 
   return (
     <Toaster>
-      <div className="scrollbar-brand mx-auto flex h-screen max-w-6xl flex-col gap-3 overflow-x-hidden overflow-y-auto p-3 md:pl-14">
-        <AppSidebar />
-        <AppTopbar onOpenCommandMenu={() => setIsCommandOpen(true)} />
-        <Outlet />
+      <div className="relative mx-auto flex min-h-dvh w-full max-w-6xl gap-3 overflow-x-clip">
+        <div className="sticky top-0 hidden h-dvh w-14 shrink-0 p-3 lg:block">
+          <div className="relative h-full w-full">
+            <AppSidebar />
+          </div>
+        </div>
+        <div className="min-w-0 flex-1">
+          <AppTopbar onOpenCommandMenu={() => setIsCommandOpen(true)} />
+          <div className="grid min-w-0 gap-3 p-3">
+            <Outlet />
+          </div>
+        </div>
       </div>
       <AppCommandMenu open={isCommandOpen} onOpenChange={setIsCommandOpen} />
     </Toaster>

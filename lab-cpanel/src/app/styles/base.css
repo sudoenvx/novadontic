@@ -5,7 +5,74 @@
 html {
   min-width: 320px;
   scroll-behavior: smooth;
-  /* scrollbar-gutter: stable; */
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--color-neutral-600) 42%, transparent) transparent;
+}
+
+html.theme-transitioning body,
+html.theme-transitioning #root,
+html.theme-transitioning :where(
+  [class~="bg-canvas"],
+  [class~="bg-surface"],
+  [class~="bg-surface-raised"],
+  [class~="bg-surface-soft"],
+  [class~="bg-surface-secondary"],
+  [class~="bg-surface-muted"],
+  [class~="bg-primary"],
+  [class~="bg-primary-soft"],
+  [class~="bg-accent-soft"],
+  [class~="bg-success-soft"],
+  [class~="bg-warning-soft"],
+  [class~="bg-destructive-soft"],
+  [class~="text-text"],
+  [class~="text-text-primary"],
+  [class~="text-text-secondary"],
+  [class~="text-text-muted"],
+  [class~="text-text-faint"],
+  [class~="text-primary"],
+  [class~="text-primary-foreground"],
+  [class~="text-accent"],
+  [class~="text-accent-foreground"],
+  [class~="border-border"],
+  [class~="border-border-soft"],
+  [class~="border-border-strong"],
+  [class~="border-border-active"]
+) {
+  transition: color 140ms linear, background-color 140ms linear, border-color 140ms linear;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.theme-transitioning body,
+  html.theme-transitioning #root,
+  html.theme-transitioning :where(
+    [class~="bg-canvas"],
+    [class~="bg-surface"],
+    [class~="bg-surface-raised"],
+    [class~="bg-surface-soft"],
+    [class~="bg-surface-secondary"],
+    [class~="bg-surface-muted"],
+    [class~="bg-primary"],
+    [class~="bg-primary-soft"],
+    [class~="bg-accent-soft"],
+    [class~="bg-success-soft"],
+    [class~="bg-warning-soft"],
+    [class~="bg-destructive-soft"],
+    [class~="text-text"],
+    [class~="text-text-primary"],
+    [class~="text-text-secondary"],
+    [class~="text-text-muted"],
+    [class~="text-text-faint"],
+    [class~="text-primary"],
+    [class~="text-primary-foreground"],
+    [class~="text-accent"],
+    [class~="text-accent-foreground"],
+    [class~="border-border"],
+    [class~="border-border-soft"],
+    [class~="border-border-strong"],
+    [class~="border-border-active"]
+  ) {
+    transition-duration: 0.01ms;
+  }
 }
 
 body {
@@ -66,24 +133,26 @@ img {
 @utility scrollbar-brand {
   scrollbar-width: thin;
   scrollbar-color: color-mix(in srgb, var(--color-neutral-600) 42%, transparent) transparent;
-  scrollbar-gutter: stable;
 }
 
+html::-webkit-scrollbar,
 .scrollbar-brand::-webkit-scrollbar {
   width: 0.55rem;
   height: 0.55rem;
 }
 
+html::-webkit-scrollbar-track,
 .scrollbar-brand::-webkit-scrollbar-track {
   background: transparent;
 }
 
-.scrollbar-brand::-webkit-scrollbar-button {
+*::-webkit-scrollbar-button {
   display: none;
   width: 0;
   height: 0;
 }
 
+html::-webkit-scrollbar-thumb,
 .scrollbar-brand::-webkit-scrollbar-thumb {
   border: 2px solid transparent;
   border-radius: var(--radius-pill);
@@ -91,6 +160,7 @@ img {
   background-color: color-mix(in srgb, var(--color-neutral-600) 42%, transparent);
 }
 
+html::-webkit-scrollbar-thumb:hover,
 .scrollbar-brand::-webkit-scrollbar-thumb:hover {
   background-color: var(--color-neutral-600);
 }

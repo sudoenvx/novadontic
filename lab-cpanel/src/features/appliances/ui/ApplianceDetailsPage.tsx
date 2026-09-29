@@ -1,4 +1,3 @@
-import { Collapsible } from "@base-ui/react/collapsible";
 import {
   ArrowLeft,
   Boxes,
@@ -13,6 +12,7 @@ import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { Badge } from "../../../shared/ui/Badge";
 import { Button } from "../../../shared/ui/Button";
 import { Card } from "../../../shared/ui/Card";
+import { Collapsible, CollapsiblePanel, CollapsibleTrigger } from "../../../shared/ui/Collapsible";
 import {
   Dialog,
   DialogContent,
@@ -201,7 +201,7 @@ export function ApplianceDetailsPage() {
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="flex items-center gap-3">
             <span
-              className="grid size-14 shrink-0 place-items-center rounded-md bg-neutral-100 text-text-muted"
+              className="grid size-14 shrink-0 place-items-center rounded-md bg-surface-muted text-text-muted"
               aria-hidden="true"
             >
               <Boxes size={26} />
@@ -279,7 +279,7 @@ export function ApplianceDetailsPage() {
         {appliance.groups.map((group) => {
           const isOpen = openGroups[group.id] ?? true;
           return (
-            <Collapsible.Root
+            <Collapsible
               key={group.id}
               open={isOpen}
               onOpenChange={(open) =>
@@ -287,8 +287,8 @@ export function ApplianceDetailsPage() {
               }
               className="overflow-hidden rounded-[calc(var(--radius-md)-2px)] border border-border"
             >
-              <div className="flex flex-wrap items-center gap-2 bg-neutral-50 px-2 py-1">
-                <Collapsible.Trigger className="group flex min-w-0 flex-1 items-center gap-2 rounded-sm px-1 py-1 text-left  focus-visible:outline-2 focus-visible:outline-primary">
+              <div className="flex flex-wrap items-center gap-2 bg-surface-soft px-2 py-1">
+                <CollapsibleTrigger className="group flex min-w-0 flex-1 items-center gap-2 rounded-sm px-1 py-1 text-left">
                   <ChevronDown
                     className={`shrink-0 text-text-muted transition-transform ${isOpen ? "rotate-180" : ""}`}
                     size={16}
@@ -300,7 +300,7 @@ export function ApplianceDetailsPage() {
                     {group.fields.length}{" "}
                     {group.fields.length === 1 ? "field" : "fields"}
                   </span>
-                </Collapsible.Trigger>
+                </CollapsibleTrigger>
                 <div className="flex items-center gap-1">
                   <Button
                     size="sm"
@@ -330,14 +330,14 @@ export function ApplianceDetailsPage() {
                   </Button>
                 </div>
               </div>
-              <Collapsible.Panel className="overflow-hidden transition-[height] duration-150 data-ending-style:h-0 data-starting-style:h-0">
+              <CollapsiblePanel>
                 {group.fields.length > 0 ? (
                   group.fields.map((field) => (
                     <div
                       key={field.id}
                       role="button"
                       tabIndex={0}
-                      className="group/field flex cursor-pointer flex-wrap items-center justify-between gap-3 border-t border-border px-2 py-2 transition-colors hover:bg-neutral-50 focus-visible:bg-neutral-50 focus-visible:outline-none"
+                      className="group/field flex cursor-pointer flex-wrap items-center justify-between gap-3 border-t border-border px-2 py-2 transition-colors hover:bg-surface-muted focus-visible:bg-surface-muted focus-visible:outline-none"
                       onClick={() => setFieldForm({ groupId: group.id, field })}
                       onKeyDown={(event) => {
                         if (event.key === "Enter" || event.key === " ") {
@@ -402,8 +402,8 @@ export function ApplianceDetailsPage() {
                     No fields yet. Add the first field to this group.
                   </p>
                 )}
-              </Collapsible.Panel>
-            </Collapsible.Root>
+              </CollapsiblePanel>
+            </Collapsible>
           );
         })}
         {appliance.groups.length === 0 && (

@@ -14,13 +14,17 @@ export function ClinicTable({ clinics, getDoctorCount, title }: ClinicTableProps
     {
       id: 'clinic',
       header: 'Clinic',
+      sortable: true,
+      pinnable: true,
       accessorKey: 'name',
       className: 'font-semibold text-text',
     },
-    { id: 'address', header: 'Address', accessorKey: 'address', className: 'text-secondary' },
+    { id: 'address', header: 'Address', accessorKey: 'address', sortable: true, pinnable: true, className: 'text-secondary' },
     {
       id: 'contact',
       header: 'Contact',
+      sortable: true,
+      pinnable: true,
       sortValue: (clinic) => clinic.email,
       cell: (clinic) => (
         <div className="grid gap-0.5 text-sm">
@@ -32,6 +36,8 @@ export function ClinicTable({ clinics, getDoctorCount, title }: ClinicTableProps
     {
       id: 'doctors',
       header: 'Doctors',
+      sortable: true,
+      pinnable: true,
       sortValue: getDoctorCount,
       cell: (clinic) => <span className="text-secondary"><strong className="text-text">{getDoctorCount(clinic)}</strong> active</span>,
     },

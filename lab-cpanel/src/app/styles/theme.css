@@ -392,6 +392,39 @@
     background: var(--secondary); color: var(--secondary-foreground);
   }
 
+  .segmented-control {
+    background: var(--surface); border-color: var(--border); color: var(--text-secondary);
+  }
+  .segmented-control > button {
+    background: transparent; color: var(--text-secondary);
+    transition: color var(--duration-fast) var(--motion-ease), background-color var(--duration-fast) var(--motion-ease);
+  }
+  .segmented-control > button:hover:not([aria-pressed="true"]) {
+    background: var(--surface-muted); color: var(--text-primary);
+  }
+  .segmented-control > button[aria-pressed="true"] {
+    background: var(--gradient-brand); color: var(--primary-foreground);
+  }
+  .segmented-control[data-variant="dark"] {
+    background: var(--brand-ink); border-color: var(--brand-ink); color: #fff;
+  }
+  .segmented-control[data-variant="dark"] > button:not([aria-pressed="true"]) {
+    color: rgb(255 255 255 / 76%);
+  }
+  .segmented-control[data-variant="dark"] > button:hover:not([aria-pressed="true"]) {
+    background: rgb(255 255 255 / 12%); color: #fff;
+  }
+  .theme-switcher-toggle {
+    background: var(--surface); border-color: var(--border); color: var(--text-primary);
+  }
+  .theme-switcher-toggle:hover { background: var(--surface-muted); }
+  .theme-switcher-toggle[data-variant="dark"] {
+    background: var(--brand-ink); border-color: var(--brand-ink); color: #fff;
+  }
+  .theme-switcher-toggle[data-variant="dark"]:hover {
+    background: color-mix(in oklab, var(--brand-ink) 86%, white);
+  }
+
   /* ---- STEP NODE (circle in the stage list)
      <span class="step-node is-done">✓</span> · is-now (current) · default (todo) */
   .step-node {

@@ -1,10 +1,10 @@
 import { Clock3 } from 'lucide-react'
 import { useState } from 'react'
 
-import { Button } from '../../../shared/ui/Button'
-import { Card, CardHeader, CardTitle } from '../../../shared/ui/Card'
-import { Textarea } from '../../../shared/ui/Textarea'
-import type { CaseActivityItem } from '../domain/casePipeline'
+import { Button } from '../../../../shared/ui/Button'
+import { Card, CardHeader, CardTitle } from '../../../../shared/ui/Card'
+import { Textarea } from '../../../../shared/ui/Textarea'
+import type { CaseActivityItem } from '../../domain/casePipeline'
 
 export function CasePipelineActivity({
   activities,

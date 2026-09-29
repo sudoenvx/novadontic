@@ -1,7 +1,33 @@
-import express from 'express'
+import { createApp } from './app/app.ts';
+import { env } from './config/env.ts';
+import { logger } from './config/logger.ts';
+import { prisma } from './infrastructure/prisma.ts';
 
-const server = express()
+const app = createApp();
+const server = app.listen(env.PORT, () => {
+  logger.info('API server started', { port: env.PORT, environment: env.NODE_ENV });
+});
 
-server.listen(3000, () => {
-    console.log("[SERVER] => Running on http://localhost:3000")
-})
+let isShuttingDown = false;
+
+async function shutdown(signal: string): Promise<void> {
+  if (isShuttingDown) return;
+  isShuttingDown = true;
+  logger.info('Shutting down API server', { signal });
+
+  server.close(async (error) => {
+    try {
+      await prisma.$disconnect();
+      if (error) {
+        logger.error('HTTP server shutdown failed', { error });
+        process.exitCode = 1;
+      }
+    } catch (closeError) {
+      logger.error('Prisma client shutdown failed', { error: closeError });
+      process.exitCode = 1;
+    }
+  });
+}
+
+process.on('SIGINT', () => void shutdown('SIGINT'));
+process.on('SIGTERM', () => void shutdown('SIGTERM'));

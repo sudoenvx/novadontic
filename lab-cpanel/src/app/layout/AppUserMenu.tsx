@@ -8,7 +8,6 @@ import {
   Settings,
   ShieldCheck,
   SlidersHorizontal,
-  UserRound,
   UsersRound,
   Workflow,
 } from 'lucide-react'
@@ -40,12 +39,12 @@ export function AppUserMenu({ compact = false, onSignOut }: AppUserMenuProps) {
           <Button
             variant="transparent"
             size={compact ? 'icon-sm' : 'sm'}
-            className={compact ? 'p-0' : 'gap-2 px-1.5'}
+            className={compact ? 'size-8! border-0 p-0' : 'gap-2 px-1.5'}
             aria-label="Open account menu"
           />
         }
       >
-        <UserAvatar />
+        <UserAvatar compact={compact} />
         {!compact && (
           <span className="hidden min-w-24 text-left sm:grid">
             <span className="text-sm font-semibold normal-case text-text">Maya Lab</span>
@@ -74,7 +73,6 @@ export function AppUserMenu({ compact = false, onSignOut }: AppUserMenuProps) {
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
           <DropdownMenuLabel>Account</DropdownMenuLabel>
-          <DropdownMenuItem><UserRound /> Profile</DropdownMenuItem>
           <DropdownMenuItem onClick={() => navigate('/lab-profile')}><Building2 /> Lab profile</DropdownMenuItem>
           <DropdownMenuItem onClick={() => navigate('/staff')}><UsersRound /> Staff</DropdownMenuItem>
           <DropdownMenuItem onClick={() => navigate('/roles-permissions')}><ShieldCheck /> Roles &amp; permissions</DropdownMenuItem>
@@ -88,9 +86,9 @@ export function AppUserMenu({ compact = false, onSignOut }: AppUserMenuProps) {
   )
 }
 
-function UserAvatar() {
+function UserAvatar({ compact }: { compact: boolean }) {
   return (
-    <span className="grid size-7 place-items-center rounded-sm bg-accent text-xs font-semibold text-accent-foreground">
+    <span className={`grid ${compact ? 'size-full' : 'size-7'} place-items-center rounded-sm bg-accent text-xs font-semibold text-accent-foreground`}>
       AM
     </span>
   )

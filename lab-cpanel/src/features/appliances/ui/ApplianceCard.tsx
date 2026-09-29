@@ -41,7 +41,7 @@ export function ApplianceCard({ appliance, onOpen, onToggle }: ApplianceCardProp
           <span
             className={`grid size-8 shrink-0 place-items-center rounded-sm transition-colors ${
               appliance.isActive
-                ? 'bg-neutral-100 text-primary-soft-foreground'
+                ? 'bg-primary-soft text-primary-soft-foreground'
                 : 'bg-surface-muted text-text-muted'
             }`}
             aria-hidden="true"

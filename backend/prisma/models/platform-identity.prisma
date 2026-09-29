@@ -1,0 +1,45 @@
+enum PlatformStaffRole {
+  super_admin
+  support_agent
+  billing_ops
+  engineer
+
+  @@map("platform_staff_role")
+}
+
+model PlatformStaff {
+  id                    BigInt                 @id @default(autoincrement()) @db.BigInt
+  fullName              String                 @map("full_name") @db.VarChar(150)
+  email                 String                 @unique @db.VarChar(150)
+  passwordHash          String                 @map("password_hash")
+  role                  PlatformStaffRole      @default(support_agent)
+  isActive              Boolean                @default(true) @map("is_active")
+  mfaEnabled            Boolean                @default(false) @map("mfa_enabled")
+  lastLoginAt           DateTime?              @map("last_login_at") @db.Timestamptz(6)
+  createdAt             DateTime               @default(now()) @map("created_at") @db.Timestamptz(6)
+  impersonationSessions ImpersonationSession[]
+
+  @@map("platform_staff")
+}
+
+model ImpersonationSession {
+  id                 BigInt        @id @default(autoincrement()) @db.BigInt
+  platformStaffId    BigInt        @map("platform_staff_id") @db.BigInt
+  tenantId           BigInt        @map("tenant_id") @db.BigInt
+  targetStaffUserId  BigInt?       @map("target_staff_user_id") @db.BigInt
+  targetPortalUserId BigInt?       @map("target_portal_user_id") @db.BigInt
+  reason             String
+  supportTicketId    BigInt?       @map("support_ticket_id") @db.BigInt
+  ipAddress          String?       @map("ip_address") @db.Inet
+  startedAt          DateTime      @default(now()) @map("started_at") @db.Timestamptz(6)
+  endedAt            DateTime?     @map("ended_at") @db.Timestamptz(6)
+  platformStaff      PlatformStaff @relation(fields: [platformStaffId], references: [id], onDelete: Restrict)
+  tenant             Tenant        @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  targetStaffUser    User?         @relation("StaffImpersonationTarget", fields: [tenantId, targetStaffUserId], references: [tenantId, id], onDelete: Restrict)
+  targetPortalUser   PortalUser?   @relation("PortalImpersonationTarget", fields: [targetPortalUserId], references: [id], onDelete: SetNull)
+  auditLogs          AuditLog[]    @relation("AuditImpersonation")
+
+  @@index([tenantId, startedAt])
+  @@index([platformStaffId, endedAt])
+  @@map("impersonation_sessions")
+}

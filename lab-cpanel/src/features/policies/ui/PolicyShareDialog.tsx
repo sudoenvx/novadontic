@@ -82,7 +82,7 @@ export function PolicyShareDialog({
               <Input
                 readOnly
                 value={policy.key}
-                className="font-mono text-xs bg-neutral-50"
+                className="bg-surface-soft font-mono text-xs"
               />
               <Button
                 type="button"
@@ -103,7 +103,7 @@ export function PolicyShareDialog({
               <Input
                 readOnly
                 value={shareUrl}
-                className="text-xs bg-neutral-50"
+                className="bg-surface-soft text-xs"
               />
               <Button
                 type="button"
@@ -118,14 +118,14 @@ export function PolicyShareDialog({
             </div>
           </div>
 
-          <div className="rounded-sm border border-border bg-neutral-50 p-2.5 space-y-1">
+          <div className="space-y-1 rounded-sm border border-border bg-surface-soft p-2.5">
             <div className="flex items-center justify-between text-2xs">
               <span className="font-semibold text-text">Clinic Acknowledgements</span>
               <span className="font-mono font-medium text-text">
                 {policy.stats.acknowledgedClinicsCount} / {policy.stats.totalEligibleClinicsCount} Clinics
               </span>
             </div>
-            <div className="h-1.5 w-full rounded-full bg-neutral-200 overflow-hidden">
+            <div className="h-1.5 w-full overflow-hidden rounded-full bg-surface-muted">
               <div
                 className="h-full bg-primary transition-all duration-300 rounded-full"
                 style={{

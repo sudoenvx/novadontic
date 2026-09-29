@@ -25,7 +25,7 @@ export function ClinicList({
   selectedClinicId,
 }: ClinicListProps) {
   return (
-    <Card size="sm" className="min-h-0 lg:sticky lg:top-3 lg:self-start">
+    <Card size="sm" className="min-h-0 xl:sticky xl:top-[calc(var(--navbar-height)+var(--page-gap))] xl:self-start">
       <CardHeader>
         <CardTitle className="flex items-center gap-1.5 normal-case">
           <Building2 size={15} />

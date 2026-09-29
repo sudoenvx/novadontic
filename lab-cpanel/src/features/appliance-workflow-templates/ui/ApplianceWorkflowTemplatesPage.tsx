@@ -28,6 +28,7 @@ import { workflowTemplateFixtures } from "../data/workflowTemplates";
 import { CreateWorkflowDialog } from "./CreateWorkflowDialog";
 import { WorkflowStepFormCard } from "./WorkflowStepFormCard";
 import { WorkflowStepPlaceholder, WorkflowStepRow } from "./WorkflowStepRow";
+import { WorkflowSummary } from "./WorkflowSummary";
 
 type StepFormState = { workflowId: string; step?: WorkflowStep };
 type StepDeleteState = { workflowId: string; step: WorkflowStep };
@@ -230,8 +231,8 @@ export function ApplianceWorkflowTemplatesPage() {
         </PageHeaderActions>
       </PageHeader>
 
-      <div className="grid gap-3 lg:grid-cols-[15rem_minmax(0,1fr)]">
-        <Card className="h-fit gap-2">
+      <div className="grid min-w-0 gap-3 xl:grid-cols-[15rem_minmax(0,1fr)]">
+        <Card className="h-fit gap-2 xl:sticky xl:top-[calc(var(--navbar-height)+var(--page-gap))] xl:self-start">
           <div className="px-1">
             <p className="text-xs font-semibold uppercase tracking-wide text-text-muted">
               Appliance types
@@ -249,14 +250,14 @@ export function ApplianceWorkflowTemplatesPage() {
                 <button
                   key={appliance.id}
                   type="button"
-                  className={`flex items-center gap-2 rounded-sm px-2 py-1.5 text-left transition-colors ${selectedAppliance?.id === appliance.id ? "bg-secondary text-secondary-foreground" : "hover:bg-neutral-100 "}`}
+                  className={`flex items-center gap-2 rounded-sm px-2 py-1.5 text-left text-text-primary transition-colors ${selectedAppliance?.id === appliance.id ? "bg-primary-soft text-primary-soft-foreground" : "hover:bg-surface-muted hover:text-text-primary"}`}
                   onClick={() => selectAppliance(appliance.id)}
                 >
 
                   <span className="min-w-0 flex-1 truncate text-sm font-medium">
                     {appliance.name}
                   </span>
-                  <span className="text-sm font-mono">{count}</span>
+                  <span className="text-sm font-mono text-text-secondary">{count}</span>
                 </button>
               );
             })}
@@ -265,12 +266,13 @@ export function ApplianceWorkflowTemplatesPage() {
 
         <div className="grid min-w-0 gap-3">
           {selectedAppliance && applianceWorkflows.length > 0 && (
-            <div className="flex items-center gap-2 overflow-x-auto">
+            <div className="grid min-w-0 gap-2 sm:grid-cols-2 2xl:grid-cols-3">
               {applianceWorkflows.map((workflow) => (
                 <button
                   key={workflow.id}
                   type="button"
-                  className={`flex items-start gap-2 rounded-md w-fit p-2 text-left transition-colors bg-neutral-50 border-2 border-neutral-400 ${selectedWorkflow?.id === workflow.id ? "border-accent! bg-accent-soft/20!" : ""}`}
+                  aria-pressed={selectedWorkflow?.id === workflow.id}
+                  className={`flex min-h-16 min-w-0 items-center justify-between gap-3 rounded-md border px-3 py-2.5 text-left transition-colors ${selectedWorkflow?.id === workflow.id ? "border-primary bg-primary-soft shadow-ring-active" : "border-border bg-surface hover:border-border-strong hover:bg-surface-muted"}`}
                   onClick={() => {
                     setSelectedWorkflowId(workflow.id);
                     setStepForm(undefined);
@@ -279,10 +281,10 @@ export function ApplianceWorkflowTemplatesPage() {
 
                   <span className="min-w-0 flex-1">
                     <span className="flex items-center gap-2">
-                      <span className="truncate text-sm font-semibold text-text">
+                      <span className="truncate text-sm font-semibold text-text-primary">
                         {workflow.name}
                       </span>
-                      {workflow.isDefault && <Badge className="text-text" tone="accent">Default</Badge>}
+                      {workflow.isDefault && <Badge tone="accent">Default</Badge>}
                     </span>
                     <span className="flex items-center gap-2 text-xs text-text-muted">
                       <span>{getWorkflowStepCount(workflow)} steps</span>
@@ -320,7 +322,7 @@ export function ApplianceWorkflowTemplatesPage() {
                     </p>
                   </div>
                   <div className="flex items-center gap-3">
-                    <label className="flex items-center gap-2 text-xs text-secondary">
+                    <label className="flex items-center gap-2 text-xs text-text-secondary">
                       <Switch
                         size="sm"
                         checked={selectedWorkflow.isActive}
@@ -342,15 +344,15 @@ export function ApplianceWorkflowTemplatesPage() {
                   </div>
                 </div>
                 <div className="grid gap-2 sm:grid-cols-3">
-                  <Summary
+                  <WorkflowSummary
                     label="Production steps"
                     value={String(getWorkflowStepCount(selectedWorkflow))}
                   />
-                  <Summary
+                  <WorkflowSummary
                     label="Estimated duration"
                     value={`${getWorkflowDuration(selectedWorkflow)} days`}
                   />
-                  <Summary
+                  <WorkflowSummary
                     label="Approval gates"
                     value={String(
                       selectedWorkflow.steps.filter(
@@ -512,11 +514,3 @@ export function ApplianceWorkflowTemplatesPage() {
   );
 }
 
-function Summary({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-sm bg-surface-muted px-2 py-2">
-      <p className="text-lg font-semibold text-text">{value}</p>
-      <p className="mt-1 text-xs text-text-muted">{label}</p>
-    </div>
-  );
-}

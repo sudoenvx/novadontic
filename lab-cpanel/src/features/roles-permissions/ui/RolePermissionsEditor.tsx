@@ -58,7 +58,7 @@ export function RolePermissionsEditor({
         </div>
         <div className="flex flex-wrap items-center justify-end gap-2">
           
-          <Button variant="neutral" onClick={onEdit}>
+          <Button variant="outline" onClick={onEdit}>
             <Pencil /> Edit role
           </Button>
 
@@ -82,7 +82,7 @@ export function RolePermissionsEditor({
           permissions selected
         </p>
       </div>
-      <div className="grid gap-3 lg:min-h-0 lg:flex-1 lg:overflow-y-auto">
+      <div className="grid gap-3">
         {permissionGroups.map((group) => (
           <section key={group.subject} className="grid gap-1.5">
             <div className="flex items-center justify-between gap-2 border-b border-border-soft pb-1">
@@ -92,7 +92,7 @@ export function RolePermissionsEditor({
               {group.permissions.map((permission) => (
                 <label
                   key={permission.id}
-                  className="flex items-start gap-2 rounded-sm px-1.5 py-1.5 hover:bg-neutral-100"
+                  className="flex items-start gap-2 rounded-sm px-1.5 py-1.5 transition-colors hover:bg-surface-raised"
                 >
                   <Checkbox
                     checked={role.permissions.includes(permission.id)}
@@ -106,7 +106,7 @@ export function RolePermissionsEditor({
                     <span className="text-sm font-medium text-text">
                       {permission.label}
                     </span>
-                    <span className="font-mono text-2xs text-secondary">
+                    <span className="font-mono text-2xs text-text-secondary">
                       {permission.id}
                     </span>
                     <span className="text-xs text-text-muted">

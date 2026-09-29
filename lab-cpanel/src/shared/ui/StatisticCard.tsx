@@ -21,7 +21,7 @@ export function StatisticCard({
   return (
     <article
       className={cn(
-        'min-w-0 rounded-lg border border-border bg-surface p-2 shadow-card',
+        'min-w-0 rounded-lg border border-border bg-surface p-2',
         featured && 'ring ring-accent bg-accent-soft-light',
       )}
     >

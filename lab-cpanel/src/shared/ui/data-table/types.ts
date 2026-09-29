@@ -14,6 +14,7 @@ export type DataTableColumn<TData> = {
   cell?: (row: TData) => ReactNode
   sortable?: boolean
   sortValue?: (row: TData) => unknown
+  pinnable?: boolean
   className?: string
   headerClassName?: string
 }
@@ -33,6 +34,7 @@ export type DataTableProps<TData> = {
   selectable?: boolean
   selectedRowIds?: Array<string | number>
   defaultSelectedRowIds?: Array<string | number>
+  defaultPinnedColumnIds?: string[]
   onSelectionChange?: (rows: TData[]) => void
   className?: string
 }

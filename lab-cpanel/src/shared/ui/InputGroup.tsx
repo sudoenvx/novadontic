@@ -20,7 +20,7 @@ import { Textarea } from "./Textarea"
  */
 const inputGroupVariants = cva(
   [
-    "group/input-group relative flex w-full min-w-0 items-center overflow-hidden rounded-sm border transition-colors duration-(--duration-fast) outline-none",
+    "group/input-group relative flex w-full min-w-0 items-center overflow-hidden rounded-sm border text-text-primary transition-colors duration-(--duration-fast) outline-none",
     // the control fills the box; its own chrome is removed (Input variant="bare")
     "[&>input]:h-full [&>input]:flex-1",
     // focus + error live on the wrapper, not the inner control

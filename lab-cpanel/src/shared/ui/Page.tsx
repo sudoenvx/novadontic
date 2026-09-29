@@ -12,5 +12,5 @@ const sizeClasses = {
 }
 
 export function Page({ className, size = 'lg', ...props }: PageProps) {
-  return <main className={cn('flex flex-col gap-3', sizeClasses[size], className)} {...props} />
+  return <main className={cn('flex w-full min-w-0 flex-col gap-3', sizeClasses[size], className)} {...props} />
 }

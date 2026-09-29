@@ -13,11 +13,12 @@ const statusTone: Record<PlaygroundCase['status'], BadgeTone> = {
 }
 
 const columns: DataTableColumn<PlaygroundCase>[] = [
-  { id: 'id', header: 'Case', accessorKey: 'id', className: 'font-semibold text-text' },
+  { id: 'id', header: 'Case', accessorKey: 'id', sortable: true, pinnable: true, className: 'font-semibold text-text' },
   {
     id: 'patient',
     header: 'Patient',
     sortable: true,
+    pinnable: true,
     sortValue: (row) => row.patient,
     cell: (row) => (
       <div>
@@ -26,13 +27,14 @@ const columns: DataTableColumn<PlaygroundCase>[] = [
       </div>
     ),
   },
-  { id: 'appliance', header: 'Appliance', accessorKey: 'appliance', className: 'text-secondary' },
-  { id: 'stage', header: 'Stage', accessorKey: 'stage', className: 'text-secondary' },
-  { id: 'due', header: 'Due', accessorKey: 'due', className: 'text-secondary' },
+  { id: 'appliance', header: 'Appliance', accessorKey: 'appliance', sortable: true, pinnable: true, className: 'text-secondary' },
+  { id: 'stage', header: 'Stage', accessorKey: 'stage', sortable: true, pinnable: true, className: 'text-secondary' },
+  { id: 'due', header: 'Due', accessorKey: 'due', sortable: true, pinnable: true, className: 'text-secondary' },
   {
     id: 'status',
     header: 'Status',
     sortable: true,
+    pinnable: true,
     sortValue: (row) => row.status,
     cell: (row) => <Badge tone={statusTone[row.status]}>{row.status}</Badge>,
   },

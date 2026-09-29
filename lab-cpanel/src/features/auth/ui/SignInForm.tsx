@@ -1,5 +1,6 @@
 import { Eye, EyeOff } from 'lucide-react'
 import { useId, useState, type FormEvent } from 'react'
+import { Link } from 'react-router-dom'
 
 import { Button } from '../../../shared/ui/Button'
 import { Checkbox } from '../../../shared/ui/Checkbox'
@@ -21,7 +22,6 @@ const initialValues: LabSignInValues = {
 export function SignInForm({ onSubmit }: SignInFormProps) {
   const [values, setValues] = useState(initialValues)
   const [error, setError] = useState<string>()
-  const [notice, setNotice] = useState<string>()
   const [isPasswordVisible, setIsPasswordVisible] = useState(false)
   const emailId = useId()
   const passwordId = useId()
@@ -33,7 +33,6 @@ export function SignInForm({ onSubmit }: SignInFormProps) {
   ) {
     setValues((current) => ({ ...current, [key]: value }))
     setError(undefined)
-    setNotice(undefined)
   }
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -107,17 +106,9 @@ export function SignInForm({ onSubmit }: SignInFormProps) {
           />
           Remember this device
         </Label>
-        <Button
-          type="button"
-          variant="link"
-          className="normal-case"
-          onClick={() => {
-            setError(undefined)
-            setNotice('Contact your lab administrator to reset your password.')
-          }}
-        >
+        <Link to="/forgot-password" className="text-xs font-semibold text-primary underline-offset-4 hover:underline">
           Forgot password?
-        </Button>
+        </Link>
       </div>
 
       {error && (
@@ -125,12 +116,6 @@ export function SignInForm({ onSubmit }: SignInFormProps) {
           {error}
         </p>
       )}
-      {notice && (
-        <p className="text-xs text-text-secondary" role="status" aria-live="polite">
-          {notice}
-        </p>
-      )}
-
       <Button type="submit" size="lg" className="mt-1 w-full">
         Sign in
       </Button>

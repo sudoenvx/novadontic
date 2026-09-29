@@ -1,3 +1,5 @@
+import { useLayoutEffect, useMemo, useRef, useState } from 'react'
+
 import { Card } from '../Card'
 import { Table, TableHeader } from '../Table'
 import { DataTableBody } from './DataTableBody'
@@ -30,6 +32,7 @@ export function DataTable<TData>({
   children,
   columns,
   data,
+  defaultPinnedColumnIds,
   defaultSelectedRowIds,
   description,
   emptyMessage = 'No records found.',
@@ -43,6 +46,18 @@ export function DataTable<TData>({
   selectedRowIds,
   title,
 }: DataTableProps<TData>) {
+  const [pinnedColumnIds, setPinnedColumnIds] = useState<string[]>(
+    () => defaultPinnedColumnIds ?? [],
+  )
+  const pinnedColumns = useMemo(
+    () => new Set(
+      pinnedColumnIds.filter((id) =>
+        columns.some((column) => column.id === id && column.pinnable === true),
+      ),
+    ),
+    [columns, pinnedColumnIds],
+  )
+  const tableWrapperRef = useRef<HTMLDivElement>(null)
   const {
     allRowsSelected,
     selectedIds,
@@ -65,6 +80,53 @@ export function DataTable<TData>({
   const rowCount = loadingRowCount ?? (data.length || 5)
   const columnCount = columns.length + (selectable ? 1 : 0)
 
+  useLayoutEffect(() => {
+    const wrapper = tableWrapperRef.current
+    if (!wrapper) return
+
+    const updatePinnedOffsets = () => {
+      const headerCells = Array.from(
+        wrapper.querySelectorAll<HTMLTableCellElement>('thead th[data-column-id]'),
+      )
+      const widths = new Map(
+        headerCells.map((cell) => [cell.dataset.columnId!, cell.getBoundingClientRect().width]),
+      )
+      let left = selectable
+        ? wrapper.querySelector<HTMLTableCellElement>('thead tr > th:first-child')?.getBoundingClientRect().width ?? 0
+        : 0
+      const offsets = new Map<string, number>()
+
+      columns.forEach((column) => {
+        if (!pinnedColumns.has(column.id)) return
+        offsets.set(column.id, left)
+        left += widths.get(column.id) ?? 0
+      })
+
+      wrapper.querySelectorAll<HTMLElement>('[data-column-id]').forEach((cell) => {
+        const columnId = cell.dataset.columnId
+        cell.style.left = columnId && offsets.has(columnId)
+          ? `${offsets.get(columnId)}px`
+          : ''
+      })
+    }
+
+    const resizeObserver = new ResizeObserver(updatePinnedOffsets)
+    const headerRow = wrapper.querySelector('thead tr')
+    if (headerRow) resizeObserver.observe(headerRow)
+    wrapper.querySelectorAll('thead th[data-column-id]').forEach((cell) => resizeObserver.observe(cell))
+    updatePinnedOffsets()
+
+    return () => resizeObserver.disconnect()
+  }, [columns, pinnedColumns, selectable])
+
+  function togglePinnedColumn(columnId: string) {
+    setPinnedColumnIds((current) =>
+      current.includes(columnId)
+        ? current.filter((id) => id !== columnId)
+        : [...current, columnId],
+    )
+  }
+
   return (
     <Card className={className} size="xs">
       {hasHeader && (
@@ -81,12 +143,15 @@ export function DataTable<TData>({
         </div>
       )}
 
-      <div className="scrollbar-brand overflow-x-auto">
-        <Table className="min-w-full">
+      <div ref={tableWrapperRef} className="scrollbar-brand overflow-x-auto">
+        <Table className="min-w-full border-separate border-spacing-0">
           <TableHeader>
             <DataTableHeader
               allRowsSelected={allRowsSelected}
               columns={columns}
+              hasPinnedColumns={pinnedColumns.size > 0}
+              pinnedColumns={pinnedColumns}
+              onTogglePinnedColumn={togglePinnedColumn}
               onSortChange={setSortState}
               onToggleAll={toggleAllRows}
               selectable={selectable}
@@ -101,9 +166,11 @@ export function DataTable<TData>({
               columns={columns}
               emptyMessage={emptyMessage}
               getRowId={getRowId}
+              hasPinnedColumns={pinnedColumns.size > 0}
               onRowClick={onRowClick}
               onToggleRow={toggleRow}
               rows={sortedData}
+              pinnedColumns={pinnedColumns}
               selectable={selectable}
               selectedIds={selectedIds}
             />

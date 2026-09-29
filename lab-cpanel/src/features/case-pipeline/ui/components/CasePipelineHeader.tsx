@@ -1,9 +1,9 @@
 import { Flag, RotateCcw } from 'lucide-react'
 
-import { Badge } from '../../../shared/ui/Badge'
-import { Button } from '../../../shared/ui/Button'
-import { Card } from '../../../shared/ui/Card'
-import type { CasePipelineCase } from '../domain/casePipeline'
+import { Badge } from '../../../../shared/ui/Badge'
+import { Button } from '../../../../shared/ui/Button'
+import { Card } from '../../../../shared/ui/Card'
+import type { CasePipelineCase } from '../../domain/casePipeline'
 
 type CasePipelineHeaderProps = {
   caseItem: CasePipelineCase

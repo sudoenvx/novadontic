@@ -1,12 +1,12 @@
 import { useMemo } from 'react'
 
-import { Checkbox } from '../../../shared/ui/Checkbox'
-import { Input } from '../../../shared/ui/Input'
-import { Label } from '../../../shared/ui/Label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../shared/ui/Select'
-import { Textarea } from '../../../shared/ui/Textarea'
-import type { Appliance, ApplianceField } from '../../appliances/domain/appliance'
-import type { CaseFieldValue } from '../domain/casePipeline'
+import { Checkbox } from '../../../../shared/ui/Checkbox'
+import { Input } from '../../../../shared/ui/Input'
+import { Label } from '../../../../shared/ui/Label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../../shared/ui/Select'
+import { Textarea } from '../../../../shared/ui/Textarea'
+import type { Appliance, ApplianceField } from '../../../appliances/domain/appliance'
+import type { CaseFieldValue } from '../../domain/casePipeline'
 
 export type CaseFieldValues = Record<string, CaseFieldValue>
 

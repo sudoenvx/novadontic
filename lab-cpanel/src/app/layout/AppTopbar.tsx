@@ -1,10 +1,11 @@
 import { formatForDisplay } from '@tanstack/react-hotkeys'
-import { Plus, Search } from 'lucide-react'
+import { Search } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 
 import { Brand } from '../../shared/ui/Brand'
 import { Button } from '../../shared/ui/Button'
 import { Kbd } from '../../shared/ui/Kbd'
+import { ThemeSwitcher } from '../../shared/ui/ThemeSwitcher'
 import { AppUserMenu } from './AppUserMenu'
 
 type AppTopbarProps = {
@@ -16,25 +17,23 @@ export function AppTopbar({ context, onOpenCommandMenu }: AppTopbarProps) {
   const navigate = useNavigate()
 
   return (
-    <header className="sticky top-0 z-30 flex items-center justify-between gap-3 rounded-md bg-surface  p-2 shadow-card max-sm:flex-col max-sm:items-start max-sm:p-3">
+    <header className="sticky top-0 z-30 flex h-navbar w-full shrink-0 items-center justify-between gap-3 bg-canvas px-3">
       <Brand context={context} onClick={() => navigate('/')} />
-      <div className="flex items-center gap-2 max-sm:w-full">
-        <Button size="sm" onClick={() => navigate('/cases/new')}>
-          <Plus />
-          <span>Create case</span>
-        </Button>
+      <div className="ml-auto flex min-w-0 items-center gap-3">
         <Button
-          variant="transparent"
-          size="sm"
-          className="min-w-52 justify-between bg-neutral-100 text-secondary max-sm:min-w-0 max-sm:flex-1"
+          variant="outline"
+          size="md"
+          className="min-w-52 px-1.5 py-1.5 justify-between bg-surface hover:bg-surface text-secondary max-sm:min-w-0 max-sm:flex-1"
           onClick={onOpenCommandMenu}
           aria-label="Open command menu"
         >
           <span className="flex items-center gap-2 text-sm text-text-muted">
-            <Search size={16} /> Search
+            <Search size={16} />
+            <span className="">Search</span>
           </span>
           <Kbd>{formatForDisplay('Mod+K')}</Kbd>
         </Button>
+        <ThemeSwitcher size="compact" />
         <AppUserMenu />
       </div>
     </header>

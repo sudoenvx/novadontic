@@ -1,16 +1,16 @@
 import { GripVertical, Pencil, Trash2 } from "lucide-react";
 
-import { Badge } from "../../../shared/ui/Badge";
+import { Badge, type BadgeTone } from "../../../shared/ui/Badge";
 import { Button } from "../../../shared/ui/Button";
 import {
   getWorkflowKindLabel,
   type WorkflowStep,
 } from "../domain/workflowTemplate";
 
-const kindColors = {
-  production: { background: "#e6eefb", foreground: "#1e5ca8" },
-  quality: { background: "#f4e6f1", foreground: "#a33d78" },
-  shipping: { background: "#e2f2ec", foreground: "#16735f" },
+const kindTones: Record<WorkflowStep["kind"], BadgeTone> = {
+  production: "info",
+  quality: "accent",
+  shipping: "success",
 };
 
 type WorkflowStepRowProps = {
@@ -36,11 +36,9 @@ export function WorkflowStepRow({
   onDragEnd,
   isDragging,
 }: WorkflowStepRowProps) {
-  const color = kindColors[step.kind];
-
   return (
     <div
-      className={`group flex items-center gap-2 rounded-md bg-neutral-50 border border-border px-2 py-2 transition-colors hover:bg-neutral-50 ${isDragging ? "opacity-40" : ""}`}
+      className={`group flex items-center gap-2 rounded-md border border-border bg-surface-soft px-2 py-2 transition-colors hover:bg-surface-muted ${isDragging ? "opacity-40" : ""}`}
       draggable
       onDragStart={(event) => onDragStart(event, index)}
       onDragOver={(event) => onDragOver(event, index)}
@@ -61,7 +59,7 @@ export function WorkflowStepRow({
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-2">
           <h3 className="font-semibold text-text">{step.name}</h3>
-          <Badge color={color.background} foregroundColor={color.foreground}>
+          <Badge tone={kindTones[step.kind]}>
             {getWorkflowKindLabel(step.kind)}
           </Badge>
           {step.requiresApproval && <Badge tone="warning">Approval gate</Badge>}
@@ -102,11 +100,11 @@ export function WorkflowStepRow({
 export function WorkflowStepPlaceholder() {
   return (
     <div
-      className="flex min-h-14 items-center gap-2 rounded-md bg-neutral-50 px-2 py-2"
+      className="flex min-h-14 items-center gap-2 rounded-md bg-surface-soft px-2 py-2"
       aria-hidden="true"
     >
-      <span className="size-7 shrink-0 animate-pulse rounded-full bg-neutral-300" />
-      <span className="h-3 w-40 animate-pulse rounded-sm bg-neutral-300" />
+      <span className="size-7 shrink-0 animate-pulse rounded-full bg-surface-muted" />
+      <span className="h-3 w-40 animate-pulse rounded-sm bg-surface-muted" />
     </div>
   );
 }

@@ -1,17 +1,17 @@
 import { useState } from 'react'
 import { useLocation, useParams } from 'react-router-dom'
 
-import { toast } from '../../../shared/ui/Toast'
-import { Page } from '../../../shared/ui/Page'
-import { casePipelineFixtures } from '../data/cases'
-import { getPreviousStage } from '../domain/casePipeline'
+import { toast } from '../../../../shared/ui/Toast'
+import { Page } from '../../../../shared/ui/Page'
+import { casePipelineFixtures } from '../../data/cases'
+import { getPreviousStage } from '../../domain/casePipeline'
 import type {
   CasePipelineCase,
   CasePipelineStage,
-} from '../domain/casePipeline'
-import { CasePipelineHeader } from './CasePipelineHeader'
-import { CasePipelineSidebarDetails } from './CasePipelineSidebarDetails'
-import { CaseWorkflowStages } from './CaseWorkflowStages'
+} from '../../domain/casePipeline'
+import { CasePipelineHeader } from '../components/CasePipelineHeader'
+import { CasePipelineSidebarDetails } from '../components/CasePipelineSidebarDetails'
+import { CaseWorkflowStages } from '../components/CaseWorkflowStages'
 
 export function CasePipelinePage() {
   const { caseNumberCode } = useParams<{ caseNumberCode: string }>()
@@ -71,7 +71,7 @@ export function CasePipelinePage() {
 
   return (
     <Page size="full">
-      <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_16rem]">
+      <div className="grid min-w-0 gap-3 xl:grid-cols-[minmax(0,1fr)_16rem]">
         <main className="grid min-w-0 gap-3.5">
           <CasePipelineHeader
             caseItem={selectedCase}

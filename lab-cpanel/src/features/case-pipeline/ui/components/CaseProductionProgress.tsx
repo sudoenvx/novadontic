@@ -1,8 +1,8 @@
 import { Check } from 'lucide-react'
 
-import { Card, CardHeader, CardTitle } from '../../../shared/ui/Card'
-import { casePipelineStages, getStageIndex } from '../domain/casePipeline'
-import type { CasePipelineCase } from '../domain/casePipeline'
+import { Card, CardHeader, CardTitle } from '../../../../shared/ui/Card'
+import { casePipelineStages, getStageIndex } from '../../domain/casePipeline'
+import type { CasePipelineCase } from '../../domain/casePipeline'
 
 export function CaseProductionProgress({ caseItem }: { caseItem: CasePipelineCase }) {
   const currentIndex = getStageIndex(caseItem.stage)

@@ -1,17 +1,17 @@
-import { Card, CardHeader, CardTitle } from '../../../shared/ui/Card'
+import { Card, CardHeader, CardTitle } from '../../../../shared/ui/Card'
 import {
   DescriptionItem,
   DescriptionItemDescription,
   DescriptionItemTitle,
   DescriptionList,
-} from '../../../shared/ui/DescriptionList'
-import { getCaseBillingRuleLabel } from '../domain/caseCategory'
+} from '../../../../shared/ui/DescriptionList'
+import { getCaseBillingRuleLabel } from '../../domain/caseCategory'
 import type { ReactNode } from 'react'
-import type { CasePipelineCase } from '../domain/casePipeline'
+import type { CasePipelineCase } from '../../domain/casePipeline'
 
 export function CasePipelineSidebarDetails({ caseItem }: { caseItem: CasePipelineCase }) {
   return (
-    <aside className="grid gap-2 lg:sticky lg:top-3 lg:self-start">
+    <aside className="grid gap-2 xl:sticky xl:top-[calc(var(--navbar-height)+var(--page-gap))] xl:self-start">
       <InfoCard title="Doctor & clinic">
         <DescriptionList>
           <DescriptionItem><DescriptionItemTitle>Doctor</DescriptionItemTitle><DescriptionItemDescription>{caseItem.doctorName}</DescriptionItemDescription></DescriptionItem>

@@ -1,8 +1,8 @@
 import { Download, FileBox, Trash2 } from 'lucide-react'
 
-import { Button } from '../../../shared/ui/Button'
-import { Card, CardHeader, CardTitle } from '../../../shared/ui/Card'
-import type { CasePipelineCase } from '../domain/casePipeline'
+import { Button } from '../../../../shared/ui/Button'
+import { Card, CardHeader, CardTitle } from '../../../../shared/ui/Card'
+import type { CasePipelineCase } from '../../domain/casePipeline'
 
 export function CasePipelineFiles({ caseItem }: { caseItem: CasePipelineCase }) {
   const files = caseItem.productionSteps.flatMap((step) => step.files)

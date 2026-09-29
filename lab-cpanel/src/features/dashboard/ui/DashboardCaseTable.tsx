@@ -45,6 +45,8 @@ const columns: DataTableColumn<DashboardCase>[] = [
   {
     id: "case",
     header: "Case",
+    sortable: true,
+    pinnable: true,
     sortValue: (row) => row.id,
     cell: (dashboardCase) => (
       <Link
@@ -66,6 +68,8 @@ const columns: DataTableColumn<DashboardCase>[] = [
   {
     id: "case-type",
     header: "Case type",
+    sortable: true,
+    pinnable: true,
     accessorKey: "caseType",
     cell: (dashboardCase) => (
       <Badge
@@ -79,6 +83,8 @@ const columns: DataTableColumn<DashboardCase>[] = [
   {
     id: "category",
     header: "Category",
+    sortable: true,
+    pinnable: true,
     accessorKey: "category",
     cell: (dashboardCase) => (
       <Badge tone="accent">{dashboardCase.category}</Badge>
@@ -87,12 +93,16 @@ const columns: DataTableColumn<DashboardCase>[] = [
   {
     id: "stage",
     header: "Stage",
+    sortable: true,
+    pinnable: true,
     accessorKey: "stage",
     className: "text-secondary",
   },
   {
     id: "due-date",
     header: "Due",
+    sortable: true,
+    pinnable: true,
     accessorKey: "dueDate",
     className: "text-secondary",
     cell: (dashboardCase) => (
@@ -108,6 +118,8 @@ const columns: DataTableColumn<DashboardCase>[] = [
   {
     id: "status",
     header: "Status",
+    sortable: true,
+    pinnable: true,
     accessorKey: "status",
     cell: (dashboardCase) => (
       <Badge tone={statusTone[dashboardCase.status]}>

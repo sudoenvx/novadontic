@@ -13,6 +13,8 @@ type DataTableBodyProps<TData> = {
   onRowClick?: (row: TData) => void
   selectable: boolean
   selectedIds: Set<string>
+  pinnedColumns: Set<string>
+  hasPinnedColumns: boolean
   onToggleRow: (row: TData, index: number) => void
 }
 
@@ -25,6 +27,8 @@ export function DataTableBody<TData>({
   rows,
   selectable,
   selectedIds,
+  pinnedColumns,
+  hasPinnedColumns,
 }: DataTableBodyProps<TData>) {
   return (
     <TableBody>
@@ -43,6 +47,8 @@ export function DataTableBody<TData>({
               rowId={rowId}
               selectable={selectable}
               selected={selectedIds.has(rowId)}
+              pinnedColumns={pinnedColumns}
+              hasPinnedColumns={hasPinnedColumns}
             />
           )
         })
@@ -69,6 +75,8 @@ type DataTableRowProps<TData> = {
   rowId: string
   selectable: boolean
   selected: boolean
+  pinnedColumns: Set<string>
+  hasPinnedColumns: boolean
 }
 
 function DataTableRow<TData>({
@@ -80,6 +88,8 @@ function DataTableRow<TData>({
   rowId,
   selectable,
   selected,
+  pinnedColumns,
+  hasPinnedColumns,
 }: DataTableRowProps<TData>) {
   const rowRef = useRef<HTMLTableRowElement>(null)
   const handleRowClick = useCallback(() => onRowClick?.(row), [onRowClick, row])
@@ -121,7 +131,11 @@ function DataTableRow<TData>({
     >
       {selectable && (
         <TableCell
-          className="w-10 px-3 text-center align-middle"
+          className={cn(
+            'w-10 px-3 text-center align-middle',
+            hasPinnedColumns && 'sticky left-0 z-20 bg-surface group-hover:bg-surface-soft group-data-[selected=true]:bg-primary-soft',
+          )}
+          style={hasPinnedColumns ? { left: 0 } : undefined}
           onClick={(event) => event.stopPropagation()}
         >
           <Checkbox
@@ -132,12 +146,24 @@ function DataTableRow<TData>({
         </TableCell>
       )}
       {columns.map((column) => (
-        <TableCell key={column.id} className={column.className}>
+        <TableCell
+          key={column.id}
+          data-column-id={column.id}
+          data-pinned={pinnedColumns.has(column.id) || undefined}
+          className={cn(
+            column.className,
+            pinnedColumns.has(column.id) && 'sticky z-10 bg-surface shadow-[1px_0_0_var(--border)] group-hover:bg-surface-soft group-data-[selected=true]:bg-primary-soft',
+          )}
+        >
           {column.cell ? column.cell(row) : getCellValue(row, column)}
         </TableCell>
       ))}
     </TableRow>
   )
+}
+
+function cn(...classes: (string | undefined | null | false)[]) {
+  return classes.filter(Boolean).join(' ')
 }
 
 function getCellValue<TData>(row: TData, column: DataTableColumn<TData>) {

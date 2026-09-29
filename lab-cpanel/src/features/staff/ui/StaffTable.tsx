@@ -27,6 +27,8 @@ export function StaffTable({ onEdit, onStatusChange, roles, staff, title }: Staf
     {
       id: 'staff',
       header: 'Staff member',
+      sortable: true,
+      pinnable: true,
       accessorKey: 'name',
       className: 'font-semibold text-text',
       cell: (member) => (
@@ -39,13 +41,14 @@ export function StaffTable({ onEdit, onStatusChange, roles, staff, title }: Staf
         </div>
       ),
     },
-    { id: 'role', header: 'Role', sortValue: (member) => roleNames.get(member.roleId) ?? member.roleId, cell: (member) => <span className="text-secondary">{roleNames.get(member.roleId) ?? member.roleId}</span> },
-    { id: 'status', header: 'Status', accessorKey: 'status', cell: (member) => <Badge tone={statusTones[member.status]}>{getStaffStatusLabel(member.status)}</Badge> },
-    { id: 'createdAt', header: 'Created at', accessorKey: 'createdAt', className: 'text-secondary' },
+    { id: 'role', header: 'Role', sortable: true, pinnable: true, sortValue: (member) => roleNames.get(member.roleId) ?? member.roleId, cell: (member) => <span className="text-secondary">{roleNames.get(member.roleId) ?? member.roleId}</span> },
+    { id: 'status', header: 'Status', sortable: true, pinnable: true, accessorKey: 'status', cell: (member) => <Badge tone={statusTones[member.status]}>{getStaffStatusLabel(member.status)}</Badge> },
+    { id: 'createdAt', header: 'Created at', sortable: true, pinnable: true, accessorKey: 'createdAt', className: 'text-secondary' },
     {
       id: 'actions',
       header: 'Actions',
       sortable: false,
+      pinnable: false,
       className: 'w-12 text-end',
       cell: (member) => (
         member.roleId === 'owner' ? (

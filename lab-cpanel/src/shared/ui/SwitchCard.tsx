@@ -1,6 +1,6 @@
 import { useId } from 'react'
 
-import { Field, FieldContent, FieldDescription, FieldLabel } from './field'
+import { Field, FieldContent, FieldDescription, FieldLabel } from './Field'
 import { Switch } from './Switch'
 
 type SwitchCardProps = {

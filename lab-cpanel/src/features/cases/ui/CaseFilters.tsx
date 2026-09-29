@@ -300,14 +300,14 @@ export function CaseFilters({
 
       {/* Active Filter Chips Row */}
       {activeFilterChips.length > 0 && (
-        <div className="flex flex-wrap items-center gap-2 border-t border-border-soft pt-2" aria-label="Active case filters">
+        <div className="flex flex-wrap items-center gap-2 pt-2" aria-label="Active case filters">
           <span className="text-xs font-semibold text-text-secondary">
             Active filters
           </span>
           {activeFilterChips.map((chip) => (
             <Tag
               key={chip.id}
-              tone="neutral"
+              tone="outline"
               className="gap-1 py-0.5 pe-0.5"
             >
               <span className="wrap-break-word">{chip.label}</span>

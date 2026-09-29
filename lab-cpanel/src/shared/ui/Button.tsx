@@ -27,7 +27,7 @@ import { cn } from "cn"
 const OUTLINE =
   "border-border bg-surface text-text-primary hover:bg-surface-muted aria-expanded:bg-surface-muted"
 const NEUTRAL =
-  "bg-surface-muted text-text-primary hover:bg-border aria-expanded:bg-border"
+  "bg-surface-muted  text-text-primary hover:bg-border aria-expanded:bg-border"
 const GHOST =
   "text-text-secondary hover:bg-surface-muted hover:text-text-primary aria-expanded:bg-surface-muted"
 

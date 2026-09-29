@@ -38,6 +38,8 @@ export function DoctorTable({
     {
       id: 'doctor',
       header: 'Doctor',
+      sortable: true,
+      pinnable: true,
       sortValue: (doctor) => doctor.name,
       cell: (doctor) => (
         <button type="button" className="flex items-center gap-2 text-left" onClick={() => onView(doctor)}>
@@ -52,6 +54,8 @@ export function DoctorTable({
     {
       id: 'source',
       header: 'Added via',
+      sortable: true,
+      pinnable: true,
       sortValue: (doctor) => doctor.source,
       cell: (doctor) => (
         <span className="text-sm text-secondary">
@@ -62,11 +66,14 @@ export function DoctorTable({
     {
       id: 'status',
       header: 'Portal access',
+      pinnable: true,
       cell: (doctor) => <DoctorPortalStatusBadge status={doctor.status} />,
     },
     {
       id: 'active-cases',
       header: 'Active cases',
+      sortable: true,
+      pinnable: true,
       accessorKey: 'activeCases',
       cell: (doctor) => (
         <span className="text-sm text-secondary">
@@ -77,6 +84,8 @@ export function DoctorTable({
     {
       id: 'email',
       header: 'Email',
+      sortable: true,
+      pinnable: true,
       accessorKey: 'email',
       cell: (doctor) => (
         <a href={`mailto:${doctor.email}`} className="inline-flex items-center gap-1 text-sm text-primary hover:underline">
@@ -87,12 +96,15 @@ export function DoctorTable({
     {
       id: 'phone',
       header: 'Phone',
+      sortable: true,
+      pinnable: true,
       accessorKey: 'phoneNumber',
       cell: (doctor) => <a href={`tel:${doctor.phoneNumber}`} className="text-sm text-primary hover:underline">{doctor.phoneNumber}</a>,
     },
     {
       id: 'actions',
       header: '',
+      pinnable: false,
       headerClassName: 'w-10',
       className: 'w-10',
       cell: (doctor) => (

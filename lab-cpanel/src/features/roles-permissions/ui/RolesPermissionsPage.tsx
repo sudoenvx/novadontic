@@ -91,7 +91,7 @@ export function RolesPermissionsPage() {
   }
 
   return (
-    <Page size="full" className="min-h-0 flex-1 lg:overflow-hidden">
+    <Page size="full">
       <PageHeader
         title="Roles & permissions"
         description="Control what each role can see and do across the lab workspace."
@@ -108,7 +108,7 @@ export function RolesPermissionsPage() {
         </PageHeaderActions>
       </PageHeader>
 
-      <div className="grid gap-3 lg:min-h-0 lg:flex-1 lg:grid-cols-[18rem_minmax(0,1fr)]">
+      <div className="grid min-w-0 gap-3 xl:grid-cols-[18rem_minmax(0,1fr)]">
         <RoleList
           roles={visibleRoles}
           selectedRoleId={selectedRole?.id}
@@ -160,7 +160,7 @@ function RoleList({
   onSelect: (roleId: string) => void;
 }) {
   return (
-    <Card className="h-fit lg:sticky lg:top-0">
+    <Card className="h-fit xl:sticky xl:top-[calc(var(--navbar-height)+var(--page-gap))]">
       <div>
         <h2 className="text-base font-semibold uppercase text-primary">
           Roles
@@ -174,7 +174,7 @@ function RoleList({
           <button
             key={role.id}
             type="button"
-            className={`grid gap-1 rounded-sm px-2 py-2 text-left transition-colors ${selectedRoleId === role.id ? "bg-neutral-100" : "hover:bg-neutral-100"}`}
+            className={`grid gap-1 rounded-sm px-2 py-2 text-left transition-colors ${selectedRoleId === role.id ? "bg-primary-soft" : "hover:bg-surface-raised"}`}
             onClick={() => onSelect(role.id)}
             aria-pressed={selectedRoleId === role.id}
             >
@@ -184,7 +184,7 @@ function RoleList({
             <span className="line-clamp-2 text-xs text-text-muted">
               {role.description}
             </span>
-            <span className="text-2xs uppercase tracking-wide text-secondary">
+            <span className="text-2xs uppercase tracking-wide text-text-secondary">
               {role.staffCount} staff
             </span>
           </button>

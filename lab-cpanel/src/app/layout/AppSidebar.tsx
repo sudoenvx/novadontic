@@ -23,7 +23,7 @@ export function AppSidebar() {
 
   return (
     <TooltipProvider>
-      <aside className="fixed top-1/2 left-2 z-40 hidden -translate-y-1/2 rounded-md bg-surface p-1.5 shadow-sm  md:block" aria-label="Primary navigation">
+      <aside className="absolute border border-border top-1/2 left-1/2 z-40 hidden -translate-x-1/2 -translate-y-1/2 rounded-md bg-surface p-1.5  lg:block" aria-label="Primary navigation">
         <div className="grid gap-2">
           <nav className="grid gap-1">
             {navigationItems.map(({ end, icon: Icon, label, path }) => {
@@ -37,11 +37,11 @@ export function AppSidebar() {
                         to={path}
                         end={end}
                         aria-label={label}
-                        className={`grid size-8 place-items-center rounded-sm transition-colors ${isActive ? 'bg-primary text-primary-foreground' : 'text-secondary hover:bg-neutral-100 hover:text-text'}`}
+                        className={`grid size-8 place-items-center rounded-sm transition-colors ${isActive ? 'bg-primary text-primary-foreground' : 'text-text-secondary hover:bg-surface-raised hover:text-text-primary'}`}
                       />
                     }
                   >
-                    <Icon size={16} aria-hidden="true" />
+                    <Icon size={18} aria-hidden="true" />
                   </TooltipTrigger>
                   <TooltipContent side="right">{label}</TooltipContent>
                 </Tooltip>

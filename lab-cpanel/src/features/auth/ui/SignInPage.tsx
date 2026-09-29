@@ -1,8 +1,9 @@
 import { ShieldCheck, Workflow } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 
 import { Card } from '../../../shared/ui/Card'
 import { Tag } from '../../../shared/ui/Tag'
+import { ThemeSwitcher } from '../../../shared/ui/ThemeSwitcher'
 import { labTenantAuth } from '../data/labTenantAuth'
 import { SignInForm } from './SignInForm'
 
@@ -60,7 +61,9 @@ export function SignInPage() {
             <img src="/images/novadontic_icon.png" alt="" className="size-8" />
             <img src="/images/novadontic_wordmark.png" alt="Novadontic" className="h-5 w-auto" />
           </a>
-          <span className="ms-auto text-sm font-medium text-text-secondary">Secure lab workspace</span>
+          <div className="ms-auto flex items-center gap-3">
+            <ThemeSwitcher />
+          </div>
         </header>
 
         <div className="flex flex-1 items-center justify-center py-8">
@@ -80,11 +83,11 @@ export function SignInPage() {
         </div>
 
         <footer className="flex justify-center gap-4 text-xs text-text-faint">
-          <span>Privacy</span>
+          <Link to="/policies" className="transition-colors hover:text-text-primary hover:underline hover:underline-offset-4">Privacy</Link>
           <span aria-hidden="true">·</span>
-          <span>Terms</span>
+          <Link to="/policies" className="transition-colors hover:text-text-primary hover:underline hover:underline-offset-4">Terms</Link>
           <span aria-hidden="true">·</span>
-          <span>Help</span>
+          <a href="mailto:support@novadontic.com" className="transition-colors hover:text-text-primary hover:underline hover:underline-offset-4">Help</a>
         </footer>
       </section>
     </main>

@@ -14,12 +14,13 @@ import { StaffPage } from '../features/staff'
 import { RolesPermissionsPage } from '../features/roles-permissions'
 import { PoliciesPage, PolicyDetailsPage } from '../features/policies'
 import { DataTablePlaygroundPage } from '../features/data-table-playground'
-import { SignInPage } from '../features/auth'
+import { ForgotPasswordPage, SignInPage } from '../features/auth'
 import { AppLayout } from './layout/AppLayout'
 import { NotFoundPage } from './pages/NotFoundPage'
 
 export const router = createBrowserRouter([
   { path: 'sign-in', element: <SignInPage /> },
+  { path: 'forgot-password', element: <ForgotPasswordPage /> },
   {
     path: '/',
     element: <AppLayout />,

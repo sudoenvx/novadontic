@@ -21,7 +21,7 @@ const inputVariants = cva(
     variants: {
       variant: {
         outline:
-          "rounded-sm border border-border bg-surface hover:border-border-strong focus-visible:border-primary focus-visible:ring-3 focus-visible:ring-focus/25 disabled:bg-surface-muted",
+          "rounded-sm border border-border bg-surface hover:border-border-strong focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-focus/25 disabled:bg-surface-muted",
         neutral:
           "rounded-sm border border-transparent bg-surface-muted focus-visible:border-primary focus-visible:bg-surface focus-visible:ring-3 focus-visible:ring-focus/25",
         "bottom-border":

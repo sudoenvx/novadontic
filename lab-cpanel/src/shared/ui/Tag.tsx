@@ -1,7 +1,7 @@
 import { cn } from 'cn'
 import type { HTMLAttributes } from 'react'
 
-export type TagTone = 'neutral' | 'blue' | 'violet' | 'teal' | 'amber' | 'rose'
+export type TagTone = 'neutral' | 'blue' | 'violet' | 'teal' | 'amber' | 'rose' | 'outline'
 
 type TagProps = HTMLAttributes<HTMLSpanElement> & {
   tone?: TagTone
@@ -9,6 +9,7 @@ type TagProps = HTMLAttributes<HTMLSpanElement> & {
 
 const toneClasses: Record<TagTone, string> = {
   neutral: 'bg-surface-muted text-text-secondary',
+  outline: 'bg-transparent text-text-secondary border border-border-strong',
   blue: 'bg-info-soft text-info-soft-foreground',
   violet: 'bg-accent-soft text-accent-soft-foreground',
   teal: 'bg-success-soft text-success-soft-foreground',

@@ -80,7 +80,7 @@ export function TableCell({ className, ...props }: TdHTMLAttributes<HTMLTableCel
   return (
     <td
       className={cn(
-        'h-row whitespace-nowrap px-3 align-middle first:rounded-l-sm last:rounded-r-sm',
+        'h-row whitespace-nowrap px-3 align-middle ',
         className,
       )}
       {...props}

@@ -19,7 +19,7 @@ export function LabSettingsSidebar({ selectedSection, onSelect }: { selectedSect
           <button
             key={id}
             type="button"
-            className={`flex items-center gap-2 rounded-sm px-2 py-1 text-start text-sm font-medium transition-colors ${selectedSection === id ? 'bg-secondary text-secondary-foreground' : 'text-secondary hover:bg-neutral-100 hover:text-text'}`}
+            className={`flex items-center gap-2 rounded-sm px-2 py-1 text-start text-sm font-medium transition-colors ${selectedSection === id ? 'bg-primary-soft text-primary-soft-foreground' : 'text-text-secondary hover:bg-surface-muted hover:text-text-primary'}`}
             onClick={() => onSelect(id)}
             aria-current={selectedSection === id ? 'page' : undefined}
           >

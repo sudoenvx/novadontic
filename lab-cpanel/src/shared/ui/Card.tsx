@@ -26,7 +26,7 @@ const cardVariants = cva(
   {
     variants: {
       variant: {
-        default: "border-border bg-surface shadow-card",
+        default: "border-border bg-surface",
         transparent: "border-transparent bg-transparent",
         window: "border-border bg-surface shadow-card",
       },

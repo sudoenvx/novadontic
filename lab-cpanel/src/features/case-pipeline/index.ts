@@ -1,4 +1,4 @@
-export { CasePipelinePage } from './ui/CasePipelinePage'
-export { CreateCasePage } from './ui/CreateCasePage'
-export { CaseWorkflowStages } from './ui/CaseWorkflowStages'
+export { CasePipelinePage } from './ui/pages/CasePipelinePage'
+export { CreateCasePage } from './ui/pages/CreateCasePage'
+export { CaseWorkflowStages } from './ui/components/CaseWorkflowStages'
 
