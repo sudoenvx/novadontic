@@ -1,12 +1,19 @@
+import { useTheme } from '../providers/ThemeProvider'
+
 type BrandProps = {
   context?: string
   onClick?: () => void
 }
 
 export function Brand({ context, onClick }: BrandProps) {
+  const { theme } = useTheme()
+  const wordmark = theme === 'dark'
+    ? '/images/novadontic_wordmark_dark.png'
+    : '/images/novadontic_wordmark.png'
+
   const content = (
     <>
-      <img className="h-7 object-contain" src="/images/novadontic_wordmark.png" alt="" />
+      <img className="h-7 object-contain" src={wordmark} alt="" />
       {context && <span className="truncate bg-neutral-200 px-2 py-0.5 text-sm text-text-muted max-sm:hidden">{context}</span>}
     </>
   )

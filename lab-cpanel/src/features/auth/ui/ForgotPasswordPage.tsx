@@ -7,7 +7,7 @@ import { Card } from '../../../shared/ui/Card'
 import { Input } from '../../../shared/ui/Input'
 import { Label } from '../../../shared/ui/Label'
 import { ThemeSwitcher } from '../../../shared/ui/ThemeSwitcher'
-import { labTenantAuth } from '../data/labTenantAuth'
+import { labAuth } from '../data/labAuth'
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -61,7 +61,7 @@ export function ForgotPasswordPage() {
               </h1>
               <p className="text-sm text-text-secondary">
                 {isSubmitted
-                  ? `Email recovery is not connected yet. Contact ${labTenantAuth.supportEmail} for help with your account.`
+                  ? `Email recovery is not connected yet. Contact ${labAuth.supportEmail} for help with your account.`
                   : 'Enter the email address associated with your lab account.'}
               </p>
             </div>

@@ -222,6 +222,20 @@ export function hasRolePermission(role: Role, permission: Permission) {
   return role.type === 'owner' || role.permissions.includes(permission)
 }
 
+export function hasAnyRolePermission(
+  role: Role,
+  permissions: readonly Permission[],
+) {
+  return permissions.some((permission) => hasRolePermission(role, permission))
+}
+
+export function hasAllRolePermissions(
+  role: Role,
+  permissions: readonly Permission[],
+) {
+  return permissions.every((permission) => hasRolePermission(role, permission))
+}
+
 function permission(id: Permission, label: string, description: string): PermissionDefinition {
   return { id, label, description }
 }

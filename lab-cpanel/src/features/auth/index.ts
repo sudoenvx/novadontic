@@ -1,2 +1,8 @@
 export { SignInPage } from './ui/SignInPage'
 export { ForgotPasswordPage } from './ui/ForgotPasswordPage'
+export { AuthProvider } from './providers/AuthProvider'
+export { useAuth } from './hooks/useAuth'
+export { useAuthorization } from './hooks/useAuthorization'
+export { PermissionGate } from './ui/PermissionGate'
+export { RoleGate } from './ui/RoleGate'
+export type { AuthSession, LabSignInValues } from './domain/auth'

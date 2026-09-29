@@ -1,0 +1,40 @@
+model Role {
+  id          BigInt           @id @default(autoincrement()) @db.BigInt
+  code        String           @unique @db.VarChar(40)
+  name        String           @db.VarChar(100)
+  isSystem    Boolean          @default(false) @map("is_system")
+  users       UserRole[]
+  permissions RolePermission[]
+
+  @@map("roles")
+}
+
+model Permission {
+  id          BigInt           @id @default(autoincrement()) @db.BigInt
+  code        String           @unique @db.VarChar(100)
+  module      String           @db.VarChar(40)
+  description String?          @db.Text
+  roles       RolePermission[]
+
+  @@map("permissions")
+}
+
+model RolePermission {
+  roleId       BigInt     @map("role_id") @db.BigInt
+  permissionId BigInt     @map("permission_id") @db.BigInt
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+  @@map("role_permissions")
+}
+
+model UserRole {
+  userId BigInt @map("user_id") @db.BigInt
+  roleId BigInt @map("role_id") @db.BigInt
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role   Role   @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@id([userId, roleId])
+  @@map("user_roles")
+}

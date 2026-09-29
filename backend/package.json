@@ -1,7 +1,7 @@
 {
   "name": "novadontic-backend",
   "version": "1.0.0",
-  "description": "Multi-tenant orthodontic lab management API",
+  "description": "Single-client orthodontic lab management API",
   "main": "dist/server.js",
   "scripts": {
     "start": "node dist/server.js",
@@ -10,9 +10,10 @@
     "prisma:generate": "prisma generate",
     "prisma:validate": "prisma validate",
     "prisma:migrate:dev": "prisma migrate dev",
-    "typecheck": "tsc --noEmit",
+    "db:seed": "prisma db seed",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.prisma.json",
     "build": "tsc -p tsconfig.json",
-    "test": "node --test"
+    "test": "tsx --test src/app/api.test.ts src/modules/auth/auth.domain.test.ts src/shared/realtime/socket-server.test.ts"
   },
   "keywords": [],
   "author": "",
@@ -35,7 +36,7 @@
     "typescript": "^7.0.2"
   },
   "dependencies": {
-    "@prisma/adapter-pg": "^7.10.0",
+    "@prisma/adapter-mariadb": "^7.10.0",
     "@prisma/client": "^7.10.0",
     "argon2": "^0.45.1",
     "body-parser": "^2.3.0",

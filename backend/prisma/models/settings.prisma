@@ -1,0 +1,10 @@
+model Setting {
+  key       String   @id @db.VarChar(100)
+  value     String   @db.Text
+  group     String?  @db.VarChar(100)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+
+  @@index([group])
+  @@map("settings")
+}

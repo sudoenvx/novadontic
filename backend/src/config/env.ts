@@ -11,6 +11,8 @@ const environmentSchema = z.object({
     .default("info"),
   CORS_ORIGIN: z.string().default("*"),
   DATABASE_URL: z.string().min(1, "DATABASE_URL is required"),
+  AUTH_JWT_SECRET: z.string().min(32, "AUTH_JWT_SECRET must be at least 32 characters"),
+  AUTH_ACCESS_TOKEN_TTL_SECONDS: z.coerce.number().int().positive().default(900),
 });
 
 const parsedEnvironment = environmentSchema.safeParse(process.env);

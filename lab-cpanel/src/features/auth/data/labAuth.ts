@@ -1,5 +1,4 @@
-export const labTenantAuth = {
+export const labAuth = {
   labName: 'Novadontic Dental Laboratory',
-  workspace: 'orthotec.novadontic.app',
   supportEmail: 'support@novadontic.com',
 }
