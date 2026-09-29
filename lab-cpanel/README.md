@@ -23,23 +23,56 @@ src/
 
 TanStack Query is provided application-wide by `src/app/providers/QueryProvider.tsx`.
 Use the shared Axios instance from `src/shared/api/httpClient.ts` for API requests.
-Copy `.env.example` to `.env.local` and set `VITE_API_BASE_URL` and, if required,
-`VITE_API_KEY`. `VITE_REALTIME_URL` optionally overrides the realtime endpoint;
-otherwise it uses `VITE_API_BASE_URL`. The socket stays disconnected when neither
-URL is set. Use `useRealtimeQueryInvalidation(eventName, queryKey)` in a feature
-to refresh its TanStack Query data when the server emits the corresponding event.
-Vite exposes `VITE_` values in the browser bundle, so never put private or
-server-side secrets in them.
+Use `useGetQuery` and `useMutationAction` from `src/shared/api/queryHooks.ts`
+for typed TanStack Query hooks. Define feature hooks with the query function and
+optional response transformation:
 
-The app layout requires an auth session. `AuthProvider` currently starts
-unauthenticated and does not persist a fabricated identity; connect a backend
-auth flow before enabling protected routes. `useAuth` exposes the in-memory
-session boundary, while `useAuthorization`, `PermissionGate`, and `RoleGate`
-provide reusable UI checks based on the assigned role. A denied gate renders
-nothing by default and accepts an optional fallback. These checks only control
-frontend presentation; the backend must enforce authorization. An unauthenticated
-redirect stores the attempted path in router state as `from` for the eventual
-successful sign-in flow.
+```ts
+export const useUsers = () =>
+  useGetQuery({
+    queryKey: ['users'],
+    queryFn: getUsers,
+    select: mapUsers,
+  })
+
+export const useCreateUser = () =>
+  useMutationAction({
+    mutationFn: createUser,
+  })
+```
+
+`useMutationAction` preserves typed mutation variables, return values, and
+callbacks. Feature API functions use the shared client and the backend's
+`{ data: ... }` / `{ error: ... }` response envelopes.
+
+Copy `.env.example` to `.env.local`. Set `VITE_API_BASE_URL` to the backend URL
+including `/api/v1` (the example targets a local backend), and set `VITE_API_KEY`
+only when the deployment requires it. `VITE_REALTIME_URL` optionally overrides
+the realtime endpoint; otherwise the `/api/v1` suffix is removed from
+`VITE_API_BASE_URL` for the Socket.IO server root. The socket stays disconnected
+when neither URL is set. Use
+`useRealtimeQueryInvalidation(eventName, queryKey)` in a feature to refresh its
+TanStack Query data when the server emits the corresponding event. Vite exposes
+`VITE_` values in the browser bundle, so never put private or server-side secrets
+in them.
+
+`AuthProvider` signs in through `POST /auth/sessions`, restores sessions by
+rotating the refresh token at `POST /auth/sessions/refresh`, renews access tokens
+before expiry, and signs out through `DELETE /auth/sessions/current`. The backend
+expects the access token unchanged in the `Authorization` header, without a
+`Bearer` prefix. Access tokens stay in memory; refresh tokens are stored in
+`sessionStorage` unless “Remember this device” is selected, in which case the
+refresh token is stored in `localStorage`. Browser storage is accessible to
+same-origin JavaScript; production deployments should mitigate XSS and consider
+an HttpOnly-cookie session design if the backend supports it.
+
+The app layout is protected by `RequireAuth`, which waits for session restoration
+before redirecting unauthenticated users. `useAuth` exposes the session and auth
+actions, while `useAuthorization`, `PermissionGate`, and `RoleGate` use backend
+role and permission assignments for presentation. A denied gate renders nothing
+by default and accepts an optional fallback. These checks are only for frontend
+UX; the backend must enforce authorization. An unauthenticated redirect stores
+the attempted path in router state as `from` and sign-in returns to that path.
 
 The visual system is deliberately flat: a neutral canvas, white surfaces,
 compact spacing, no card borders, and rounded corners capped at `rounded-lg`.

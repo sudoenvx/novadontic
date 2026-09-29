@@ -1,28 +1,52 @@
 model ApplianceType {
-  id        BigInt               @id @default(autoincrement()) @db.BigInt
-  code      String               @unique @db.VarChar(30)
-  name      String               @db.VarChar(100)
-  color     String?              @default("#1e88f5") @db.VarChar(7)
-  isActive  Boolean              @default(true) @map("is_active")
-  sortOrder Int                  @default(0) @map("sort_order") @db.SmallInt
-  fields    ApplianceTypeField[]
-  workflows WorkflowTemplate[]
+  id          BigInt                    @id @default(autoincrement()) @db.BigInt
+  code        String                    @unique @db.VarChar(30)
+  name        String                    @db.VarChar(100)
+  color       String?                   @default("#1e88f5") @db.VarChar(7)
+  isActive    Boolean                   @default(true) @map("is_active")
+  sortOrder   Int                       @default(0) @map("sort_order") @db.SmallInt
+  fields      ApplianceTypeField[]
+  fieldGroups ApplianceTypeFieldGroup[]
+  workflows  WorkflowTemplate[]
 
+  @@index([name])
+  @@index([isActive, sortOrder])
   @@map("appliance_types")
 }
 
+model ApplianceTypeFieldGroup {
+  id              BigInt               @id @default(autoincrement()) @db.BigInt
+  applianceTypeId BigInt               @map("appliance_type_id") @db.BigInt
+  name            String               @db.VarChar(100)
+  sortOrder       Int                  @default(0) @map("sort_order") @db.SmallInt
+  createdAt       DateTime             @default(now()) @map("created_at")
+  updatedAt       DateTime             @default(now()) @updatedAt @map("updated_at")
+  applianceType   ApplianceType        @relation(fields: [applianceTypeId], references: [id], onDelete: Cascade)
+  fields          ApplianceTypeField[]
+
+  @@unique([applianceTypeId, name])
+  @@index([applianceTypeId, sortOrder])
+  @@map("appliance_type_field_groups")
+}
+
 model ApplianceTypeField {
-  id              BigInt        @id @default(autoincrement()) @db.BigInt
-  applianceTypeId BigInt        @map("appliance_type_id") @db.BigInt
-  fieldKey        String        @map("field_key") @db.VarChar(60)
-  label           String        @db.VarChar(120)
-  dataType        String        @map("data_type") @db.VarChar(10)
-  selectOptions   Json?         @map("select_options")
-  isRequired      Boolean       @default(false) @map("is_required")
-  sortOrder       Int           @default(0) @map("sort_order") @db.SmallInt
-  helpText        String?       @map("help_text") @db.VarChar(200)
-  applianceType   ApplianceType @relation(fields: [applianceTypeId], references: [id], onDelete: Cascade)
+  id              BigInt                   @id @default(autoincrement()) @db.BigInt
+  applianceTypeId BigInt                   @map("appliance_type_id") @db.BigInt
+  groupId         BigInt?                  @map("group_id") @db.BigInt
+  fieldKey        String                   @map("field_key") @db.VarChar(60)
+  label           String                   @db.VarChar(120)
+  dataType        String                   @map("data_type") @db.VarChar(20)
+  selectOptions   Json?                    @map("select_options")
+  defaultValue    String?                  @map("default_value") @db.Text
+  dependsOn       String?                  @map("depends_on") @db.VarChar(60)
+  dependsOnValue  String?                  @map("depends_on_value") @db.VarChar(255)
+  isRequired      Boolean                  @default(false) @map("is_required")
+  sortOrder       Int                      @default(0) @map("sort_order") @db.SmallInt
+  helpText        String?                  @map("help_text") @db.VarChar(200)
+  applianceType   ApplianceType           @relation(fields: [applianceTypeId], references: [id], onDelete: Cascade)
+  group           ApplianceTypeFieldGroup? @relation(fields: [groupId], references: [id], onDelete: Cascade)
 
   @@unique([applianceTypeId, fieldKey])
+  @@index([groupId, sortOrder])
   @@map("appliance_type_fields")
 }

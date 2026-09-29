@@ -1,21 +1,53 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { useTheme } from '../../../shared/providers/ThemeProvider'
 
 import { Card } from '../../../shared/ui/Card'
+import { getApiErrorMessage } from '../../../shared/api/apiError'
+import { useAuth } from '../hooks/useAuth'
 import { Tag } from '../../../shared/ui/Tag'
 import { ThemeSwitcher } from '../../../shared/ui/ThemeSwitcher'
 import { labAuth } from '../data/labAuth'
 import { SignInForm } from './SignInForm'
 
 export function SignInPage() {
-  const [authUnavailable, setAuthUnavailable] = useState(false)
+  const [isPending, setIsPending] = useState(false)
+  const [submitError, setSubmitError] = useState<string>()
   const { theme } = useTheme()
+  const { signIn, session, isRestoring, authError } = useAuth()
+  const navigate = useNavigate()
+  const location = useLocation()
   const wordmark = theme === 'dark'
     ? '/images/novadontic_wordmark_dark.png'
     : '/images/novadontic_wordmark.png'
 
-  function handleSignIn() {
-    setAuthUnavailable(true)
+  const locationState = location.state as { from?: unknown; authError?: unknown } | null
+  const returnTo = typeof locationState?.from === 'string'
+    && locationState.from.startsWith('/')
+    && !locationState.from.startsWith('//')
+    ? locationState.from
+    : '/'
+  const navigationError = typeof locationState?.authError === 'string'
+    ? locationState.authError
+    : undefined
+
+  useEffect(() => {
+    if (!isRestoring && session) {
+      navigate(returnTo, { replace: true })
+    }
+  }, [isRestoring, navigate, returnTo, session])
+
+  async function handleSignIn(values: Parameters<typeof signIn>[0]) {
+    setIsPending(true)
+    setSubmitError(undefined)
+    try {
+      await signIn(values)
+      navigate(returnTo, { replace: true })
+    } catch (error) {
+      setSubmitError(getApiErrorMessage(error, 'Unable to sign in. Please try again.'))
+    } finally {
+      setIsPending(false)
+    }
   }
 
   return (
@@ -39,12 +71,11 @@ export function SignInPage() {
                 <h2 className="mt-1 text-2xl font-extrabold text-text-primary">Sign in to your lab</h2>
                 <p className="text-sm text-text-secondary">Manage cases, production, and clinic communication.</p>
               </div>
-              <SignInForm onSubmit={handleSignIn} />
-              {authUnavailable && (
-                <p className="text-xs text-destructive" role="alert">
-                  Sign-in is not available until authentication is connected.
-                </p>
-              )}
+              <SignInForm
+                onSubmit={handleSignIn}
+                isPending={isPending || isRestoring}
+                submitError={submitError ?? navigationError ?? authError ?? undefined}
+              />
             </Card>
           </div>
         </div>

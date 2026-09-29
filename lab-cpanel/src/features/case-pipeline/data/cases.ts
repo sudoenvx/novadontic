@@ -1,5 +1,8 @@
 import type { CasePipelineCase } from '../domain/casePipeline'
 
+export const DEMO_STL_MODEL_URL =
+  'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/models/stl/ascii/slotted_disk.stl'
+
 const file = (
   id: string,
   name: string,

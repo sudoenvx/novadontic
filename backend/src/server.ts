@@ -5,8 +5,13 @@ import { corsOrigin } from './config/cors.ts';
 import { env } from './config/env.ts';
 import { logger } from './config/logger.ts';
 import { database } from './infrastructure/database/mysql.client.ts';
+import { AppliancesService } from './modules/appliances/index.ts';
 import { AuthService } from './modules/auth/index.ts';
 import { ClinicsService } from './modules/clinics/index.ts';
+import { DoctorsService } from './modules/doctors/index.ts';
+import { RolesService } from './modules/roles/index.ts';
+import { SettingsService } from './modules/settings/index.ts';
+import { StaffService } from './modules/staff/index.ts';
 import { attachSocketServer } from './shared/realtime/socket-server.ts';
 import { AccessTokenService } from './shared/security/access-tokens.ts';
 import { Argon2PasswordHasher } from './shared/security/passwords.ts';
@@ -18,8 +23,13 @@ const auth = new AuthService(
   new AccessTokenService(env.AUTH_JWT_SECRET, env.AUTH_ACCESS_TOKEN_TTL_SECONDS),
   env.AUTH_ACCESS_TOKEN_TTL_SECONDS,
 );
+const appliances = new AppliancesService(database);
 const clinics = new ClinicsService(database);
-const app = createApp(createApiRoutes(auth, clinics));
+const doctors = new DoctorsService(database);
+const roles = new RolesService(database);
+const settings = new SettingsService(database);
+const staff = new StaffService(database, passwordHasher);
+const app = createApp(createApiRoutes(auth, appliances, clinics, doctors, roles, settings, staff));
 const server = createServer(app);
 const io = attachSocketServer(server, corsOrigin);
 

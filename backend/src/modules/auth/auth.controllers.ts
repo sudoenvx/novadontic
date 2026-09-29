@@ -34,6 +34,16 @@ export function createAuthenticationMiddleware(service: AuthServiceContract): Re
   };
 }
 
+export function createPermissionMiddleware(permission: string): RequestHandler {
+  return (_request, response, next) => {
+    const staffUser = response.locals['staffUser'] as AuthenticatedStaffUser | undefined;
+    if (!staffUser?.permissions.includes(permission)) {
+      return next(new AppError('You do not have permission to perform this action', 403, 'PERMISSION_DENIED'));
+    }
+    next();
+  };
+}
+
 export function createAuthControllers(service: AuthServiceContract): AuthControllers {
   const login: RequestHandler = async (request, response) => {
     response.status(201).json({

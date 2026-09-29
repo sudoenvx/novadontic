@@ -3,6 +3,7 @@ CREATE TABLE `roles` (
     `id` BIGINT NOT NULL AUTO_INCREMENT,
     `code` VARCHAR(40) NOT NULL,
     `name` VARCHAR(100) NOT NULL,
+    `description` TEXT NULL,
     `is_system` BOOLEAN NOT NULL DEFAULT false,
 
     UNIQUE INDEX `roles_code_key`(`code`),
@@ -136,6 +137,9 @@ CREATE TABLE `doctors` (
     `full_name` VARCHAR(100) NOT NULL,
     `email` VARCHAR(150) NULL,
     `phone` VARCHAR(30) NULL,
+    `address` VARCHAR(255) NULL,
+    `country` VARCHAR(100) NULL,
+    `source` VARCHAR(20) NOT NULL DEFAULT 'clinic',
     `specialty` VARCHAR(100) NULL,
     `notes` TEXT NULL,
     `is_active` BOOLEAN NOT NULL DEFAULT true,

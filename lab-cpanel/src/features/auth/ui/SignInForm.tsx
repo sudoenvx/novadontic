@@ -10,7 +10,9 @@ import type { LabSignInValues } from '../domain/auth'
 import { validateLabSignIn } from '../domain/auth'
 
 type SignInFormProps = {
-  onSubmit: (values: LabSignInValues) => void;
+  onSubmit: (values: LabSignInValues) => void | Promise<void>
+  isPending: boolean
+  submitError?: string
 }
 
 const initialValues: LabSignInValues = {
@@ -19,7 +21,11 @@ const initialValues: LabSignInValues = {
   rememberDevice: true,
 }
 
-export function SignInForm({ onSubmit }: SignInFormProps) {
+export function SignInForm({
+  onSubmit,
+  isPending,
+  submitError,
+}: SignInFormProps) {
   const [values, setValues] = useState(initialValues)
   const [error, setError] = useState<string>()
   const [isPasswordVisible, setIsPasswordVisible] = useState(false)
@@ -44,7 +50,7 @@ export function SignInForm({ onSubmit }: SignInFormProps) {
       return
     }
 
-    onSubmit({
+    void onSubmit({
       ...values,
       email: values.email.trim().toLowerCase(),
     })
@@ -116,8 +122,13 @@ export function SignInForm({ onSubmit }: SignInFormProps) {
           {error}
         </p>
       )}
-      <Button type="submit" size="lg" className="mt-1 w-full">
-        Sign in
+      {submitError && (
+        <p className="text-xs text-destructive" role="alert" aria-live="assertive">
+          {submitError}
+        </p>
+      )}
+      <Button type="submit" size="lg" className="mt-1 w-full" disabled={isPending}>
+        {isPending ? 'Please wait…' : 'Sign in'}
       </Button>
     </form>
   )

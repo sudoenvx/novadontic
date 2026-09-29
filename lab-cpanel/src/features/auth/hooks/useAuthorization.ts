@@ -1,29 +1,24 @@
-import {
-  hasAllRolePermissions,
-  hasAnyRolePermission,
-  hasRolePermission,
-  type Permission,
-} from '../../roles-permissions/domain/role'
+import type { Permission } from '../../roles-permissions/domain/role'
 import { useAuth } from './useAuth'
 
 export function useAuthorization() {
   const { session } = useAuth()
-  const role = session?.user.role
+  const user = session?.user
 
   function hasRole(roleId: string): boolean {
-    return role?.id === roleId
+    return user?.roles.includes(roleId) ?? false
   }
 
   function hasPermission(permission: Permission): boolean {
-    return role ? hasRolePermission(role, permission) : false
+    return user?.permissions.includes(permission) ?? false
   }
 
   function hasAnyPermission(permissions: readonly Permission[]): boolean {
-    return role ? hasAnyRolePermission(role, permissions) : false
+    return permissions.some(hasPermission)
   }
 
   function hasAllPermissions(permissions: readonly Permission[]): boolean {
-    return role ? hasAllRolePermissions(role, permissions) : false
+    return permissions.every(hasPermission)
   }
 
   return {

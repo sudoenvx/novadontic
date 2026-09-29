@@ -2,6 +2,7 @@ model Role {
   id          BigInt           @id @default(autoincrement()) @db.BigInt
   code        String           @unique @db.VarChar(40)
   name        String           @db.VarChar(100)
+  description String?          @db.Text
   isSystem    Boolean          @default(false) @map("is_system")
   users       UserRole[]
   permissions RolePermission[]

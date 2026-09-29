@@ -17,16 +17,19 @@ import { DataTablePlaygroundPage } from '../features/data-table-playground'
 import { ForgotPasswordPage, SignInPage } from '../features/auth'
 import { AppLayout } from './layout/AppLayout'
 import { NotFoundPage } from './pages/NotFoundPage'
+import { StlViewerRoute } from './routes/StlViewerRoute'
+import { RequireAuth } from './guards/RequireAuth'
 
 export const router = createBrowserRouter([
   { path: 'sign-in', element: <SignInPage /> },
   { path: 'forgot-password', element: <ForgotPasswordPage /> },
+  { path: 'stl-viewer', element: <StlViewerRoute /> },
   {
     path: '/',
     element: (
+      <RequireAuth>
         <AppLayout />
-      // <RequireAuth>
-      // </RequireAuth>
+      </RequireAuth>
     ),
     children: [
       { index: true, element: <DashboardPage /> },

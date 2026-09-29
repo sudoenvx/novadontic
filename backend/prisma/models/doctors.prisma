@@ -3,6 +3,9 @@ model Doctor {
   fullName    String         @map("full_name") @db.VarChar(100)
   email        String?        @unique @db.VarChar(150)
   phone        String?        @db.VarChar(30)
+  address      String?        @db.VarChar(255)
+  country      String?        @db.VarChar(100)
+  source       String         @default("clinic") @db.VarChar(20)
   specialty    String?        @db.VarChar(100)
   notes        String?        @db.Text
   isActive     Boolean        @default(true) @map("is_active")

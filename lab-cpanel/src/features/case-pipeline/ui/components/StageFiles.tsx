@@ -1,7 +1,8 @@
 import { Boxes, Download, File, FileCode, FileText, Image as ImageIcon, Pencil, Save, Trash2, Upload, X } from 'lucide-react'
 import { useRef } from 'react'
+import { Link } from 'react-router-dom'
 
-import { Button } from '../../../../shared/ui/Button'
+import { Button, buttonVariants } from '../../../../shared/ui/Button'
 import { Input } from '../../../../shared/ui/Input'
 import type { CasePipelineFile } from '../../domain/casePipeline'
 
@@ -101,6 +102,14 @@ export function StageFiles({
                           <X />
                         </Button>
                       </div>
+                    ) : file.type === 'STL' ? (
+                      <Link
+                        to={getStlViewerHref(file.name)}
+                        className="block truncate text-sm font-medium text-primary hover:underline"
+                        aria-label={`View ${file.name} in 3D viewer`}
+                      >
+                        {file.name}
+                      </Link>
                     ) : (
                       <p className="truncate text-sm font-medium text-text-primary">{file.name}</p>
                     )}
@@ -111,6 +120,16 @@ export function StageFiles({
                 </div>
 
                 <div className="flex items-center gap-0.5">
+                  {file.type === 'STL' && !isEditing && (
+                    <Link
+                      to={getStlViewerHref(file.name)}
+                      className={buttonVariants({ variant: 'ghost', size: 'icon-sm' })}
+                      aria-label={`Open ${file.name} in 3D viewer`}
+                      title="View 3D"
+                    >
+                      <Boxes />
+                    </Link>
+                  )}
                   <Button
                     size="icon-sm"
                     variant="ghost"
@@ -160,6 +179,11 @@ export function StageFiles({
       )}
     </section>
   )
+}
+
+function getStlViewerHref(fileName: string) {
+  const searchParams = new URLSearchParams({ fileName })
+  return `/stl-viewer?${searchParams.toString()}`
 }
 
 function FileTypeIcon({ type }: { type: CasePipelineFile['type'] }) {

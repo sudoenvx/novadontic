@@ -1,0 +1,185 @@
+export const clinicFixtures = [
+  {
+    name: 'Smile Studio',
+    email: 'hello@smilestudio.eg',
+    phone: '+20 100 111 2222',
+    address: '12 Tahrir St',
+    city: 'Cairo',
+  },
+  {
+    name: 'Adel Ortho',
+    email: 'hello@adelortho.eg',
+    phone: '+20 100 231 4412',
+    address: '4 Gezira St',
+    city: 'Giza',
+  },
+  {
+    name: 'Bright Dental',
+    email: 'hello@brightdental.eg',
+    phone: '+20 100 882 1350',
+    address: '19 Corniche Rd',
+    city: 'Alexandria',
+  },
+  {
+    name: 'Ezzat Clinic',
+    email: 'hello@ezzatclinic.eg',
+    phone: '+20 100 772 9104',
+    address: '7 Mostafa St',
+    city: 'Mansoura',
+  },
+] as const;
+
+export const doctorFixtures = [
+  {
+    fullName: 'Dr. Nour Hassan',
+    email: 'nour@smilestudio.eg',
+    phone: '+20 100 111 2222',
+    address: '12 Tahrir St, Cairo',
+    country: 'Egypt',
+    specialty: 'Orthodontics',
+    clinicName: 'Smile Studio',
+    source: 'clinic',
+    isActive: true,
+  },
+  {
+    fullName: 'Dr. Yara Sabry',
+    email: 'yara@smilestudio.eg',
+    phone: '+20 100 222 3333',
+    address: '12 Tahrir St, Cairo',
+    country: 'Egypt',
+    specialty: 'Pediatric dentistry',
+    clinicName: 'Smile Studio',
+    source: 'clinic',
+    isActive: true,
+  },
+  {
+    fullName: 'Dr. Karim Adel',
+    email: 'karim@adelortho.eg',
+    phone: '+20 100 333 4444',
+    address: '4 Gezira St, Giza',
+    country: 'Egypt',
+    specialty: 'Orthodontics',
+    clinicName: 'Adel Ortho',
+    source: 'clinic',
+    isActive: true,
+  },
+  {
+    fullName: 'Dr. Salma Fathy',
+    email: 'salma@brightdental.eg',
+    phone: '+20 100 444 5555',
+    address: '19 Corniche Rd, Alexandria',
+    country: 'Egypt',
+    specialty: 'Orthodontics',
+    clinicName: 'Bright Dental',
+    source: 'clinic',
+    isActive: true,
+  },
+  {
+    fullName: 'Dr. Tamer Fouad',
+    email: 'tamer@brightdental.eg',
+    phone: '+20 100 555 6666',
+    address: '19 Corniche Rd, Alexandria',
+    country: 'Egypt',
+    specialty: 'General dentistry',
+    clinicName: null,
+    source: 'portal',
+    isActive: false,
+  },
+  {
+    fullName: 'Dr. Mona Ezzat',
+    email: 'mona@ezzatclinic.eg',
+    phone: '+20 100 666 7777',
+    address: '7 Mostafa St, Mansoura',
+    country: 'Egypt',
+    specialty: 'Prosthodontics',
+    clinicName: 'Ezzat Clinic',
+    source: 'clinic',
+    isActive: true,
+  },
+] as const;
+
+export const settingFixtures = [
+  { key: 'default_case_turnaround_days', value: '7', group: 'operations' },
+  { key: 'allow_clinic_portal', value: 'true', group: 'operations' },
+  { key: 'require_case_approval', value: 'false', group: 'operations' },
+  { key: 'notify_new_case', value: 'true', group: 'notifications' },
+  { key: 'notify_status_change', value: 'true', group: 'notifications' },
+  { key: 'notify_production_delay', value: 'true', group: 'notifications' },
+  { key: 'notify_daily_summary', value: 'false', group: 'notifications' },
+] as const;
+
+export const applianceTypeFixtures = [
+  {
+    code: 'aligner',
+    name: 'Aligner',
+    color: '#1e88f5',
+    sortOrder: 0,
+    groups: [
+      {
+        name: 'Aligner specification',
+        sortOrder: 0,
+        fields: [
+          {
+            key: 'upper_aligner_count',
+            label: 'Upper aligner count',
+            type: 'text',
+            required: false,
+            sortOrder: 0,
+          },
+          {
+            key: 'lower_aligner_count',
+            label: 'Lower aligner count',
+            type: 'text',
+            required: false,
+            sortOrder: 1,
+          },
+        ],
+      },
+    ],
+  },
+  {
+    code: 'retainer',
+    name: 'Retainer',
+    color: '#1e88f5',
+    sortOrder: 1,
+    groups: [
+      {
+        name: 'Retainer specification',
+        sortOrder: 0,
+        fields: [
+          {
+            key: 'arch_type',
+            label: 'Arch type',
+            type: 'select',
+            required: false,
+            sortOrder: 0,
+            options: [
+              { label: 'Upper', value: 'upper' },
+              { label: 'Lower', value: 'lower' },
+              { label: 'Both', value: 'both' },
+            ],
+          },
+          {
+            key: 'total_sets_ordered',
+            label: 'Total sets ordered',
+            type: 'number',
+            required: false,
+            sortOrder: 1,
+          },
+          {
+            key: 'material',
+            label: 'Material',
+            type: 'select',
+            required: false,
+            sortOrder: 2,
+            options: [
+              { label: 'Acrylic', value: 'acrylic' },
+              { label: 'Essix', value: 'essix' },
+              { label: 'Hawley', value: 'hawley' },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+] as const;

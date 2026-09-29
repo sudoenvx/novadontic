@@ -62,6 +62,8 @@
      muted   → hover fills, disabled fills, code blocks
      ========================================================================== */
   --canvas: #f4f5fa;
+  --stl-viewer-canvas-dark: var(--brand-ink);
+  --stl-viewer-canvas-light: var(--canvas);
   --surface: #ffffff;
   --surface-raised: #ffffff;       /* popovers, menus, dialogs */
   --surface-soft: #fafbfe;         /* subtle zebra / nested panels */
@@ -286,6 +288,8 @@
 
   /* ---- surfaces: neutral charcoal, real elevation steps ---- */
   --canvas: #111318;
+  --stl-viewer-canvas-dark: var(--canvas);
+  --stl-viewer-canvas-light: var(--neutral-100);
   --surface: #191b22;
   --surface-raised: #20232c;       /* popovers, menus, dialogs */
   --surface-soft: #15171d;         /* subtle zebra / nested panels */

@@ -13,7 +13,9 @@ import {
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 
+import { getApiErrorMessage } from '../../shared/api/apiError'
 import { Button } from '../../shared/ui/Button'
+import { useAuth } from '../../features/auth/hooks/useAuth'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,11 +28,33 @@ import {
 
 type AppUserMenuProps = {
   compact?: boolean
-  onSignOut?: () => void
 }
 
-export function AppUserMenu({ compact = false, onSignOut }: AppUserMenuProps) {
+export function AppUserMenu({ compact = false }: AppUserMenuProps) {
   const navigate = useNavigate()
+  const { session, signOut } = useAuth()
+  const fullName = session?.user.fullName ?? 'Account'
+  const roleLabel = session?.user.roles.join(', ') || 'Lab workspace'
+  const initials = fullName
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase())
+    .join('') || 'NA'
+
+  async function handleSignOut() {
+    try {
+      await signOut()
+      navigate('/sign-in', { replace: true })
+    } catch (error) {
+      navigate('/sign-in', {
+        replace: true,
+        state: {
+          authError: getApiErrorMessage(error, 'Unable to end your session.'),
+        },
+      })
+    }
+  }
 
   return (
     <DropdownMenu>
@@ -44,11 +68,11 @@ export function AppUserMenu({ compact = false, onSignOut }: AppUserMenuProps) {
           />
         }
       >
-        <UserAvatar compact={compact} />
+        <UserAvatar compact={compact} initials={initials} />
         {!compact && (
           <span className="hidden min-w-24 text-left sm:grid">
-            <span className="text-sm font-semibold normal-case text-text">Maya Lab</span>
-            <span className="text-xs font-normal normal-case text-text-muted">Admin workspace</span>
+            <span className="text-sm font-semibold normal-case text-text">{fullName}</span>
+            <span className="text-xs font-normal normal-case text-text-muted">{roleLabel}</span>
           </span>
         )}
         <ChevronDown size={16} className={compact ? 'hidden' : 'text-text-muted'} />
@@ -56,8 +80,8 @@ export function AppUserMenu({ compact = false, onSignOut }: AppUserMenuProps) {
       <DropdownMenuContent align={compact ? 'start' : 'end'} side={compact ? 'right' : 'bottom'} className="w-64">
         <DropdownMenuGroup>
           <DropdownMenuLabel>
-            <span className="block text-sm font-semibold text-text">Maya Lab</span>
-            <span className="mt-0.5 block text-xs font-normal text-text-muted">Production workspace</span>
+            <span className="block text-sm font-semibold text-text">{fullName}</span>
+            <span className="mt-0.5 block text-xs font-normal text-text-muted">{session?.user.email}</span>
           </DropdownMenuLabel>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
@@ -79,17 +103,17 @@ export function AppUserMenu({ compact = false, onSignOut }: AppUserMenuProps) {
           <DropdownMenuItem onClick={() => navigate('/settings')}><Settings /> Settings</DropdownMenuItem>
           <DropdownMenuItem><Keyboard /> Keyboard shortcuts</DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem variant="destructive" onClick={onSignOut ?? (() => navigate('/sign-in'))}><LogOut /> Log out</DropdownMenuItem>
+          <DropdownMenuItem variant="destructive" onClick={() => void handleSignOut()}><LogOut /> Log out</DropdownMenuItem>
         </DropdownMenuGroup>
       </DropdownMenuContent>
     </DropdownMenu>
   )
 }
 
-function UserAvatar({ compact }: { compact: boolean }) {
+function UserAvatar({ compact, initials }: { compact: boolean; initials: string }) {
   return (
     <span className={`grid ${compact ? 'size-full' : 'size-7'} place-items-center rounded-sm bg-accent text-xs font-semibold text-accent-foreground`}>
-      AM
+      {initials}
     </span>
   )
 }

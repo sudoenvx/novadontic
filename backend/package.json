@@ -13,7 +13,7 @@
     "db:seed": "prisma db seed",
     "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.prisma.json",
     "build": "tsc -p tsconfig.json",
-    "test": "tsx --test src/app/api.test.ts src/modules/auth/auth.domain.test.ts src/shared/realtime/socket-server.test.ts"
+    "test": "tsx --test src/app/api.test.ts src/modules/auth/auth.domain.test.ts src/shared/realtime/socket-server.test.ts prisma/seed/*.test.ts"
   },
   "keywords": [],
   "author": "",

@@ -1,18 +1,22 @@
-import type { Role } from '../../roles-permissions/domain/role'
-
 export type LabSignInValues = {
   email: string
   password: string
   rememberDevice: boolean
 }
 
+export type AuthUser = {
+  id: string
+  fullName: string
+  email: string
+  roles: string[]
+  permissions: string[]
+}
+
 export type AuthSession = {
-  user: {
-    id: string
-    name: string
-    email: string
-    role: Role
-  }
+  accessToken: string
+  refreshToken: string
+  expiresIn: number
+  user: AuthUser
 }
 
 export function validateLabSignIn(values: LabSignInValues): string | undefined {
