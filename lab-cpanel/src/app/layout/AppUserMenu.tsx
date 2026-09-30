@@ -13,7 +13,7 @@ import {
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 
-import { getApiErrorMessage } from '../../shared/api/apiError'
+import { getApiErrorMessage, isUnauthorizedApiError } from '../../shared/api/apiError'
 import { Button } from '../../shared/ui/Button'
 import { useAuth } from '../../features/auth/hooks/useAuth'
 import {
@@ -47,6 +47,11 @@ export function AppUserMenu({ compact = false }: AppUserMenuProps) {
       await signOut()
       navigate('/sign-in', { replace: true })
     } catch (error) {
+      if (isUnauthorizedApiError(error)) {
+        navigate('/sign-in', { replace: true })
+        return
+      }
+
       navigate('/sign-in', {
         replace: true,
         state: {

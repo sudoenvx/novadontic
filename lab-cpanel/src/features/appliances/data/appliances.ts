@@ -30,6 +30,26 @@ const applianceResponses: ApplianceResponse[] = [
           },
         ],
       },
+      {
+        id: 'aligner-material',
+        name: 'Aligner material',
+        fields: [
+          {
+            id: 'material',
+            label: 'Material',
+            key: 'material',
+            type: 'select',
+            required: false,
+            options: [
+              { label: 'Essix', value: 'essix' },
+              { label: 'Clear Aligner', value: 'clear_aligner' },
+              { label: 'Durasoft', value: 'durasoft' },
+              { label: 'Durasoft Plus', value: 'durasoft_plus' },
+              { label: 'Durasoft Ultra', value: 'durasoft_ultra' },
+            ],
+          },
+        ],
+      }
     ],
   },
   {

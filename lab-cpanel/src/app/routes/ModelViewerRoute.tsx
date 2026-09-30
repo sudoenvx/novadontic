@@ -1,22 +1,22 @@
 import { lazy, Suspense } from 'react'
 
-const StlViewerPage = lazy(async () => {
+const ModelViewerPage = lazy(async () => {
   const casePipeline = await import(
-    '../../features/case-pipeline/ui/pages/StlViewerPage'
+    '../../features/case-pipeline/ui/pages/ModelViewerPage'
   )
-  return { default: casePipeline.StlViewerPage }
+  return { default: casePipeline.ModelViewerPage }
 })
 
-export function StlViewerRoute() {
+export function ModelViewerRoute() {
   return (
     <Suspense
       fallback={
         <main className="grid min-h-dvh place-items-center bg-canvas text-sm text-text-secondary">
-          Loading 3D viewer…
+          Loading model viewer…
         </main>
       }
     >
-      <StlViewerPage />
+      <ModelViewerPage />
     </Suspense>
   )
 }

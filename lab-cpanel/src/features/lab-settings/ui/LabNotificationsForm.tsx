@@ -8,9 +8,10 @@ type LabNotificationsFormProps = {
   settings: LabSettings
   onChange: (changes: Partial<LabSettings>) => void
   onSave: () => void
+  isSaving: boolean
 }
 
-export function LabNotificationsForm({ settings, onChange, onSave }: LabNotificationsFormProps) {
+export function LabNotificationsForm({ settings, onChange, onSave, isSaving }: LabNotificationsFormProps) {
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     onSave()
@@ -23,7 +24,9 @@ export function LabNotificationsForm({ settings, onChange, onSave }: LabNotifica
       <SwitchCard title="Production delay alerts" description="Alert admins when a case passes its expected completion date." checked={settings.notifyProductionDelay} onCheckedChange={(notifyProductionDelay) => onChange({ notifyProductionDelay })} />
       <SwitchCard title="Daily production summary" description="Receive one daily summary of active cases and upcoming work." checked={settings.notifyDailySummary} onCheckedChange={(notifyDailySummary) => onChange({ notifyDailySummary })} />
       <div className="flex justify-end pt-1">
-        <Button type="submit">Save changes</Button>
+        <Button type="submit" disabled={isSaving}>
+          {isSaving ? 'Saving…' : 'Save changes'}
+        </Button>
       </div>
     </form>
   )

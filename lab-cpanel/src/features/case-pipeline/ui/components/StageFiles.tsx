@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom'
 
 import { Button, buttonVariants } from '../../../../shared/ui/Button'
 import { Input } from '../../../../shared/ui/Input'
+import { isSupportedModelFile } from '../../../../shared/lib/modelFormats'
 import type { CasePipelineFile } from '../../domain/casePipeline'
 
 export type EditingStageFile = {
@@ -15,6 +16,8 @@ export type EditingStageFile = {
 type StageFilesProps = {
   stepId: string
   files: CasePipelineFile[]
+  caseNumberCode: string
+  doctorName: string
   editingFile?: EditingStageFile
   onSelectFile: (file: File, stepId: string) => void
   onStartRename: (file: CasePipelineFile) => void
@@ -28,6 +31,8 @@ type StageFilesProps = {
 export function StageFiles({
   stepId,
   files,
+  caseNumberCode,
+  doctorName,
   editingFile,
   onSelectFile,
   onStartRename,
@@ -71,6 +76,7 @@ export function StageFiles({
         <div className="grid gap-1.5">
           {files.map((file) => {
             const isEditing = editingFile?.stepId === stepId && editingFile.fileId === file.id
+            const canPreviewModel = isSupportedModelFile(file.name)
             return (
               <div
                 key={file.id}
@@ -102,11 +108,11 @@ export function StageFiles({
                           <X />
                         </Button>
                       </div>
-                    ) : file.type === 'STL' ? (
+                    ) : canPreviewModel ? (
                       <Link
-                        to={getStlViewerHref(file.name)}
+                        to={getModelViewerHref(file.name, caseNumberCode, doctorName)}
                         className="block truncate text-sm font-medium text-primary hover:underline"
-                        aria-label={`View ${file.name} in 3D viewer`}
+                        aria-label={`View ${file.name} in 3D model viewer`}
                       >
                         {file.name}
                       </Link>
@@ -120,12 +126,12 @@ export function StageFiles({
                 </div>
 
                 <div className="flex items-center gap-0.5">
-                  {file.type === 'STL' && !isEditing && (
+                  {canPreviewModel && !isEditing && (
                     <Link
-                      to={getStlViewerHref(file.name)}
+                      to={getModelViewerHref(file.name, caseNumberCode, doctorName)}
                       className={buttonVariants({ variant: 'ghost', size: 'icon-sm' })}
-                      aria-label={`Open ${file.name} in 3D viewer`}
-                      title="View 3D"
+                      aria-label={`Open ${file.name} in 3D model viewer`}
+                      title="View 3D model"
                     >
                       <Boxes />
                     </Link>
@@ -181,9 +187,13 @@ export function StageFiles({
   )
 }
 
-function getStlViewerHref(fileName: string) {
-  const searchParams = new URLSearchParams({ fileName })
-  return `/stl-viewer?${searchParams.toString()}`
+function getModelViewerHref(fileName: string, caseNumberCode: string, doctorName: string) {
+  const searchParams = new URLSearchParams({
+    fileName,
+    caseNumber: caseNumberCode,
+    doctorName,
+  })
+  return `/model-viewer?${searchParams.toString()}`
 }
 
 function FileTypeIcon({ type }: { type: CasePipelineFile['type'] }) {

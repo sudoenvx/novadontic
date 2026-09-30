@@ -10,12 +10,14 @@ type LabOperationsFormProps = {
   settings: LabSettings;
   onChange: (changes: Partial<LabSettings>) => void;
   onSave: () => void;
+  isSaving: boolean;
 };
 
 export function LabOperationsForm({
   settings,
   onChange,
   onSave,
+  isSaving,
 }: LabOperationsFormProps) {
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -32,15 +34,15 @@ export function LabOperationsForm({
           id="default-case-turnaround-days"
           type="number"
           min={0}
+          step={1}
           value={settings.defaultCaseTurnaroundDays}
-          onChange={(event) =>
+          onChange={(event) => {
+            const days = Number(event.currentTarget.value)
             onChange({
-              defaultCaseTurnaroundDays: Math.max(
-                0,
-                Number(event.currentTarget.value) || 0,
-              ),
+              defaultCaseTurnaroundDays:
+                Number.isSafeInteger(days) && days >= 0 ? days : 0,
             })
-          }
+          }}
         />
         <p className="text-xs text-text-muted">
           Used when a new case does not specify a custom turnaround.
@@ -65,7 +67,9 @@ export function LabOperationsForm({
         />
       </div>
       <div className="flex justify-end">
-        <Button type="submit">Save changes</Button>
+        <Button type="submit" disabled={isSaving}>
+          {isSaving ? "Saving…" : "Save changes"}
+        </Button>
       </div>
     </form>
   );

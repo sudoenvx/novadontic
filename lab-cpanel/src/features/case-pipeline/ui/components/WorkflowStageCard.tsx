@@ -24,6 +24,8 @@ type WorkflowStageCardProps = {
   onRenameChange: (name: string) => void
   onDownloadFile: (file: CaseProductionStep['files'][number]) => void
   onDeleteFile: (file: CaseProductionStep['files'][number]) => void
+  caseNumberCode: string
+  doctorName: string
 }
 
 const statusLabels: Record<ProductionStepStatus, string> = {
@@ -55,6 +57,8 @@ export function WorkflowStageCard({
   onRenameChange,
   onDownloadFile,
   onDeleteFile,
+  caseNumberCode,
+  doctorName,
 }: WorkflowStageCardProps) {
   const technicians = step.technicians ?? (step.technician ? [step.technician] : [])
 
@@ -137,6 +141,8 @@ export function WorkflowStageCard({
             onRenameChange={onRenameChange}
             onDownload={onDownloadFile}
             onDelete={onDeleteFile}
+            caseNumberCode={caseNumberCode}
+            doctorName={doctorName}
           />
         </div>
       </CollapsiblePanel>

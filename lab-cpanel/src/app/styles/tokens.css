@@ -62,8 +62,20 @@
      muted   → hover fills, disabled fills, code blocks
      ========================================================================== */
   --canvas: #f4f5fa;
-  --stl-viewer-canvas-dark: var(--brand-ink);
-  --stl-viewer-canvas-light: var(--canvas);
+  --model-viewer-canvas-dark: var(--brand-ink);
+  --model-viewer-canvas-light: var(--canvas);
+  --model-viewer-ui-surface-light: #ffffff;
+  --model-viewer-ui-text-light: var(--brand-ink);
+  --model-viewer-ui-muted-light: #5b6478;
+  --model-viewer-ui-border-light: #dfe3ee;
+  --model-viewer-ui-hover-light: #eceff7;
+  --model-viewer-ui-active-light: #dde5f9;
+  --model-viewer-ui-surface-dark: #191b22;
+  --model-viewer-ui-text-dark: #e7e8ee;
+  --model-viewer-ui-muted-dark: #a4a8b8;
+  --model-viewer-ui-border-dark: #343744;
+  --model-viewer-ui-hover-dark: #252832;
+  --model-viewer-ui-active-dark: #30364a;
   --surface: #ffffff;
   --surface-raised: #ffffff;       /* popovers, menus, dialogs */
   --surface-soft: #fafbfe;         /* subtle zebra / nested panels */
@@ -288,8 +300,8 @@
 
   /* ---- surfaces: neutral charcoal, real elevation steps ---- */
   --canvas: #111318;
-  --stl-viewer-canvas-dark: var(--canvas);
-  --stl-viewer-canvas-light: var(--neutral-100);
+  --model-viewer-canvas-dark: var(--canvas);
+  --model-viewer-canvas-light: var(--neutral-100);
   --surface: #191b22;
   --surface-raised: #20232c;       /* popovers, menus, dialogs */
   --surface-soft: #15171d;         /* subtle zebra / nested panels */

@@ -45,9 +45,12 @@ export const useCreateUser = () =>
 callbacks. Feature API functions use the shared client and the backend's
 `{ data: ... }` / `{ error: ... }` response envelopes.
 
-Copy `.env.example` to `.env.local`. Set `VITE_API_BASE_URL` to the backend URL
-including `/api/v1` (the example targets a local backend), and set `VITE_API_KEY`
-only when the deployment requires it. `VITE_REALTIME_URL` optionally overrides
+Copy `.env.example` to `.env.local` when configuring a custom backend URL.
+Without `VITE_API_BASE_URL`, API requests use `/api/v1` and the Vite development
+server proxies them to `http://localhost:3000`. When setting
+`VITE_API_BASE_URL`, include `/api/v1` (for example
+`http://localhost:3000/api/v1`). Set `VITE_API_KEY` only when the deployment
+requires it. `VITE_REALTIME_URL` optionally overrides
 the realtime endpoint; otherwise the `/api/v1` suffix is removed from
 `VITE_API_BASE_URL` for the Socket.IO server root. The socket stays disconnected
 when neither URL is set. Use

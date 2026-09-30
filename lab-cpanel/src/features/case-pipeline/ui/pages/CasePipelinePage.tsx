@@ -2,13 +2,16 @@ import { useState } from 'react'
 import { useLocation, useParams } from 'react-router-dom'
 
 import { toast } from '../../../../shared/ui/Toast'
+import { Card, CardDescription, CardHeader, CardTitle } from '../../../../shared/ui/Card'
 import { Page } from '../../../../shared/ui/Page'
+import { appliances } from '../../../appliances/data/appliances'
 import { casePipelineFixtures } from '../../data/cases'
 import { getPreviousStage } from '../../domain/casePipeline'
 import type {
   CasePipelineCase,
   CasePipelineStage,
 } from '../../domain/casePipeline'
+import { ApplianceCaseFields } from '../components/ApplianceCaseFields'
 import { CasePipelineHeader } from '../components/CasePipelineHeader'
 import { CasePipelineSidebarDetails } from '../components/CasePipelineSidebarDetails'
 import { CaseWorkflowStages } from '../components/CaseWorkflowStages'
@@ -22,6 +25,13 @@ export function CasePipelinePage() {
   )
 
   const selectedCase = cases.find((caseItem) => caseItem.id === caseNumberCode)
+  const selectedAppliance = selectedCase
+    ? appliances.find((appliance) =>
+        selectedCase.applianceId
+          ? appliance.id === selectedCase.applianceId
+          : appliance.name.toLowerCase() === selectedCase.caseType.toLowerCase(),
+      )
+    : undefined
 
   function updateSelectedCase(update: (caseItem: CasePipelineCase) => CasePipelineCase) {
     if (!selectedCase) {
@@ -78,6 +88,24 @@ export function CasePipelinePage() {
             onToggleRush={handleToggleRush}
             onSendBack={() => moveSelectedCase(getPreviousStage(selectedCase.stage))}
           />
+
+          {selectedAppliance && (
+            <Card>
+              <ApplianceCaseFields
+                appliance={selectedAppliance}
+                values={selectedCase.caseFieldValues ?? {}}
+                onValueChange={(fieldKey, value) =>
+                  updateSelectedCase((caseItem) => ({
+                    ...caseItem,
+                    caseFieldValues: {
+                      ...caseItem.caseFieldValues,
+                      [fieldKey]: value,
+                    },
+                  }))
+                }
+              />
+            </Card>
+          )}
 
           <CaseWorkflowStages
             key={selectedCase.id}

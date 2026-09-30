@@ -262,6 +262,8 @@ export function CaseWorkflowStages({
             onRenameChange={(name) => setEditingFile((current) => current ? { ...current, name } : current)}
             onDownloadFile={downloadFile}
             onDeleteFile={(file) => deleteFile(step.id, file.id, file.name)}
+            caseNumberCode={caseItem.id}
+            doctorName={caseItem.doctorName}
           />
         ))}
       </div>

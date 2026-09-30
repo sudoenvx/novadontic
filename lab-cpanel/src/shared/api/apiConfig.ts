@@ -6,7 +6,7 @@ const realtimeBaseUrl = apiBaseUrl?.replace(/\/api\/v1\/?$/, '')
 export const API_KEY_HEADER = 'X-API-Key'
 
 export const apiConfig = {
-  baseURL: apiBaseUrl || undefined,
+  baseURL: apiBaseUrl || '/api/v1',
   apiKey: apiKey || undefined,
 } as const
 
