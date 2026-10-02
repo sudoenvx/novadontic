@@ -1,5 +1,7 @@
 import { lazy, Suspense } from 'react'
 
+import { PageLoading } from '../../shared/ui/Loading'
+
 const ModelViewerPage = lazy(async () => {
   const casePipeline = await import(
     '../../features/case-pipeline/ui/pages/ModelViewerPage'
@@ -10,11 +12,7 @@ const ModelViewerPage = lazy(async () => {
 export function ModelViewerRoute() {
   return (
     <Suspense
-      fallback={
-        <main className="grid min-h-dvh place-items-center bg-canvas text-sm text-text-secondary">
-          Loading model viewer…
-        </main>
-      }
+      fallback={<main className="min-h-dvh bg-canvas p-4"><PageLoading label="Loading model viewer" /></main>}
     >
       <ModelViewerPage />
     </Suspense>

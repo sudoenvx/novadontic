@@ -113,7 +113,6 @@ export const applianceTypeFixtures = [
     code: 'aligner',
     name: 'Aligner',
     color: '#1e88f5',
-    sortOrder: 0,
     groups: [
       {
         name: 'Aligner specification',
@@ -141,7 +140,6 @@ export const applianceTypeFixtures = [
     code: 'retainer',
     name: 'Retainer',
     color: '#1e88f5',
-    sortOrder: 1,
     groups: [
       {
         name: 'Retainer specification',
@@ -180,6 +178,33 @@ export const applianceTypeFixtures = [
           },
         ],
       },
+    ],
+  },
+] as const;
+
+export const workflowTemplateFixtures = [
+  {
+    applianceTypeCode: 'aligner',
+    name: 'Aligner Production Workflow',
+    stages: [
+      'STL DESIGN',
+      'PRINTING',
+      'ASSEMBLING',
+      'FINISHING',
+      'PACKAGING',
+      'DELIVERED',
+    ],
+  },
+  {
+    applianceTypeCode: 'retainer',
+    name: 'Retainer Production Workflow',
+    stages: [
+      'STL DESIGN',
+      'PRINTING',
+      'ASSEMBLING',
+      'FINISHING',
+      'PACKAGING',
+      'DELIVERED',
     ],
   },
 ] as const;

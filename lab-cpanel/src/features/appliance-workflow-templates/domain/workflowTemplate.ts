@@ -1,37 +1,46 @@
-export type WorkflowStepKind = 'production' | 'quality' | 'shipping'
+export type WorkflowFileKind = 'stl' | 'photo' | 'pdf' | 'doc'
 
 export type WorkflowStep = {
   id: string
   name: string
-  description?: string
-  kind: WorkflowStepKind
-  estimatedDays: number
+  slaHours: number | null
   requiresApproval: boolean
+  allowedFileKinds: WorkflowFileKind[]
 }
 
 export type WorkflowTemplate = {
   id: string
-  applianceId: string
+  applianceId: string | null
   name: string
   isDefault: boolean
-  isActive: boolean
   steps: WorkflowStep[]
 }
 
+export type WorkflowTemplateOption = {
+  id: string
+  applianceId: string | null
+  name: string
+  isDefault: boolean
+}
+
+export type WorkflowStageInput = Omit<WorkflowStep, 'id'>
+export type WorkflowTemplateInput = {
+  applianceTypeId: string | null
+  name: string
+  isDefault: boolean
+}
+export type WorkflowTemplateUpdateInput = Partial<WorkflowTemplateInput>
+
 export function getWorkflowDuration(workflow: WorkflowTemplate) {
-  return workflow.steps.reduce((total, step) => total + step.estimatedDays, 0)
+  const totalHours = workflow.steps.reduce(
+    (total, step) => total + (step.slaHours ?? 0),
+    0,
+  )
+  return Math.ceil(totalHours / 24)
 }
 
 export function getWorkflowStepCount(workflow: WorkflowTemplate) {
   return workflow.steps.length
-}
-
-export function getWorkflowKindLabel(kind: WorkflowStepKind) {
-  return kind === 'quality' ? 'Quality' : kind === 'shipping' ? 'Shipping' : 'Production'
-}
-
-export function getNextStepName(workflow: WorkflowTemplate) {
-  return `Step ${workflow.steps.length + 1}`
 }
 
 export function moveWorkflowStep(

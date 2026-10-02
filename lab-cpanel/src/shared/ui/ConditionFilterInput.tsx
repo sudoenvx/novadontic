@@ -1,12 +1,17 @@
-import { useState } from 'react'
-import { Filter, Plus, Search, X } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
+import { Plus, X } from 'lucide-react'
+import { useHotkey } from '@tanstack/react-hotkeys'
 
 import { Button } from './Button'
 import { Input } from './Input'
+import { useUserPreferenceScope } from '../hooks/useUserPreferenceScope'
+import { getUserPreferenceStorageKey } from '../lib/userPreferenceStorage'
 import {
   Popover,
   PopoverContent,
-  PopoverTrigger,
+  PopoverDescription,
+  PopoverHeader,
+  PopoverTitle,
 } from './Popover'
 import {
   Select,
@@ -41,7 +46,7 @@ export type ConditionFilterField<TField extends string, TOperator extends string
 
 type ConditionFilterInputProps<
   TField extends string,
-  TOperator extends string,
+  TOperator extends ConditionFilterOperator,
 > = {
   fields: readonly ConditionFilterField<TField, TOperator>[]
   conditions: ConditionFilterValue<TField, TOperator>[]
@@ -50,9 +55,18 @@ type ConditionFilterInputProps<
   ) => void
   searchValue?: string
   onSearchValueChange?: (value: string) => void
+  onPersistedStateChange?: (state: {
+    conditions: ConditionFilterValue<TField, TOperator>[]
+    searchValue: string
+  }) => void
   placeholder?: string
-  resultCount?: number
-  onClear?: () => void
+  persistenceKey?: string
+}
+
+type ConditionDraft<TField extends string, TOperator extends ConditionFilterOperator> = {
+  field: TField | ''
+  operator: TOperator | ''
+  value: string
 }
 
 const operatorLabels: Record<ConditionFilterOperator, string> = {
@@ -68,198 +82,478 @@ const operatorLabels: Record<ConditionFilterOperator, string> = {
 export function ConditionFilterInput<
   TField extends string,
   TOperator extends ConditionFilterOperator,
+>(props: ConditionFilterInputProps<TField, TOperator>) {
+  const userId = useUserPreferenceScope()
+
+  return (
+    <ConditionFilterInputInstance
+      key={userId ?? 'anonymous'}
+      {...props}
+    />
+  )
+}
+
+function ConditionFilterInputInstance<
+  TField extends string,
+  TOperator extends ConditionFilterOperator,
 >({
   fields,
   conditions,
   onConditionsChange,
   searchValue = '',
   onSearchValueChange,
+  onPersistedStateChange,
   placeholder = 'Search or add a condition…',
-  resultCount,
-  onClear,
+  persistenceKey,
 }: ConditionFilterInputProps<TField, TOperator>) {
-  const firstField = fields[0]
   const [open, setOpen] = useState(false)
-  const [fieldId, setFieldId] = useState<TField | ''>(firstField?.id ?? '')
-  const activeField = fields.find((field) => field.id === fieldId) ?? firstField
-  const [operator, setOperator] = useState<TOperator>(
-    activeField?.operators[0] ?? ('is' as TOperator),
+  const [editingIndex, setEditingIndex] = useState<number>()
+  const [draft, setDraft] = useState<ConditionDraft<TField, TOperator>>(
+    () => createEmptyDraft(fields),
   )
-  const [value, setValue] = useState('')
-  const hasFilters = conditions.length > 0 || searchValue.length > 0
+  const userId = useUserPreferenceScope()
+  const anchorRef = useRef<HTMLDivElement>(null)
+  const popupRef = useRef<HTMLDivElement>(null)
+  const restoredKeys = useRef(new Set<string>())
+  const callbacksRef = useRef({
+    onConditionsChange,
+    onSearchValueChange,
+    onPersistedStateChange,
+  })
+  const activeField = fields.find((field) => field.id === draft.field)
+  const canApply = Boolean(activeField && draft.operator && draft.value.trim())
+  const storageKey = getUserPreferenceStorageKey(
+    userId,
+    persistenceKey ? `condition-filter:${persistenceKey}` : undefined,
+  )
 
-  function changeField(nextFieldId: string | null) {
-    const nextField = fields.find((field) => field.id === nextFieldId)
-    if (!nextField) return
-    setFieldId(nextField.id)
-    setOperator(nextField.operators[0])
-    setValue('')
+  useHotkey('Escape', (event) => {
+    event.preventDefault()
+    setOpen(false)
+  }, { enabled: open })
+
+  useEffect(() => {
+    callbacksRef.current = {
+      onConditionsChange,
+      onSearchValueChange,
+      onPersistedStateChange,
+    }
+  })
+
+  useEffect(() => {
+    if (!storageKey || restoredKeys.current.has(storageKey)) return
+    restoredKeys.current.add(storageKey)
+    const stored = readStoredFilter(storageKey, fields)
+    if (!stored) return
+    if (callbacksRef.current.onPersistedStateChange) {
+      callbacksRef.current.onPersistedStateChange(stored)
+      return
+    }
+    callbacksRef.current.onConditionsChange(stored.conditions)
+    callbacksRef.current.onSearchValueChange?.(stored.searchValue)
+  }, [fields, storageKey])
+
+  useEffect(() => {
+    if (!open) return
+
+    function closeOnOutsidePointer(event: PointerEvent) {
+      const target = event.target
+      if (!(target instanceof Node)) return
+      if (anchorRef.current?.contains(target) || popupRef.current?.contains(target)) return
+      if (target instanceof Element && target.closest('[data-slot="select-content"]')) return
+      setOpen(false)
+    }
+
+    document.addEventListener('pointerdown', closeOnOutsidePointer, true)
+    return () => {
+      document.removeEventListener('pointerdown', closeOnOutsidePointer, true)
+    }
+  }, [open])
+
+  function beginAdd() {
+    setEditingIndex(undefined)
+    setDraft(createEmptyDraft(fields))
+    setOpen(true)
   }
 
-  function addCondition() {
-    if (!activeField || !value.trim()) return
-    onConditionsChange([
-      ...conditions,
-      { field: activeField.id, operator, value: value.trim() },
-    ])
-    setValue('')
+  function beginEdit(index: number) {
+    const condition = conditions[index]
+    if (!condition) return
+    setEditingIndex(index)
+    setDraft(condition)
+    setOpen(true)
+  }
+
+  function handleOpenChange(nextOpen: boolean) {
+    setOpen(nextOpen)
+    if (!nextOpen) {
+      setEditingIndex(undefined)
+      return
+    }
+    if (editingIndex === undefined) setDraft(createEmptyDraft(fields))
+  }
+
+  function updateField(fieldId: string | null) {
+    const field = fields.find((item) => item.id === fieldId)
+    if (!field) return
+    setDraft({ field: field.id, operator: field.operators[0] ?? '', value: '' })
+  }
+
+  function applyCondition() {
+    if (!activeField || !draft.operator || !draft.value.trim()) return
+
+    const condition: ConditionFilterValue<TField, TOperator> = {
+      field: activeField.id,
+      operator: draft.operator,
+      value: draft.value.trim(),
+    }
+
+    if (editingIndex === undefined) {
+      updateConditions([...conditions, condition])
+    } else {
+      updateConditions(
+        conditions.map((current, index) => index === editingIndex ? condition : current),
+      )
+    }
     setOpen(false)
   }
 
   function removeCondition(index: number) {
-    onConditionsChange(conditions.filter((_, conditionIndex) => conditionIndex !== index))
+    updateConditions(conditions.filter((_, conditionIndex) => conditionIndex !== index))
+    if (editingIndex === index) {
+      setOpen(false)
+    } else if (editingIndex !== undefined && editingIndex > index) {
+      setEditingIndex(editingIndex - 1)
+    }
   }
 
-  function getConditionLabel(condition: ConditionFilterValue<TField, TOperator>) {
-    const fieldLabel = fields.find((field) => field.id === condition.field)?.label
-      ?? condition.field
-    const opLabel = operatorLabels[condition.operator as ConditionFilterOperator]
-      ?? condition.operator
-    return `${fieldLabel} ${opLabel} ${condition.value}`
+  function updateConditions(nextConditions: ConditionFilterValue<TField, TOperator>[]) {
+    onConditionsChange(nextConditions)
+    writeStoredFilter(storageKey, { conditions: nextConditions, searchValue })
+  }
+
+  function updateSearchValue(nextSearchValue: string) {
+    onSearchValueChange?.(nextSearchValue)
+    writeStoredFilter(storageKey, { conditions, searchValue: nextSearchValue })
   }
 
   return (
-    <div className="grid w-full gap-2">
-      <div className="flex min-h-control-md w-full flex-wrap items-center gap-1.5 rounded-sm border border-field-border bg-surface px-2.5 py-1.5 shadow-xs transition-colors focus-within:border-border-focus focus-within:ring-3 focus-within:ring-ring">
-        <Search aria-hidden="true" className="size-(--icon-size-sm) shrink-0 text-text-muted" />
-        {conditions.map((condition, index) => (
-          <span
-            key={`${condition.field}-${condition.operator}-${condition.value}-${index}`}
-            className="inline-flex max-w-full items-center gap-1 rounded-xs bg-neutral-50 px-1.5 py-0.5 text-xs text-text-primary"
-          >
-            <span className="truncate">{getConditionLabel(condition)}</span>
-            <button
-              type="button"
-              className="grid size-4 shrink-0 place-items-center rounded-xs text-text-muted hover:bg-neutral-200 hover:text-text-primary focus-visible:outline-2 focus-visible:outline-focus"
-              aria-label={`Remove ${getConditionLabel(condition)} condition`}
-              onClick={() => removeCondition(index)}
-            >
-              <X aria-hidden="true" className="size-3" />
-            </button>
-          </span>
-        ))}
+    <Popover open={open} modal={false} onOpenChange={handleOpenChange}>
+      <div
+        ref={anchorRef}
+        className={`flex min-h-control-md w-full flex-wrap items-center gap-1.5 rounded-sm border bg-surface px-1 py-0.5 shadow-xs transition-colors focus-within:border-border-focus focus-within:ring-3 focus-within:ring-ring ${
+          open ? 'border-border-focus ring-3 ring-ring' : 'border-field-border'
+        }`}
+      >
+        <ConditionFilterTokens
+          conditions={conditions}
+          fields={fields}
+          onEdit={beginEdit}
+          onRemove={removeCondition}
+        />
         <Input
           aria-label="Search cases"
-          className="h-7 min-w-40 flex-1 border-0 bg-transparent px-0 text-sm shadow-none focus-visible:border-transparent focus-visible:ring-0"
+          aria-expanded={open}
+          aria-haspopup="dialog"
+          variant="bare"
+          size="sm"
+          className="h-control-sm min-w-40 flex-1 px-0 text-sm"
           placeholder={placeholder}
           value={searchValue}
-          onChange={(event) => onSearchValueChange?.(event.target.value)}
-          onClick={() => setOpen(true)}
-          onFocus={() => setOpen(true)}
+          onChange={(event) => updateSearchValue(event.currentTarget.value)}
+          onClick={() => {
+            if (!open) beginAdd()
+          }}
           onKeyDown={(event) => {
             if (event.key === 'Escape') setOpen(false)
+            if (event.key === 'ArrowDown' && !open) beginAdd()
           }}
         />
-        <Popover open={open} onOpenChange={setOpen}>
-          <PopoverTrigger
-            render={
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon-xs"
-                aria-label="Add filter condition"
-                aria-expanded={open}
-              />
-            }
-          >
-            <Filter aria-hidden="true" />
-          </PopoverTrigger>
-          <PopoverContent align="end" className="w-[min(24rem,calc(100vw-2rem))] p-3">
-            <div className="grid gap-3">
-              <div className="grid gap-0.5">
-                <p className="font-semibold text-text-primary">Add filter condition</p>
-                <p className="text-xs text-text-secondary">Choose a field and a condition.</p>
-              </div>
-              {activeField && (
-                <>
-                  <div className="grid grid-cols-2 gap-2">
-                    <label className="grid gap-1 text-xs font-medium text-text-secondary">
-                      Field
-                      <Select value={activeField.id} onValueChange={changeField}>
-                        <SelectTrigger className="w-full">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {fields.map((field) => (
-                            <SelectItem key={field.id} value={field.id}>{field.label}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </label>
-                    <label className="grid gap-1 text-xs font-medium text-text-secondary">
-                      Condition
-                      <Select
-                        value={operator}
-                        onValueChange={(nextOperator) => {
-                          if (nextOperator !== null) setOperator(nextOperator as TOperator)
-                        }}
-                      >
-                        <SelectTrigger className="w-full">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {activeField.operators.map((fieldOperator) => (
-                            <SelectItem key={fieldOperator} value={fieldOperator}>
-                              {operatorLabels[fieldOperator as ConditionFilterOperator] ?? fieldOperator}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </label>
-                  </div>
-                  <label className="grid gap-1 text-xs font-medium text-text-secondary">
-                    Value
-                    {activeField.valueKind === 'select' ? (
-                      <Select value={value || null} onValueChange={(nextValue) => setValue(nextValue ?? '')}>
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Choose a value" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {activeField.options?.map((option) => (
-                            <SelectItem key={option.value} value={option.value}>
-                              {option.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    ) : (
-                      <Input
-                        type={activeField.valueKind === 'date' ? 'date' : 'text'}
-                        value={value}
-                        onChange={(event) => setValue(event.target.value)}
-                        aria-label={`${activeField.label} filter value`}
-                      />
-                    )}
-                  </label>
-                  <Button
-                    type="button"
-                    variant="neutral"
-                    size="sm"
-                    disabled={!value.trim()}
-                    onClick={addCondition}
-                  >
-                    <Plus aria-hidden="true" />
-                    Add condition
-                  </Button>
-                </>
-              )}
-            </div>
-          </PopoverContent>
-        </Popover>
       </div>
-      {(resultCount !== undefined || (hasFilters && onClear)) && (
-        <div className="flex items-center justify-between gap-2">
-          <p className="text-xs text-text-secondary">
-            {resultCount !== undefined && `${resultCount} matching result${resultCount === 1 ? '' : 's'}`}
-          </p>
-          {hasFilters && onClear && (
-            <Button type="button" variant="ghost" size="xs" onClick={onClear}>
-              <X aria-hidden="true" />
-              Clear filters
-            </Button>
+      <PopoverContent
+        anchor={anchorRef}
+        align="start"
+        className="w-[min(24rem,calc(100vw-2rem))] p-2"
+        ref={popupRef}
+      >
+        <div className="grid gap-2">
+          <PopoverHeader>
+            <PopoverTitle>
+              {editingIndex === undefined ? 'Add filter condition' : 'Edit filter condition'}
+            </PopoverTitle>
+            <PopoverDescription>
+              Choose a field, condition, and value.
+            </PopoverDescription>
+          </PopoverHeader>
+          {activeField && (
+            <ConditionEditor
+              fields={fields}
+              activeField={activeField}
+              draft={draft}
+              onFieldChange={updateField}
+              onOperatorChange={(operator) => setDraft((current) => ({ ...current, operator }))}
+              onValueChange={(value) => setDraft((current) => ({ ...current, value }))}
+            />
           )}
+          <Button
+            type="button"
+            variant="neutral"
+            size="sm"
+            disabled={!canApply}
+            onClick={applyCondition}
+          >
+            <Plus aria-hidden="true" />
+            {editingIndex === undefined ? 'Add condition' : 'Save condition'}
+          </Button>
         </div>
-      )}
-    </div>
+      </PopoverContent>
+    </Popover>
   )
+}
+
+type StoredConditionFilter = {
+  searchValue: string
+  conditions: ConditionFilterValue<string, ConditionFilterOperator>[]
+}
+
+function readStoredFilter<TField extends string, TOperator extends ConditionFilterOperator>(
+  key: string,
+  fields: readonly ConditionFilterField<TField, TOperator>[],
+): { searchValue: string; conditions: ConditionFilterValue<TField, TOperator>[] } | undefined {
+  try {
+    const stored = window.localStorage.getItem(key)
+    if (!stored) return undefined
+
+    const parsed: unknown = JSON.parse(stored)
+    if (!isStoredConditionFilter(parsed, fields)) return undefined
+    return parsed
+  } catch {
+    return undefined
+  }
+}
+
+function isStoredConditionFilter<TField extends string, TOperator extends ConditionFilterOperator>(
+  value: unknown,
+  fields: readonly ConditionFilterField<TField, TOperator>[],
+): value is { searchValue: string; conditions: ConditionFilterValue<TField, TOperator>[] } {
+  if (!value || typeof value !== 'object') return false
+  const stored = value as Partial<StoredConditionFilter>
+  return typeof stored.searchValue === 'string'
+    && Array.isArray(stored.conditions)
+    && stored.conditions.every((condition) => {
+      if (!condition || typeof condition !== 'object') return false
+      const field = fields.find((item) => item.id === condition.field)
+      return Boolean(
+        field
+        && typeof condition.value === 'string'
+        && field.operators.some((operator) => operator === condition.operator),
+      )
+    })
+}
+
+function writeStoredFilter(
+  key: string | undefined,
+  value: StoredConditionFilter,
+) {
+  if (!key) return
+  try {
+    window.localStorage.setItem(key, JSON.stringify(value))
+  } catch {
+    // Filtering remains available when browser storage is unavailable.
+  }
+}
+
+function ConditionFilterTokens<
+  TField extends string,
+  TOperator extends ConditionFilterOperator,
+>({
+  conditions,
+  fields,
+  onEdit,
+  onRemove,
+}: {
+  conditions: ConditionFilterValue<TField, TOperator>[]
+  fields: readonly ConditionFilterField<TField, TOperator>[]
+  onEdit: (index: number) => void
+  onRemove: (index: number) => void
+}) {
+  return conditions.map((condition, index) => {
+    const label = describeCondition(condition, fields)
+    return (
+      <span
+        key={`${condition.field}-${condition.operator}-${condition.value}-${index}`}
+        className="inline-flex max-w-full items-center rounded-xs bg-surface-muted text-text-primary"
+      >
+        <Button
+          type="button"
+          variant="ghost"
+          size="xs"
+          className="max-w-full justify-start truncate font-medium text-text-primary"
+          aria-label={`Edit ${label} condition`}
+          onClick={() => onEdit(index)}
+        >
+          <span className="truncate">{label}</span>
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon-xs"
+          className="me-0.5"
+          aria-label={`Remove ${label} condition`}
+          onClick={() => onRemove(index)}
+        >
+          <X aria-hidden="true" />
+        </Button>
+      </span>
+    )
+  })
+}
+
+function ConditionEditor<
+  TField extends string,
+  TOperator extends ConditionFilterOperator,
+>({
+  fields,
+  activeField,
+  draft,
+  onFieldChange,
+  onOperatorChange,
+  onValueChange,
+}: {
+  fields: readonly ConditionFilterField<TField, TOperator>[]
+  activeField: ConditionFilterField<TField, TOperator>
+  draft: ConditionDraft<TField, TOperator>
+  onFieldChange: (fieldId: string | null) => void
+  onOperatorChange: (operator: TOperator) => void
+  onValueChange: (value: string) => void
+}) {
+  return (
+    <>
+      <div className="grid grid-cols-2 gap-2">
+        <label className="grid gap-1 text-xs font-medium text-text-secondary">
+          Field
+          <Select value={activeField.id} onValueChange={onFieldChange}>
+            <SelectTrigger className="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {fields.map((field) => (
+                <SelectItem key={field.id} value={field.id}>
+                  {field.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </label>
+        <ConditionOperatorSelect
+          operators={activeField.operators}
+          value={draft.operator}
+          onChange={onOperatorChange}
+        />
+      </div>
+      <ConditionValueInput
+        field={activeField}
+        value={draft.value}
+        onChange={onValueChange}
+      />
+    </>
+  )
+}
+
+function ConditionOperatorSelect<TOperator extends ConditionFilterOperator>({
+  operators,
+  value,
+  onChange,
+}: {
+  operators: readonly TOperator[]
+  value: TOperator | ''
+  onChange: (operator: TOperator) => void
+}) {
+  return (
+    <label className="grid gap-1 text-xs font-medium text-text-secondary">
+      Condition
+      <Select
+        value={value || null}
+        onValueChange={(nextOperator) => {
+          const selectedOperator = operators.find((operator) => operator === nextOperator)
+          if (selectedOperator) onChange(selectedOperator)
+        }}
+      >
+        <SelectTrigger className="w-full">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          {operators.map((operator) => (
+            <SelectItem key={operator} value={operator}>
+              {operatorLabels[operator]}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </label>
+  )
+}
+
+function ConditionValueInput<
+  TField extends string,
+  TOperator extends ConditionFilterOperator,
+>({
+  field,
+  value,
+  onChange,
+}: {
+  field: ConditionFilterField<TField, TOperator>
+  value: string
+  onChange: (value: string) => void
+}) {
+  return (
+    <label className="grid gap-1 text-xs font-medium text-text-secondary">
+      Value
+      {field.valueKind === 'select' ? (
+        <Select value={value || null} onValueChange={(nextValue) => onChange(nextValue ?? '')}>
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Choose a value" />
+          </SelectTrigger>
+          <SelectContent>
+            {field.options?.map((option) => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      ) : (
+        <Input
+          type={field.valueKind === 'date' ? 'date' : 'text'}
+          value={value}
+          onChange={(event) => onChange(event.currentTarget.value)}
+          aria-label={`${field.label} filter value`}
+        />
+      )}
+    </label>
+  )
+}
+
+function createEmptyDraft<
+  TField extends string,
+  TOperator extends ConditionFilterOperator,
+>(fields: readonly ConditionFilterField<TField, TOperator>[]): ConditionDraft<TField, TOperator> {
+  const field = fields[0]
+  return {
+    field: field?.id ?? '',
+    operator: field?.operators[0] ?? '',
+    value: '',
+  }
+}
+
+function describeCondition<TField extends string, TOperator extends ConditionFilterOperator>(
+  condition: ConditionFilterValue<TField, TOperator>,
+  fields: readonly ConditionFilterField<TField, TOperator>[],
+) {
+  const field = fields.find((item) => item.id === condition.field)
+  const fieldLabel = field?.label ?? condition.field
+  const operatorLabel = operatorLabels[condition.operator]
+  const valueLabel = field?.options?.find((option) => option.value === condition.value)?.label
+    ?? condition.value
+  return `${fieldLabel} ${operatorLabel} ${valueLabel}`
 }

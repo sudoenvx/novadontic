@@ -1,5 +1,48 @@
 import type { Prisma } from '../../src/generated/prisma/client.ts';
-import { permissionDefinitions, roleDefinitions } from './catalog.ts';
+import { permissionDefinitions, roleDefinitions, type SeedRoleCode } from './catalog.ts';
+
+const technicianPermissions = new Set([
+  'dashboard:view',
+  'cases:view',
+  'cases:update',
+  'cases:move',
+  'case_files:view',
+  'case_files:upload',
+  'case_files:update',
+  'case_files:download',
+  'case_activity:view',
+  'case_activity:add_note',
+  'production_steps:view',
+  'production_steps:assign',
+  'production_steps:update',
+  'appliances:view',
+  'appliance_fields:view',
+  'workflows:view',
+  'doctors:view',
+  'clinics:view',
+  'staff:view',
+]);
+
+const qualityControllerPermissions = new Set([
+  'dashboard:view',
+  'cases:view',
+  'cases:update',
+  'cases:approve',
+  'cases:move',
+  'case_files:view',
+  'case_files:upload',
+  'case_files:update',
+  'case_files:download',
+  'case_activity:view',
+  'case_activity:add_note',
+  'production_steps:view',
+  'production_steps:update',
+  'appliances:view',
+  'appliance_fields:view',
+  'workflows:view',
+  'doctors:view',
+  'clinics:view',
+]);
 
 export async function seedAccessControl(
   transaction: Prisma.TransactionClient,
@@ -31,9 +74,7 @@ export async function seedAccessControl(
     const roleId = roleIds.get(definition.code);
     if (roleId === undefined) throw new Error(`Seed role "${definition.code}" was not created.`);
 
-    const grantedPermissions = definition.code === 'developer'
-      ? permissionDefinitions.filter(([code]) => !code.startsWith('account:'))
-      : permissionDefinitions;
+    const grantedPermissions = permissionsForRole(definition.code);
 
     await transaction.rolePermission.deleteMany({ where: { roleId } });
     await transaction.rolePermission.createMany({
@@ -48,4 +89,14 @@ export async function seedAccessControl(
   }
 
   return roleIds;
+}
+
+function permissionsForRole(roleCode: SeedRoleCode) {
+  if (roleCode === 'owner' || roleCode === 'administrator') {
+    return permissionDefinitions;
+  }
+  const allowedPermissions = roleCode === 'technician'
+    ? technicianPermissions
+    : qualityControllerPermissions;
+  return permissionDefinitions.filter(([code]) => allowedPermissions.has(code));
 }

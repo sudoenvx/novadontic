@@ -12,6 +12,7 @@ import type { Clinic } from '../domain/clinic'
 
 type ClinicTableProps = {
   clinics: Clinic[]
+  loading?: boolean
   onEdit: (clinic: Clinic) => void
   onSetActive: (clinic: Clinic) => void
   title?: string
@@ -19,6 +20,7 @@ type ClinicTableProps = {
 
 export function ClinicTable({
   clinics,
+  loading = false,
   onEdit,
   onSetActive,
   title,
@@ -79,6 +81,7 @@ export function ClinicTable({
     {
       id: 'actions',
       header: '',
+      showInColumnVisualizer: false,
       headerClassName: 'w-10',
       className: 'w-10',
       cell: (clinic) => (
@@ -112,8 +115,10 @@ export function ClinicTable({
     <DataTable
       columns={columns}
       data={clinics}
+      persistenceKey="clinic-list"
       emptyMessage="No clinics match your search."
       getRowId={(clinic) => clinic.id}
+      loading={loading}
       title={title}
     />
   )

@@ -1,6 +1,7 @@
 import { Card, CardHeader, CardTitle } from '../../../../shared/ui/Card'
 import { Field, FieldContent, FieldLabel } from '../../../../shared/ui/Field'
 import { Input } from '../../../../shared/ui/Input'
+import { FieldLoading } from '../../../../shared/ui/Loading'
 import {
   Select,
   SelectContent,
@@ -17,6 +18,7 @@ const noClinicOption = '__no_clinic__'
 type CreateCasePatientFieldsProps = {
   values: CreateCaseValues
   doctors: Doctor[]
+  doctorsLoading: boolean
   onClinicChange: (clinicId: string) => void
   onUpdateValue: CreateCaseValueUpdater
 }
@@ -24,6 +26,7 @@ type CreateCasePatientFieldsProps = {
 export function CreateCasePatientFields({
   values,
   doctors,
+  doctorsLoading,
   onClinicChange,
   onUpdateValue,
 }: CreateCasePatientFieldsProps) {
@@ -67,25 +70,29 @@ export function CreateCasePatientFields({
         <Field>
           <FieldLabel htmlFor="case-clinic">Clinic (optional)</FieldLabel>
           <FieldContent>
-            <Select
-              items={[
-                { value: noClinicOption, label: 'All clinics / portal' },
-                ...clinics.map((clinic) => ({ value: clinic.id, label: clinic.name })),
-              ]}
-              value={values.clinicId || noClinicOption}
-              onValueChange={(value) => onClinicChange(value === noClinicOption ? '' : (value ?? ''))}
-              disabled={clinicsQuery.isPending || clinicsQuery.isError}
-            >
-              <SelectTrigger id="case-clinic" className="w-full">
-                <SelectValue placeholder="All clinics / portal" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value={noClinicOption}>All clinics / portal</SelectItem>
-                {clinics.map((clinic) => (
-                  <SelectItem key={clinic.id} value={clinic.id}>{clinic.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            {clinicsQuery.isPending ? (
+              <FieldLoading label="Loading clinic options" />
+            ) : (
+              <Select
+                items={[
+                  { value: noClinicOption, label: 'All clinics / portal' },
+                  ...clinics.map((clinic) => ({ value: clinic.id, label: clinic.name })),
+                ]}
+                value={values.clinicId || noClinicOption}
+                onValueChange={(value) => onClinicChange(value === noClinicOption ? '' : (value ?? ''))}
+                disabled={clinicsQuery.isError}
+              >
+                <SelectTrigger id="case-clinic" className="w-full">
+                  <SelectValue placeholder="All clinics / portal" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={noClinicOption}>All clinics / portal</SelectItem>
+                  {clinics.map((clinic) => (
+                    <SelectItem key={clinic.id} value={clinic.id}>{clinic.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
             {clinicsQuery.isError && (
               <p role="alert" className="text-xs text-destructive">
                 Could not load clinics. Please retry before selecting a clinic.
@@ -98,23 +105,27 @@ export function CreateCasePatientFields({
             Doctor <span aria-hidden="true" className="text-destructive">*</span>
           </FieldLabel>
           <FieldContent>
-            <Select
-              items={doctors.map((doctor) => ({ value: doctor.id, label: doctor.fullName }))}
-              value={values.doctorId}
-              onValueChange={(value) => onUpdateValue('doctorId', value ?? '')}
-              disabled={doctors.length === 0}
-            >
-              <SelectTrigger id="case-doctor" className="w-full">
-                <SelectValue
-                  placeholder={doctors.length > 0 ? 'Select doctor' : 'No doctors available'}
-                />
-              </SelectTrigger>
-              <SelectContent>
-                {doctors.map((doctor) => (
-                  <SelectItem key={doctor.id} value={doctor.id}>{doctor.fullName}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            {doctorsLoading ? (
+              <FieldLoading label="Loading doctor options" />
+            ) : (
+              <Select
+                items={doctors.map((doctor) => ({ value: doctor.id, label: doctor.fullName }))}
+                value={values.doctorId}
+                onValueChange={(value) => onUpdateValue('doctorId', value ?? '')}
+                disabled={doctors.length === 0}
+              >
+                <SelectTrigger id="case-doctor" className="w-full">
+                  <SelectValue
+                    placeholder={doctors.length > 0 ? 'Select doctor' : 'No doctors available'}
+                  />
+                </SelectTrigger>
+                <SelectContent>
+                  {doctors.map((doctor) => (
+                    <SelectItem key={doctor.id} value={doctor.id}>{doctor.fullName}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
           </FieldContent>
         </Field>
       </div>

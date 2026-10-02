@@ -5,6 +5,7 @@ model WorkflowTemplate {
   isDefault       Boolean         @default(false) @map("is_default")
   applianceType   ApplianceType?  @relation(fields: [applianceTypeId], references: [id], onDelete: SetNull)
   stages          WorkflowStage[]
+  cases           CaseRecord[]
 
   @@map("workflow_templates")
 }

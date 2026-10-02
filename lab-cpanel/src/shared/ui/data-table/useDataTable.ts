@@ -9,6 +9,7 @@ type UseDataTableOptions<TData> = {
   selectable?: boolean
   selectedRowIds?: Array<string | number>
   defaultSelectedRowIds?: Array<string | number>
+  defaultSortState?: DataTableSortState
   onSelectionChange?: (rows: TData[]) => void
 }
 
@@ -16,12 +17,13 @@ export function useDataTable<TData>({
   columns,
   data,
   defaultSelectedRowIds,
+  defaultSortState,
   getRowId,
   onSelectionChange,
   selectable = false,
   selectedRowIds,
 }: UseDataTableOptions<TData>) {
-  const [sortState, setSortState] = useState<DataTableSortState>()
+  const [sortState, setSortState] = useState<DataTableSortState | undefined>(defaultSortState)
   const [internalSelectedRowIds, setInternalSelectedRowIds] = useState(
     () => new Set((defaultSelectedRowIds ?? []).map(String)),
   )

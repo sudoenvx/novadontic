@@ -35,7 +35,7 @@ export function DataTableHeader<TData>({
       {selectable && (
         <TableHead
           className={cn(
-            'sticky top-0 z-20 w-10 px-3 text-center bg-neutral-50 align-middle',
+            'sticky top-0 z-20 w-10 border-b border-border-soft px-3 text-center bg-neutral-50 align-middle',
             hasPinnedColumns && 'left-0 z-40 bg-neutral-50',
           )}
           style={hasPinnedColumns ? { left: 0 } : undefined}
@@ -89,9 +89,9 @@ function HeaderContent<TData>({
   const nextDirection = isActive && sortState.direction === 'asc' ? 'desc' : 'asc'
 
   return (
-    <div className="flex min-w-0 items-center gap-3">
-      <span className="min-w-0 truncate">{column.header}</span>
-      <div className="flex shrink-0 items-center gap-1">
+    <div className="flex min-w-0 items-center gap-2">
+      <span className="min-w-0 truncate uppercase">{column.header}</span>
+      <div className="flex shrink-0 items-center gap-0">
         {column.sortable === true && (
           <button
             type="button"

@@ -17,9 +17,8 @@ export type CaseFilterOptions = {
 type CaseFiltersProps = {
   filters: CaseListFilters
   options: CaseFilterOptions
-  totalCount: number
+  persistenceKey: string
   onChange: (filters: CaseListFilters) => void
-  onReset: () => void
 }
 
 const equalityOperators: CaseConditionOperator[] = ['is', 'is-not']
@@ -35,9 +34,8 @@ const dateOperators: CaseConditionOperator[] = [
 export function CaseFilters({
   filters,
   options,
-  totalCount,
+  persistenceKey,
   onChange,
-  onReset,
 }: CaseFiltersProps) {
   const fields: ConditionFilterField<CaseConditionField, CaseConditionOperator>[] = [
     {
@@ -103,9 +101,13 @@ export function CaseFilters({
       onConditionsChange={(conditions) => onChange({ ...filters, conditions })}
       searchValue={filters.searchTerm}
       onSearchValueChange={(searchTerm) => onChange({ ...filters, searchTerm })}
+      onPersistedStateChange={(state) => onChange({
+        ...filters,
+        conditions: state.conditions,
+        searchTerm: state.searchValue,
+      })}
       placeholder="Search cases or add a condition…"
-      resultCount={totalCount}
-      onClear={onReset}
+      persistenceKey={persistenceKey}
     />
   )
 }

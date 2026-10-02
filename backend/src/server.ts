@@ -1,4 +1,5 @@
 import { createServer } from 'node:http';
+import { resolve } from 'node:path';
 import { createApp } from './app/app.ts';
 import { createApiRoutes } from './app/routes.ts';
 import { corsOrigin } from './config/cors.ts';
@@ -12,11 +13,13 @@ import { DoctorsService } from './modules/doctors/index.ts';
 import { RolesService } from './modules/roles/index.ts';
 import { SettingsService } from './modules/settings/index.ts';
 import { StaffService } from './modules/staff/index.ts';
+import { WorkflowsService } from './modules/workflows/index.ts';
+import { CaseAssetsService, CaseFileStorage, CasesService } from './modules/cases/index.ts';
 import { attachSocketServer } from './shared/realtime/socket-server.ts';
 import { AccessTokenService } from './shared/security/access-tokens.ts';
-import { Argon2PasswordHasher } from './shared/security/passwords.ts';
+import { BcryptPasswordHasher } from './shared/security/passwords.ts';
 
-const passwordHasher = new Argon2PasswordHasher();
+const passwordHasher = new BcryptPasswordHasher();
 const auth = new AuthService(
   database,
   passwordHasher,
@@ -29,7 +32,23 @@ const doctors = new DoctorsService(database);
 const roles = new RolesService(database);
 const settings = new SettingsService(database);
 const staff = new StaffService(database, passwordHasher);
-const app = createApp(createApiRoutes(auth, appliances, clinics, doctors, roles, settings, staff));
+const workflows = new WorkflowsService(database);
+const cases = new CasesService(database);
+const caseFileStorage = new CaseFileStorage(resolve(process.cwd(), env.CASE_FILES_STORAGE_DIR));
+const caseAssets = new CaseAssetsService(database, caseFileStorage);
+const app = createApp(createApiRoutes(
+  auth,
+  appliances,
+  clinics,
+  doctors,
+  roles,
+  settings,
+  staff,
+  workflows,
+  cases,
+  caseAssets,
+  caseFileStorage,
+));
 const server = createServer(app);
 const io = attachSocketServer(server, corsOrigin);
 

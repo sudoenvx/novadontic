@@ -26,6 +26,10 @@ type StageFilesProps = {
   onDownload: (file: CasePipelineFile) => void
   onDelete: (file: CasePipelineFile) => void
   onRenameChange: (name: string) => void
+  canUpload: boolean
+  canRename: boolean
+  canDownload: boolean
+  canDelete: boolean
 }
 
 export function StageFiles({
@@ -41,6 +45,10 @@ export function StageFiles({
   onDownload,
   onDelete,
   onRenameChange,
+  canUpload,
+  canRename,
+  canDownload,
+  canDelete,
 }: StageFilesProps) {
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -66,10 +74,12 @@ export function StageFiles({
           <FileCode size={13} className="text-primary" />
           <span className="text-xs font-semibold text-text-primary">Stage files ({files.length})</span>
         </div>
-        <Button size="xs" variant="outline" onClick={openFilePicker}>
-          <Upload size={12} />
-          <span>Add file</span>
-        </Button>
+        {canUpload && (
+          <Button size="xs" variant="outline" onClick={openFilePicker}>
+            <Upload size={12} />
+            <span>Add file</span>
+          </Button>
+        )}
       </div>
 
       {files.length ? (
@@ -101,16 +111,18 @@ export function StageFiles({
                           }}
                           autoFocus
                         />
-                        <Button size="icon-sm" variant="ghost" aria-label="Save file name" onClick={() => onRename(file.id)}>
-                          <Save />
-                        </Button>
+                        {canRename && (
+                          <Button size="icon-sm" variant="ghost" aria-label="Save file name" onClick={() => onRename(file.id)}>
+                            <Save />
+                          </Button>
+                        )}
                         <Button size="icon-sm" variant="ghost" aria-label="Cancel rename" onClick={onCancelRename}>
                           <X />
                         </Button>
                       </div>
-                    ) : canPreviewModel ? (
+                    ) : canPreviewModel && canDownload ? (
                       <Link
-                        to={getModelViewerHref(file.name, caseNumberCode, doctorName)}
+                        to={getModelViewerHref(file, caseNumberCode, doctorName)}
                         className="block truncate text-sm font-medium text-primary hover:underline"
                         aria-label={`View ${file.name} in 3D model viewer`}
                       >
@@ -126,9 +138,9 @@ export function StageFiles({
                 </div>
 
                 <div className="flex items-center gap-0.5">
-                  {canPreviewModel && !isEditing && (
+                  {canPreviewModel && canDownload && !isEditing && (
                     <Link
-                      to={getModelViewerHref(file.name, caseNumberCode, doctorName)}
+                      to={getModelViewerHref(file, caseNumberCode, doctorName)}
                       className={buttonVariants({ variant: 'ghost', size: 'icon-sm' })}
                       aria-label={`Open ${file.name} in 3D model viewer`}
                       title="View 3D model"
@@ -136,34 +148,40 @@ export function StageFiles({
                       <Boxes />
                     </Link>
                   )}
-                  <Button
-                    size="icon-sm"
-                    variant="ghost"
-                    onClick={() => onStartRename(file)}
-                    title={`Rename ${file.name}`}
-                    aria-label={`Rename ${file.name}`}
-                  >
-                    <Pencil />
-                  </Button>
-                  <Button
-                    size="icon-sm"
-                    variant="ghost"
-                    onClick={() => onDownload(file)}
-                    title={`Download ${file.name}`}
-                    aria-label={`Download ${file.name}`}
-                  >
-                    <Download />
-                  </Button>
-                  <Button
-                    size="icon-sm"
-                    variant="ghost"
-                    onClick={() => onDelete(file)}
-                    className="text-destructive hover:bg-destructive-soft hover:text-destructive"
-                    title={`Delete ${file.name}`}
-                    aria-label={`Delete ${file.name}`}
-                  >
-                    <Trash2 />
-                  </Button>
+                  {canRename && (
+                    <Button
+                      size="icon-sm"
+                      variant="ghost"
+                      onClick={() => onStartRename(file)}
+                      title={`Rename ${file.name}`}
+                      aria-label={`Rename ${file.name}`}
+                    >
+                      <Pencil />
+                    </Button>
+                  )}
+                  {canDownload && (
+                    <Button
+                      size="icon-sm"
+                      variant="ghost"
+                      onClick={() => onDownload(file)}
+                      title={`Download ${file.name}`}
+                      aria-label={`Download ${file.name}`}
+                    >
+                      <Download />
+                    </Button>
+                  )}
+                  {canDelete && (
+                    <Button
+                      size="icon-sm"
+                      variant="ghost"
+                      onClick={() => onDelete(file)}
+                      className="text-destructive hover:bg-destructive-soft hover:text-destructive"
+                      title={`Delete ${file.name}`}
+                      aria-label={`Delete ${file.name}`}
+                    >
+                      <Trash2 />
+                    </Button>
+                  )}
                 </div>
               </div>
             )
@@ -172,24 +190,31 @@ export function StageFiles({
       ) : (
         <div className="empty-state grid justify-items-center gap-1.5 py-4">
           <p className="text-sm">No files uploaded for this stage yet.</p>
-          <Button
-            size="xs"
-            variant="ghost"
-            onClick={openFilePicker}
-            className="h-auto rounded-sm px-2 py-0.5 text-primary hover:bg-primary-soft hover:text-primary-soft-foreground"
-          >
-            <Upload size={12} />
-            <span>Upload CAD, scan or document</span>
-          </Button>
+          {canUpload && (
+            <Button
+              size="xs"
+              variant="ghost"
+              onClick={openFilePicker}
+              className="h-auto rounded-sm px-2 py-0.5 text-primary hover:bg-primary-soft hover:text-primary-soft-foreground"
+            >
+              <Upload size={12} />
+              <span>Upload CAD, scan or document</span>
+            </Button>
+          )}
         </div>
       )}
     </section>
   )
 }
 
-function getModelViewerHref(fileName: string, caseNumberCode: string, doctorName: string) {
+function getModelViewerHref(
+  file: CasePipelineFile,
+  caseNumberCode: string,
+  doctorName: string,
+) {
   const searchParams = new URLSearchParams({
-    fileName,
+    fileId: file.id,
+    fileName: file.name,
     caseNumber: caseNumberCode,
     doctorName,
   })

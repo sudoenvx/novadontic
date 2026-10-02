@@ -2,7 +2,6 @@ import {
   Building2,
   ChevronDown,
   ClipboardList,
-  Keyboard,
   LayoutDashboard,
   LogOut,
   Settings,
@@ -102,11 +101,9 @@ export function AppUserMenu({ compact = false }: AppUserMenuProps) {
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
           <DropdownMenuLabel>Account</DropdownMenuLabel>
-          <DropdownMenuItem onClick={() => navigate('/lab-profile')}><Building2 /> Lab profile</DropdownMenuItem>
           <DropdownMenuItem onClick={() => navigate('/staff')}><UsersRound /> Staff</DropdownMenuItem>
           <DropdownMenuItem onClick={() => navigate('/roles-permissions')}><ShieldCheck /> Roles &amp; permissions</DropdownMenuItem>
           <DropdownMenuItem onClick={() => navigate('/settings')}><Settings /> Settings</DropdownMenuItem>
-          <DropdownMenuItem><Keyboard /> Keyboard shortcuts</DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem variant="destructive" onClick={() => void handleSignOut()}><LogOut /> Log out</DropdownMenuItem>
         </DropdownMenuGroup>

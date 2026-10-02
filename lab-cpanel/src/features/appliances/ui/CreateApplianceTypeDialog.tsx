@@ -11,17 +11,15 @@ import {
 } from '../../../shared/ui/Dialog'
 import { Input } from '../../../shared/ui/Input'
 import { Label } from '../../../shared/ui/Label'
-import type { Appliance } from '../domain/appliance'
+import type { ApplianceTypeInput } from '../domain/appliance'
+import { getApiErrorMessage } from '../../../shared/api/apiError'
 
 type CreateApplianceTypeDialogProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
-  onCreate: (appliance: Appliance) => void
+  onCreate: (input: ApplianceTypeInput) => Promise<void>
   isNameAvailable: (name: string) => boolean
-}
-
-function createId(name: string) {
-  return name.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || `appliance-${Date.now()}`
+  isPending?: boolean
 }
 
 export function CreateApplianceTypeDialog({
@@ -29,6 +27,7 @@ export function CreateApplianceTypeDialog({
   onOpenChange,
   onCreate,
   isNameAvailable,
+  isPending = false,
 }: CreateApplianceTypeDialogProps) {
   const [name, setName] = useState('')
   const [error, setError] = useState('')
@@ -41,7 +40,7 @@ export function CreateApplianceTypeDialog({
     onOpenChange(nextOpen)
   }
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     const normalizedName = name.trim()
 
@@ -54,15 +53,12 @@ export function CreateApplianceTypeDialog({
       return
     }
 
-    onCreate({
-      id: createId(normalizedName),
-      name: normalizedName,
-      source: 'Custom type',
-      isActive: true,
-      casesUsing: 0,
-      groups: [],
-    })
-    handleOpenChange(false)
+    try {
+      await onCreate({ name: normalizedName })
+      handleOpenChange(false)
+    } catch (submitError) {
+      setError(getApiErrorMessage(submitError, 'Could not create appliance type.'))
+    }
   }
 
   return (
@@ -80,7 +76,9 @@ export function CreateApplianceTypeDialog({
           {error && <p className="text-xs text-destructive">{error}</p>}
           <DialogFooter>
             <Button type="button" variant="neutral" onClick={() => handleOpenChange(false)}>Cancel</Button>
-            <Button type="submit">Create appliance</Button>
+            <Button type="submit" disabled={isPending}>
+              {isPending ? 'Creating…' : 'Create appliance'}
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>

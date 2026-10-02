@@ -1,4 +1,4 @@
-import { Building2, ClipboardList, FileText, Home, Settings, ShieldCheck, SlidersHorizontal, Stethoscope, UsersRound, Workflow } from 'lucide-react'
+import { Building2, ClipboardList, Home, Settings, ShieldCheck, SlidersHorizontal, Stethoscope, UsersRound, Workflow } from 'lucide-react'
 import { NavLink, useLocation } from 'react-router-dom'
 
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../../shared/ui/Tooltip'
@@ -11,8 +11,6 @@ const navigationItems = [
   { label: 'Clinics', path: '/clinics', icon: Building2 },
   { label: 'Appliances & fields', path: '/appliances', icon: SlidersHorizontal },
   { label: 'Workflow templates', path: '/appliance-workflow-templates', icon: Workflow },
-  { label: 'Policies & terms', path: '/policies', icon: FileText },
-  { label: 'Lab profile', path: '/lab-profile', icon: Building2 },
   { label: 'Staff', path: '/staff', icon: UsersRound },
   { label: 'Roles & permissions', path: '/roles-permissions', icon: ShieldCheck },
   { label: 'Lab settings', path: '/settings', icon: Settings },

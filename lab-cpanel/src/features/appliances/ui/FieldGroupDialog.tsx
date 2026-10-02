@@ -11,18 +11,20 @@ import {
 } from '../../../shared/ui/Dialog'
 import { Input } from '../../../shared/ui/Input'
 import { Label } from '../../../shared/ui/Label'
+import { getApiErrorMessage } from '../../../shared/api/apiError'
 
 type FieldGroupDialogProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
-  onCreate: (name: string) => void
+  onCreate: (name: string) => Promise<void>
   isNameAvailable: (name: string) => boolean
+  isPending?: boolean
   initialName?: string
   title?: string
   submitLabel?: string
 }
 
-export function FieldGroupDialog({ open, onOpenChange, onCreate, isNameAvailable, initialName = '', title = 'Add field group', submitLabel = 'Add group' }: FieldGroupDialogProps) {
+export function FieldGroupDialog({ open, onOpenChange, onCreate, isNameAvailable, initialName = '', title = 'Add field group', submitLabel = 'Add group', isPending = false }: FieldGroupDialogProps) {
   const [name, setName] = useState(initialName)
   const [error, setError] = useState('')
 
@@ -34,7 +36,7 @@ export function FieldGroupDialog({ open, onOpenChange, onCreate, isNameAvailable
     onOpenChange(nextOpen)
   }
 
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
     if (!name.trim()) {
       setError('Enter a group name.')
@@ -44,8 +46,12 @@ export function FieldGroupDialog({ open, onOpenChange, onCreate, isNameAvailable
       setError('A group with this name already exists.')
       return
     }
-    onCreate(name.trim())
-    handleOpenChange(false)
+    try {
+      await onCreate(name.trim())
+      handleOpenChange(false)
+    } catch (submitError) {
+      setError(getApiErrorMessage(submitError, 'Could not save field group.'))
+    }
   }
 
   return (
@@ -63,7 +69,9 @@ export function FieldGroupDialog({ open, onOpenChange, onCreate, isNameAvailable
           {error && <p className="text-xs text-destructive">{error}</p>}
           <DialogFooter>
             <Button type="button" variant="neutral" onClick={() => handleOpenChange(false)}>Cancel</Button>
-            <Button type="submit">{submitLabel}</Button>
+            <Button type="submit" disabled={isPending}>
+              {isPending ? 'Saving…' : submitLabel}
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>

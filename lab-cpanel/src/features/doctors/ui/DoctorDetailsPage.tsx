@@ -5,6 +5,7 @@ import { useClinicOptions } from '../../clinics/queries/clinic.queries'
 import { getApiErrorMessage } from '../../../shared/api/apiError'
 import { Button } from '../../../shared/ui/Button'
 import { Card, CardDescription, CardHeader, CardTitle } from '../../../shared/ui/Card'
+import { PageLoading } from '../../../shared/ui/Loading'
 import { Page } from '../../../shared/ui/Page'
 import { toast } from '../../../shared/ui/Toast'
 import {
@@ -14,7 +15,6 @@ import {
 import { DoctorPortalStatusBadge } from './DoctorPortalStatusBadge'
 import { DoctorFormDialog } from './DoctorFormDialog'
 import type { DoctorInput } from '../domain/doctor'
-import { PersonAvatar } from './PersonAvatar'
 
 export function DoctorDetailsPage() {
   const { doctorId = '' } = useParams<{ doctorId: string }>()
@@ -46,7 +46,7 @@ export function DoctorDetailsPage() {
   if (doctorQuery.isPending) {
     return (
       <Page size="full">
-        <p role="status">Loading doctor…</p>
+        <PageLoading label="Loading doctor profile" />
       </Page>
     )
   }
@@ -78,7 +78,6 @@ export function DoctorDetailsPage() {
         </Button>
         <Card size="sm" className="gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div className="flex min-w-0 items-start gap-3">
-            <PersonAvatar name={doctor.fullName} size="lg" />
             <div className="min-w-0">
               <h1 className="truncate text-xl font-semibold text-text">
                 {doctor.fullName}

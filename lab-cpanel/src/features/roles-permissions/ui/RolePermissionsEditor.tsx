@@ -14,14 +14,18 @@ import {
   DialogTitle,
 } from "../../../shared/ui/Dialog";
 import type { Permission, Role } from "../domain/role";
-import { permissionGroups } from "../domain/role";
+import type { PermissionGroup } from "../domain/role";
 
 type RolePermissionsEditorProps = {
   role: Role;
-  onDelete: (roleId: string) => void;
+  permissionGroups: PermissionGroup[];
+  onDelete: (roleId: string) => Promise<boolean>;
   onEdit: () => void;
   onSave: () => void;
   onPermissionToggle: (permission: Permission, checked: boolean) => void;
+  isSaving: boolean;
+  isDeleting: boolean;
+  hasPermissionChanges: boolean;
 };
 
 export function RolePermissionsEditor({
@@ -29,7 +33,11 @@ export function RolePermissionsEditor({
   onEdit,
   onSave,
   onPermissionToggle,
+  permissionGroups,
   role,
+  isSaving,
+  isDeleting,
+  hasPermissionChanges,
 }: RolePermissionsEditorProps) {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const selectedCount = role.permissions.length;
@@ -58,18 +66,27 @@ export function RolePermissionsEditor({
         </div>
         <div className="flex flex-wrap items-center justify-end gap-2">
           
-          <Button variant="outline" onClick={onEdit}>
+          <Button variant="outline" onClick={onEdit} disabled={isSaving || isDeleting}>
             <Pencil /> Edit role
           </Button>
 
-          <Button onClick={onSave}>
+          <Button
+            onClick={onSave}
+            disabled={
+              role.type === "owner" ||
+              !hasPermissionChanges ||
+              isSaving ||
+              isDeleting
+            }
+          >
             <Save />
-            Save
+            {isSaving ? "Saving..." : "Save"}
           </Button>
           {role.type === "custom" && role.staffCount === 0 && (
             <Button
               variant="destructive"
               onClick={() => setIsDeleteDialogOpen(true)}
+              disabled={isSaving || isDeleting}
             >
               <Trash2 /> Delete role
             </Button>
@@ -100,7 +117,7 @@ export function RolePermissionsEditor({
                       onPermissionToggle(permission.id, checked)
                     }
                     aria-label={permission.label}
-                    disabled={role.type === "owner"}
+                    disabled={role.type === "owner" || isSaving || isDeleting}
                   />
                   <span className="grid gap-0.5">
                     <span className="text-sm font-medium text-text">
@@ -109,9 +126,11 @@ export function RolePermissionsEditor({
                     <span className="font-mono text-2xs text-text-secondary">
                       {permission.id}
                     </span>
-                    <span className="text-xs text-text-muted">
-                      {permission.description}
-                    </span>
+                    {permission.description && (
+                      <span className="text-xs text-text-muted">
+                        {permission.description}
+                      </span>
+                    )}
                   </span>
                 </label>
               ))}
@@ -136,12 +155,12 @@ export function RolePermissionsEditor({
             </Button>
             <Button
               variant="destructive"
-              onClick={() => {
-                onDelete(role.id);
-                setIsDeleteDialogOpen(false);
+              disabled={isDeleting}
+              onClick={async () => {
+                if (await onDelete(role.id)) setIsDeleteDialogOpen(false);
               }}
             >
-              Delete role
+              {isDeleting ? "Deleting..." : "Delete role"}
             </Button>
           </DialogFooter>
         </DialogContent>

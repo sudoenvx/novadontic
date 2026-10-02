@@ -1,5 +1,5 @@
-export type CaseType = 'Aligner' | 'Retainer'
-export type CaseStage = 'Planning' | 'Production' | 'Quality check' | 'Ready'
+export type CaseType = string
+export type CaseStage = string
 export type CaseStatus = 'On track' | 'Due today' | 'Needs attention'
 
 export type DashboardCase = {

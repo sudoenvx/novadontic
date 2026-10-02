@@ -15,6 +15,7 @@ export type DataTableColumn<TData> = {
   sortable?: boolean
   sortValue?: (row: TData) => unknown
   pinnable?: boolean
+  showInColumnVisualizer?: boolean
   className?: string
   headerClassName?: string
 }
@@ -46,6 +47,7 @@ export type DataTableProps<TData> = {
   selectedRowIds?: Array<string | number>
   defaultSelectedRowIds?: Array<string | number>
   defaultPinnedColumnIds?: string[]
+  persistenceKey?: string
   onSelectionChange?: (rows: TData[]) => void
   className?: string
 }

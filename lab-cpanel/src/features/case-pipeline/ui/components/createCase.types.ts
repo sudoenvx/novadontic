@@ -7,6 +7,7 @@ export type CreateCaseValues = {
   clinicId: string
   doctorId: string
   applianceId: string
+  categoryName?: string
   categoryId: string
   workflowTemplateId: string
   dueDate?: string

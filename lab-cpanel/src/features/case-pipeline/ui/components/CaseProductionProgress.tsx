@@ -1,11 +1,11 @@
 import { Check } from 'lucide-react'
 
 import { Card, CardHeader, CardTitle } from '../../../../shared/ui/Card'
-import { casePipelineStages, getStageIndex } from '../../domain/casePipeline'
 import type { CasePipelineCase } from '../../domain/casePipeline'
 
 export function CaseProductionProgress({ caseItem }: { caseItem: CasePipelineCase }) {
-  const currentIndex = getStageIndex(caseItem.stage)
+  const stages = caseItem.productionSteps
+  const currentIndex = stages.findIndex((step) => step.status === 'active')
 
   return (
     <Card size="sm">
@@ -13,14 +13,17 @@ export function CaseProductionProgress({ caseItem }: { caseItem: CasePipelineCas
         <CardTitle>Production progress</CardTitle>
       </CardHeader>
       <div className="overflow-x-auto pb-1">
-        <div className="grid min-w-[580px] grid-cols-6 gap-1">
-          {casePipelineStages.map((stage, index) => {
-            const isComplete = index < currentIndex
-            const isCurrent = index === currentIndex
+        <div
+          className="grid min-w-[580px] gap-1"
+          style={{ gridTemplateColumns: `repeat(${Math.max(stages.length, 1)}, minmax(0, 1fr))` }}
+        >
+          {stages.map((stage, index) => {
+            const isComplete = stage.status === 'completed' || index < currentIndex
+            const isCurrent = currentIndex >= 0 && index === currentIndex
 
             return (
-              <div key={stage} className="relative grid gap-1 text-center">
-                {index < casePipelineStages.length - 1 && (
+              <div key={stage.id} className="relative grid gap-1 text-center">
+                {index < stages.length - 1 && (
                   <span
                     className={`absolute top-3 left-1/2 h-0.5 w-full ${index < currentIndex ? 'bg-primary' : 'bg-surface-muted'}`}
                     aria-hidden="true"
@@ -32,7 +35,7 @@ export function CaseProductionProgress({ caseItem }: { caseItem: CasePipelineCas
                   {isComplete ? <Check className="size-3.5" /> : index + 1}
                 </span>
                 <span className={`text-xs font-semibold ${isCurrent ? 'text-text' : 'text-text-muted'}`}>
-                  {stage}
+                  {stage.name}
                 </span>
                 {/* <span className="text-xs text-text-muted">
                   {isCurrent ? 'Current' : isComplete ? 'Completed' : 'Pending'}
@@ -40,6 +43,11 @@ export function CaseProductionProgress({ caseItem }: { caseItem: CasePipelineCas
               </div>
             )
           })}
+          {stages.length === 0 && (
+            <p className="col-span-full text-center text-sm text-text-muted">
+              No production stages are configured for this workflow.
+            </p>
+          )}
         </div>
       </div>
     </Card>

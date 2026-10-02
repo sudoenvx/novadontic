@@ -17,14 +17,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../../../shared/ui/Select";
-import { applianceFixtures } from "../data/appliances";
 import { filterCasesByType } from "../domain/case";
 import type { CaseStatus, CaseType, DashboardCase } from "../domain/case";
 
-const caseTypeColor: Record<
+const caseTypeColor: Partial<Record<
   CaseType,
   { color: string; foregroundColor: string }
-> = {
+>> = {
   Aligner: {
     color: "var(--color-primary-soft)",
     foregroundColor: "var(--color-primary-soft-foreground)",
@@ -53,9 +52,6 @@ const columns: DataTableColumn<DashboardCase>[] = [
         to={`/cases/${dashboardCase.id}`}
         className="flex items-center gap-2.5 rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
       >
-        <span className="grid size-8 shrink-0 place-items-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
-          {dashboardCase.assignee}
-        </span>
         <div>
           <p className="font-semibold text-text">{dashboardCase.id}</p>
           <p className="text-sm text-text-muted">
@@ -71,8 +67,9 @@ const columns: DataTableColumn<DashboardCase>[] = [
     accessorKey: "caseType",
     cell: (dashboardCase) => (
       <Badge
-        color={caseTypeColor[dashboardCase.caseType].color}
-        foregroundColor={caseTypeColor[dashboardCase.caseType].foregroundColor}
+        color={caseTypeColor[dashboardCase.caseType]?.color}
+        foregroundColor={caseTypeColor[dashboardCase.caseType]?.foregroundColor}
+        tone={caseTypeColor[dashboardCase.caseType] ? undefined : "neutral"}
       >
         {dashboardCase.caseType}
       </Badge>
@@ -134,34 +131,32 @@ export function DashboardCaseTable({ cases }: DashboardCaseTableProps) {
     <DataTable
       columns={columns}
       data={visibleCases}
+      persistenceKey="dashboard-cases"
       emptyMessage="No cases for this appliance yet."
       getRowId={(dashboardCase) => dashboardCase.id}
       title="Orthodontic cases"
       description="Track active lab cases by appliance type and stage."
-      toolbar={
+    >
+      <DataTableActions>
         <Select
           value={selectedAppliance}
           onValueChange={(value) => setSelectedAppliance(value ?? "all")}
         >
           <SelectTrigger
-            variant="neutral"
-            className="w-36"
+            className="w-28"
             aria-label="Filter cases by appliance"
           >
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All appliances</SelectItem>
-            {applianceFixtures.map((appliance) => (
-              <SelectItem key={appliance.name} value={appliance.name}>
-                {appliance.name}
+            {[...new Set(cases.map((caseItem) => caseItem.caseType))].map((caseType) => (
+              <SelectItem key={caseType} value={caseType}>
+                {caseType}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
-      }
-    >
-      <DataTableActions>
         <Button variant="neutral" onClick={() => navigate("/cases")}>
           <List /> View all cases
         </Button>

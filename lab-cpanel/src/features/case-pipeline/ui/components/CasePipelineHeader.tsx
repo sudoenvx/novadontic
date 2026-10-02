@@ -37,26 +37,7 @@ export function CasePipelineHeader({
               {caseItem.stage}
             </Badge>
 
-            {/* Case type */}
-            <Badge tone="neutral">
-              {caseItem.caseType}
-            </Badge>
-
-            {/* Appliance */}
-            {caseItem.applianceId && (
-              <Badge tone="neutral">
-                {caseItem.applianceId}
-              </Badge>
-            )}
-
-            {/* Case category */}
-            {(caseItem.categoryName ?? caseItem.categoryId) && (
-              <Badge tone="accent">
-                {caseItem.categoryName ?? caseItem.categoryId}
-              </Badge>
-            )}
-
-            {/* Rush flag — same row, right after category */}
+            {/* Rush flag */}
             {isRush && (
               <Badge
                 tone="destructive"

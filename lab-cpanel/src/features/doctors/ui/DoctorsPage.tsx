@@ -137,7 +137,6 @@ export function DoctorsPage() {
         </PageHeaderActions>
       </PageHeader>
 
-      {doctorsQuery.isPending && <p role="status">Loading doctors…</p>}
       {doctorsQuery.isError && (
         <p role="alert">
           {getApiErrorMessage(doctorsQuery.error, 'Unable to load doctors.')}
@@ -148,16 +147,17 @@ export function DoctorsPage() {
           {getApiErrorMessage(clinicsQuery.error, 'Unable to load clinics.')}
         </p>
       )}
-      {doctorsQuery.data && (
+      {(doctorsQuery.data || doctorsQuery.isPending) && (
         <DoctorTable
           description="Doctors can be linked to a clinic or added through the website portal."
           doctors={doctors}
           getClinicName={(doctor) => doctor.clinics[0]?.name}
+          loading={doctorsQuery.isPending}
           onDelete={handleDeleteDoctor}
           onEdit={setEditingDoctor}
           onRevokePortalAccess={handleRevokePortalAccess}
           onView={openDoctorDetails}
-          title={`All doctors (${doctorsQuery.data.total})`}
+          title={doctorsQuery.data ? `All doctors (${doctorsQuery.data.total})` : 'All doctors'}
         />
       )}
 

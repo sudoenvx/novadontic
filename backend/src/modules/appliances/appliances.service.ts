@@ -106,7 +106,6 @@ function toApplianceType(row: ApplianceTypeRow): ApplianceType {
     source: platformDefaultApplianceCodes.has(row.code) ? 'Platform default' : 'Custom type',
     color: row.color,
     isActive: row.isActive,
-    sortOrder: row.sortOrder,
     fieldGroups: row.fieldGroups.map(toGroup),
   };
 }
@@ -162,26 +161,14 @@ export class AppliancesService implements AppliancesServiceContract {
     };
     const conditions: Prisma.ApplianceTypeWhereInput[] = [filters];
     if (input.cursor) {
-      const cursorType = await this.prisma.applianceType.findUnique({
-        where: { id: BigInt(input.cursor) },
-        select: { id: true, sortOrder: true },
-      });
-      if (!cursorType) {
-        throw new AppError('Appliance type cursor was not found', 422, 'INVALID_APPLIANCE_TYPE_CURSOR');
-      }
-      conditions.push({
-        OR: [
-          { sortOrder: { gt: cursorType.sortOrder } },
-          { sortOrder: cursorType.sortOrder, id: { gt: cursorType.id } },
-        ],
-      });
+      conditions.push({ id: { gt: BigInt(input.cursor) } });
     }
     const where: Prisma.ApplianceTypeWhereInput = { AND: conditions };
     const [rows, total] = await Promise.all([
       this.prisma.applianceType.findMany({
         where,
         include: applianceTypeInclude,
-        orderBy: [{ sortOrder: 'asc' }, { id: 'asc' }],
+        orderBy: { id: 'asc' },
         take: input.limit + 1,
       }),
       this.prisma.applianceType.count({ where: filters }),
@@ -228,17 +215,12 @@ export class AppliancesService implements AppliancesServiceContract {
       if (existingName) {
         throw new AppError('An appliance type with this name already exists', 409, 'APPLIANCE_TYPE_EXISTS');
       }
-      const last = await this.prisma.applianceType.findFirst({
-        orderBy: { sortOrder: 'desc' },
-        select: { sortOrder: true },
-      });
       const code = await nextAvailableCode(this.prisma, input.name);
       const row = await this.prisma.applianceType.create({
         data: {
           code,
           name: input.name,
           ...(input.color !== undefined ? { color: input.color } : {}),
-          sortOrder: input.sortOrder ?? nextSortOrder(last?.sortOrder),
         },
         include: applianceTypeInclude,
       });
@@ -268,7 +250,6 @@ export class AppliancesService implements AppliancesServiceContract {
         data: {
           ...(input.name !== undefined ? { name: input.name } : {}),
           ...(input.color !== undefined ? { color: input.color } : {}),
-          ...(input.sortOrder !== undefined ? { sortOrder: input.sortOrder } : {}),
         },
         include: applianceTypeInclude,
       });

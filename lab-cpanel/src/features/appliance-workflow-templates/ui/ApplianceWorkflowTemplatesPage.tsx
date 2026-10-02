@@ -1,6 +1,7 @@
 import { Plus, Workflow } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 
+import { getApiErrorMessage } from "../../../shared/api/apiError";
 import { Badge } from "../../../shared/ui/Badge";
 import { Button } from "../../../shared/ui/Button";
 import { PageHeader, PageHeaderActions } from "../../../shared/ui/PageHeader";
@@ -13,18 +14,26 @@ import {
   DialogHeader,
   DialogTitle,
 } from "../../../shared/ui/Dialog";
+import { PageLoading } from "../../../shared/ui/Loading";
 import { Page } from "../../../shared/ui/Page";
-import { Switch } from "../../../shared/ui/Switch";
 import { toast } from "../../../shared/ui/Toast";
-import { appliances } from "../../appliances/data/appliances";
+import { useAppliances } from "../../appliances/queries/appliance.queries";
+import {
+  useCreateWorkflowStage,
+  useCreateWorkflowTemplate,
+  useDeleteWorkflowStage,
+  useReorderWorkflowStages,
+  useUpdateWorkflowStage,
+  useUpdateWorkflowTemplate,
+  useWorkflowTemplates,
+} from "../queries/workflowTemplate.queries";
 import {
   getWorkflowDuration,
   getWorkflowStepCount,
   moveWorkflowStep,
+  type WorkflowStageInput,
   type WorkflowStep,
-  type WorkflowTemplate,
 } from "../domain/workflowTemplate";
-import { workflowTemplateFixtures } from "../data/workflowTemplates";
 import { CreateWorkflowDialog } from "./CreateWorkflowDialog";
 import { WorkflowStepFormCard } from "./WorkflowStepFormCard";
 import { WorkflowStepPlaceholder, WorkflowStepRow } from "./WorkflowStepRow";
@@ -34,34 +43,48 @@ type StepFormState = { workflowId: string; step?: WorkflowStep };
 type StepDeleteState = { workflowId: string; step: WorkflowStep };
 
 export function ApplianceWorkflowTemplatesPage() {
-  const [selectedApplianceId, setSelectedApplianceId] = useState(
-    appliances[0]?.id ?? "",
-  );
-  const [selectedWorkflowId, setSelectedWorkflowId] = useState(
-    workflowTemplateFixtures[0]?.id ?? "",
-  );
-  const [workflows, setWorkflows] = useState<WorkflowTemplate[]>(
-    workflowTemplateFixtures,
-  );
+  const appliancesQuery = useAppliances();
+  const workflowsQuery = useWorkflowTemplates();
+  const createWorkflowMutation = useCreateWorkflowTemplate();
+  const updateWorkflowMutation = useUpdateWorkflowTemplate();
+  const createStageMutation = useCreateWorkflowStage();
+  const updateStageMutation = useUpdateWorkflowStage();
+  const deleteStageMutation = useDeleteWorkflowStage();
+  const reorderStagesMutation = useReorderWorkflowStages();
+  const appliances = (appliancesQuery.data ?? []).filter((item) => item.isActive);
+  const workflows = workflowsQuery.data ?? [];
+  const [selectedApplianceId, setSelectedApplianceId] = useState("");
+  const [selectedWorkflowId, setSelectedWorkflowId] = useState("");
   const [isCreateWorkflowOpen, setIsCreateWorkflowOpen] = useState(false);
   const [stepForm, setStepForm] = useState<StepFormState>();
   const [stepToDelete, setStepToDelete] = useState<StepDeleteState>();
   const [draggedStepId, setDraggedStepId] = useState<string>();
   const [dragOverIndex, setDragOverIndex] = useState<number>();
 
-  const selectedAppliance =
-    appliances.find((appliance) => appliance.id === selectedApplianceId) ??
-    appliances[0];
-  const applianceWorkflows = useMemo(
-    () =>
-      workflows.filter(
-        (workflow) => workflow.applianceId === selectedAppliance?.id,
-      ),
-    [selectedAppliance?.id, workflows],
+  const selectedAppliance = appliances.find(
+    (appliance) => appliance.id === selectedApplianceId,
+  ) ?? appliances[0];
+  const applianceWorkflows = workflows.filter(
+    (workflow) => workflow.applianceId === selectedAppliance?.id,
   );
   const selectedWorkflow =
     applianceWorkflows.find((workflow) => workflow.id === selectedWorkflowId) ??
     applianceWorkflows[0];
+
+  if (appliancesQuery.isPending || workflowsQuery.isPending) {
+    return <Page><PageLoading label="Loading workflow templates" /></Page>;
+  }
+
+  if (appliancesQuery.isError || workflowsQuery.isError) {
+    const error = appliancesQuery.error ?? workflowsQuery.error;
+    return (
+      <Page>
+        <p role="alert" className="rounded-md bg-surface px-4 py-6 text-sm text-destructive">
+          Could not load workflow templates: {getApiErrorMessage(error, "Please try again.")}
+        </p>
+      </Page>
+    );
+  }
 
   function selectAppliance(applianceId: string) {
     setSelectedApplianceId(applianceId);
@@ -72,73 +95,55 @@ export function ApplianceWorkflowTemplatesPage() {
     setStepForm(undefined);
   }
 
-  function handleCreateWorkflow(name: string, isDefault: boolean) {
+  async function handleCreateWorkflow(name: string, isDefault: boolean) {
     if (!selectedAppliance) return;
-    const workflow: WorkflowTemplate = {
-      id: `${selectedAppliance.id}-workflow-${Date.now()}`,
-      applianceId: selectedAppliance.id,
-      name,
-      isDefault: isDefault || applianceWorkflows.length === 0,
-      isActive: true,
-      steps: [],
-    };
-    setWorkflows((current) => [
-      ...current.map((item) =>
-        item.applianceId === workflow.applianceId && workflow.isDefault
-          ? { ...item, isDefault: false }
-          : item,
-      ),
-      workflow,
-    ]);
-    setSelectedWorkflowId(workflow.id);
-    toast.add({
-      title: "Workflow created",
-      description: `${workflow.name} is ready for production steps.`,
-      type: "success",
-    });
+    try {
+      const workflow = await createWorkflowMutation.mutateAsync({
+        applianceTypeId: selectedAppliance.id,
+        name,
+        isDefault: isDefault || applianceWorkflows.length === 0,
+      });
+      setSelectedWorkflowId(workflow.id);
+      toast.add({ title: "Workflow created", description: `${workflow.name} is ready for production steps.`, type: "success" });
+    } catch (error) {
+      toast.add({ title: "Could not create workflow", description: getApiErrorMessage(error, "Please try again."), type: "error" });
+    }
   }
 
-  function handleSaveStep(step: WorkflowStep) {
+  async function handleSaveStep(step: WorkflowStageInput) {
     if (!stepForm) return;
-    setWorkflows((current) =>
-      current.map((workflow) => {
-        if (workflow.id !== stepForm.workflowId) return workflow;
-        const hasStep = workflow.steps.some((item) => item.id === step.id);
-        return {
-          ...workflow,
-          steps: hasStep
-            ? workflow.steps.map((item) => (item.id === step.id ? step : item))
-            : [...workflow.steps, step],
-        };
-      }),
-    );
-    setStepForm(undefined);
-    toast.add({
-      title: stepForm.step ? "Step updated" : "Step added",
-      type: "success",
-    });
+    try {
+      if (stepForm.step) {
+        await updateStageMutation.mutateAsync({
+          workflowId: stepForm.workflowId,
+          stageId: stepForm.step.id,
+          input: step,
+        });
+      } else {
+        await createStageMutation.mutateAsync({
+          workflowId: stepForm.workflowId,
+          input: step,
+        });
+      }
+      setStepForm(undefined);
+      toast.add({ title: stepForm.step ? "Step updated" : "Step added", type: "success" });
+    } catch (error) {
+      toast.add({ title: "Could not save workflow step", description: getApiErrorMessage(error, "Please try again."), type: "error" });
+    }
   }
 
-  function handleDeleteStep() {
+  async function handleDeleteStep() {
     if (!stepToDelete) return;
-    setWorkflows((current) =>
-      current.map((workflow) =>
-        workflow.id === stepToDelete.workflowId
-          ? {
-              ...workflow,
-              steps: workflow.steps.filter(
-                (step) => step.id !== stepToDelete.step.id,
-              ),
-            }
-          : workflow,
-      ),
-    );
-    toast.add({
-      title: "Step removed",
-      description: stepToDelete.step.name,
-      type: "success",
-    });
-    setStepToDelete(undefined);
+    try {
+      await deleteStageMutation.mutateAsync({
+        workflowId: stepToDelete.workflowId,
+        stageId: stepToDelete.step.id,
+      });
+      toast.add({ title: "Step removed", description: stepToDelete.step.name, type: "success" });
+      setStepToDelete(undefined);
+    } catch (error) {
+      toast.add({ title: "Could not remove workflow step", description: getApiErrorMessage(error, "Please try again."), type: "error" });
+    }
   }
 
   function handleStepDragStart(
@@ -176,17 +181,23 @@ export function ApplianceWorkflowTemplatesPage() {
     );
     if (sourceIndex === -1) return;
 
-    setWorkflows((current) =>
-      current.map((workflow) => {
-        if (workflow.id !== selectedWorkflow.id) return workflow;
-        return {
-          ...workflow,
-          steps: moveWorkflowStep(workflow.steps, sourceIndex, targetIndex),
-        };
-      }),
+    const reorderedSteps = moveWorkflowStep(
+      selectedWorkflow.steps,
+      sourceIndex,
+      targetIndex,
     );
     setDraggedStepId(undefined);
     setDragOverIndex(undefined);
+    void reorderStagesMutation.mutateAsync({
+      workflowId: selectedWorkflow.id,
+      stageIds: reorderedSteps.map((step) => step.id),
+    }).catch((error: unknown) => {
+      toast.add({
+        title: "Could not reorder workflow steps",
+        description: getApiErrorMessage(error, "Please try again."),
+        type: "error",
+      });
+    });
   }
 
   function handleStepDragEnd() {
@@ -194,25 +205,16 @@ export function ApplianceWorkflowTemplatesPage() {
     setDragOverIndex(undefined);
   }
 
-  function setDefaultWorkflow(workflowId: string) {
-    setWorkflows((current) =>
-      current.map((workflow) =>
-        workflow.applianceId === selectedAppliance?.id
-          ? { ...workflow, isDefault: workflow.id === workflowId }
-          : workflow,
-      ),
-    );
-    toast.add({ title: "Default workflow updated", type: "success" });
-  }
-
-  function toggleWorkflow(workflowId: string) {
-    setWorkflows((current) =>
-      current.map((workflow) =>
-        workflow.id === workflowId
-          ? { ...workflow, isActive: !workflow.isActive }
-          : workflow,
-      ),
-    );
+  async function setDefaultWorkflow(workflowId: string) {
+    try {
+      await updateWorkflowMutation.mutateAsync({
+        workflowId,
+        input: { isDefault: true },
+      });
+      toast.add({ title: "Default workflow updated", type: "success" });
+    } catch (error) {
+      toast.add({ title: "Could not update default workflow", description: getApiErrorMessage(error, "Please try again."), type: "error" });
+    }
   }
 
   return (
@@ -321,27 +323,14 @@ export function ApplianceWorkflowTemplatesPage() {
                       production path for new cases.
                     </p>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <label className="flex items-center gap-2 text-xs text-text-secondary">
-                      <Switch
-                        size="sm"
-                        checked={selectedWorkflow.isActive}
-                        onCheckedChange={() =>
-                          toggleWorkflow(selectedWorkflow.id)
-                        }
-                        aria-label="Workflow active"
-                      />{" "}
-                      Active
-                    </label>
-                    {!selectedWorkflow.isDefault && (
-                      <Button
-                        variant="neutral"
-                        onClick={() => setDefaultWorkflow(selectedWorkflow.id)}
-                      >
-                        Make default
-                      </Button>
-                    )}
-                  </div>
+                  {!selectedWorkflow.isDefault && (
+                    <Button
+                      variant="neutral"
+                      onClick={() => void setDefaultWorkflow(selectedWorkflow.id)}
+                    >
+                      Make default
+                    </Button>
+                  )}
                 </div>
                 <div className="grid gap-2 sm:grid-cols-3">
                   <WorkflowSummary
@@ -513,4 +502,3 @@ export function ApplianceWorkflowTemplatesPage() {
     </Page>
   );
 }
-

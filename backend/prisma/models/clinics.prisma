@@ -12,6 +12,7 @@ model Clinic {
   createdAt DateTime       @default(now()) @map("created_at")
   updatedAt DateTime       @default(now()) @updatedAt @map("updated_at")
   doctors   ClinicDoctor[]
+  cases     CaseRecord[]
 
   @@index([name])
   @@index([isActive])

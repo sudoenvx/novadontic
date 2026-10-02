@@ -17,8 +17,8 @@ export function DataTableToolbar({
       className={cn(
         'flex flex-wrap items-center gap-2 px-2 py-2',
         variant === 'filters'
-          ? 'border-b border-border-subtle bg-neutral-50'
-          : 'border-b border-border-subtle bg-neutral-50',
+          ? 'border-b border-border-subtle '
+          : 'border-b border-border-subtle bg-primary-soft',
         className,
       )}
       {...props}

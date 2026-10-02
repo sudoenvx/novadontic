@@ -22,7 +22,7 @@ import { cn } from "cn"
  * Titles are ink, sentence case. Never link-blue, never uppercase.
  */
 const cardVariants = cva(
-  "group/card flex flex-col gap-(--card-spacing) overflow-hidden rounded-lg  border border-border-subtle! p-(--card-spacing) text-base text-text-primary data-[disabled]:pointer-events-none data-[disabled]:opacity-70",
+  "group/card flex flex-col gap-(--card-spacing) overflow-hidden rounded-lg  border border-border p-(--card-spacing) text-base text-text-primary data-[disabled]:pointer-events-none data-[disabled]:opacity-70",
   {
     variants: {
       variant: {

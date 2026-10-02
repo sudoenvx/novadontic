@@ -143,9 +143,9 @@ function DataTableRow<TData>({
       {selectable && (
         <TableCell
           className={cn(
-            'w-10 px-3 text-center align-middle group-data-[selected=true]:bg-neutral-100',
+            'w-10 px-3 text-center align-middle group-hover:bg-neutral-50 group-data-[selected=true]:bg-primary-soft',
             compact ? 'h-auto py-1' : 'h-auto py-2',
-            hasPinnedColumns && 'sticky left-0 z-20 bg-surface group-hover:bg-surface-soft group-data-[selected=true]:bg-surface-selected',
+            hasPinnedColumns && 'sticky left-0 z-20 bg-surface group-hover:bg-neutral-50 group-data-[selected=true]:bg-primary-soft',
             !isLastRow && 'border-b border-border-subtle',
           )}
           style={hasPinnedColumns ? { left: 0 } : undefined}
@@ -164,9 +164,9 @@ function DataTableRow<TData>({
           data-column-id={column.id}
           data-pinned={pinnedColumns.has(column.id) || undefined}
           className={cn(
-            compact ? 'h-auto py-1 group-data-[selected=true]:bg-neutral-100' : 'h-auto py-2 group-data-[selected=true]:bg-neutral-100',
+            compact ? 'h-auto py-1 group-hover:bg-neutral-50 group-data-[selected=true]:bg-primary-soft' : 'h-auto py-1.5 group-hover:bg-neutral-50 group-data-[selected=true]:bg-primary-soft',
             column.className,
-            pinnedColumns.has(column.id) && 'sticky z-10 bg-surface  group-hover:bg-surface-soft group-data-[selected=true]:bg-surface-selected',
+            pinnedColumns.has(column.id) && 'sticky z-10 bg-surface group-hover:bg-neutral-50 group-data-[selected=true]:bg-primary-soft',
             !isLastRow && 'border-b border-border-subtle',
           )}
         >

@@ -11,6 +11,9 @@ export function toAppliance(response: ApplianceResponse): Appliance {
 
   return {
     ...appliance,
-    groups: fieldGroups.map((group) => ({ ...group })),
+    groups: fieldGroups.map((group) => ({
+      ...group,
+      fields: group.fields.map((field) => ({ ...field })),
+    })),
   }
 }

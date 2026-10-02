@@ -88,6 +88,7 @@ export function DoctorTable({
     {
       id: 'actions',
       header: '',
+      showInColumnVisualizer: false,
       pinnable: false,
       headerClassName: 'w-10',
       className: 'w-10',
@@ -111,6 +112,7 @@ export function DoctorTable({
     <DataTable
       columns={columns}
       data={doctors}
+      persistenceKey="doctors-clinics-list"
       description={description}
       getRowId={(doctor) => doctor.id}
       title={title}

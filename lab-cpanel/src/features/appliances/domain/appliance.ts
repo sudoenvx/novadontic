@@ -18,30 +18,58 @@ export type ApplianceFieldOption = {
 
 export type ApplianceField = {
   id: string
+  groupId: string | null
   label: string
   key: string
   type: ApplianceFieldType
   required: boolean
-  helpText?: string
-  defaultValue?: string
-  dependsOn?: string | null
-  dependsOnValue?: string | null
+  helpText: string | null
+  defaultValue: string | null
+  dependsOn: string | null
+  dependsOnValue: string | null
+  sortOrder: number
   options: ApplianceFieldOption[]
 }
 
 export type ApplianceFieldGroup = {
   id: string
   name: string
+  sortOrder: number
   fields: ApplianceField[]
 }
 
 export type Appliance = {
   id: string
+  code: string
   name: string
   source: ApplianceSource
+  color: string | null
   isActive: boolean
-  casesUsing: number
+  casesUsing: number | null
   groups: ApplianceFieldGroup[]
+}
+
+export type ApplianceTypeInput = {
+  name: string
+  color?: string | null
+}
+
+export type ApplianceFieldGroupInput = {
+  name: string
+  sortOrder?: number
+}
+
+export type ApplianceFieldInput = {
+  key: string
+  label: string
+  type: ApplianceFieldType
+  options: ApplianceFieldOption[]
+  defaultValue?: string | null
+  dependsOn?: string | null
+  dependsOnValue?: string | null
+  required?: boolean
+  sortOrder?: number
+  helpText?: string | null
 }
 
 export function getApplianceFieldCount(appliance: Appliance) {
@@ -84,7 +112,11 @@ export function filterAppliances(appliances: Appliance[], searchTerm: string) {
     return appliances
   }
 
-  return appliances.filter((appliance) => appliance.name.toLowerCase().includes(normalizedSearch))
+  return appliances.filter((appliance) =>
+    [appliance.name, appliance.code].some((value) =>
+      value.toLowerCase().includes(normalizedSearch),
+    ),
+  )
 }
 
 export function parseFieldOptions(value: string): ApplianceFieldOption[] {

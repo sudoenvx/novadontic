@@ -43,20 +43,17 @@ export interface ApplianceType {
   source: 'Platform default' | 'Custom type';
   color: string | null;
   isActive: boolean;
-  sortOrder: number;
   fieldGroups: ApplianceFieldGroup[];
 }
 
 export interface ApplianceTypeInput {
   name: string;
   color?: string | null;
-  sortOrder?: number;
 }
 
 export interface ApplianceTypeUpdateInput {
   name?: string;
   color?: string | null;
-  sortOrder?: number;
 }
 
 export interface ApplianceTypeListInput {

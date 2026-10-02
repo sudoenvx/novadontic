@@ -95,7 +95,7 @@
   --primary-hover: var(--brand-blue-dark);
   --primary-active: color-mix(in oklab, var(--primary) 78%, black);
   --primary-foreground: #ffffff;
-  --primary-soft: #dde5f9;
+  --primary-soft: #e6f0f7;
   --primary-soft-light: #f1f5ff;
   --primary-soft-foreground: var(--brand-blue-dark);
 
@@ -152,6 +152,8 @@
      ========================================================================== */
      --border-border: #ccd0d5;
      --border-subtle: #ccd0d5;
+     --border-subtle: #e3e6ea;
+     --border-subtle: #dee1e5;
   --border-focus: #0866a4;
   --border: var(--border-border);
   --border-soft: var(--border-subtle);    /* dividers inside cards */
@@ -159,7 +161,9 @@
   --border-hover: #c9cfdf;
   --border-active: #b9c9ff;               /* active stage / selected card */
   --field-border: #afbecb;
+  --field-border: var(--border-border);
   --field-hover: #8da1b0;
+  --field-hover:var(--border-hover);
   --focus: var(--border-focus);           /* keyboard focus outline */
   --ring: rgba(8,102,164,.2);
   --ring-active: 0 0 0 3px var(--primary-soft);   /* soft halo for active cards */
@@ -336,7 +340,7 @@
   --primary-hover: #87a7f7;        /* lighten on hover, not darken */
   --primary-active: #a2bdf9;
   --primary-foreground: #0d1117;
-  --primary-soft: #212a42;
+  --primary-soft: #173a52;
   --primary-soft-light: #1a2235;
   --primary-soft-foreground: #aac2fb;
 

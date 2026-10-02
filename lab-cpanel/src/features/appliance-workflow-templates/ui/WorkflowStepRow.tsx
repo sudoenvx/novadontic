@@ -1,17 +1,8 @@
 import { GripVertical, Pencil, Trash2 } from "lucide-react";
 
-import { Badge, type BadgeTone } from "../../../shared/ui/Badge";
+import { Badge } from "../../../shared/ui/Badge";
 import { Button } from "../../../shared/ui/Button";
-import {
-  getWorkflowKindLabel,
-  type WorkflowStep,
-} from "../domain/workflowTemplate";
-
-const kindTones: Record<WorkflowStep["kind"], BadgeTone> = {
-  production: "info",
-  quality: "accent",
-  shipping: "success",
-};
+import type { WorkflowStep } from "../domain/workflowTemplate";
 
 type WorkflowStepRowProps = {
   step: WorkflowStep;
@@ -59,20 +50,12 @@ export function WorkflowStepRow({
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-2">
           <h3 className="font-semibold text-text">{step.name}</h3>
-          <Badge tone={kindTones[step.kind]}>
-            {getWorkflowKindLabel(step.kind)}
-          </Badge>
           {step.requiresApproval && <Badge tone="warning">Approval gate</Badge>}
         </div>
-        {step.description && (
-          <p className="mt-1 truncate text-sm text-text-muted">
-            {step.description}
-          </p>
-        )}
-        {/* <p className="mt-1 flex items-center gap-1 text-xs text-text-muted">
-          <Clock3 size={13} /> Expected duration: {step.estimatedDays}{" "}
-          {step.estimatedDays === 1 ? "day" : "days"}
-        </p> */}
+        <p className="mt-1 truncate text-xs text-text-muted">
+          SLA: {step.slaHours === null ? "Not set" : `${step.slaHours} hours`}
+          {" · "}Files: {step.allowedFileKinds.map((kind) => kind.toUpperCase()).join(", ")}
+        </p>
       </div>
       <div className="flex items-center gap-1">
         <Button

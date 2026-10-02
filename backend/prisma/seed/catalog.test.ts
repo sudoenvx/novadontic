@@ -14,6 +14,13 @@ describe('seed access-control catalog', () => {
     );
   });
 
+  it('seeds the requested operational roles alongside the protected owner', () => {
+    assert.deepEqual(
+      roleDefinitions.map(({ code }) => code),
+      ['owner', 'administrator', 'technician', 'quality_controller'],
+    );
+  });
+
   it('includes permissions required to protect the new feature routes', () => {
     const codes = new Set<string>(permissionDefinitions.map(([code]) => code));
     for (const code of [
@@ -22,6 +29,13 @@ describe('seed access-control catalog', () => {
       'roles:update',
       'roles:delete',
       'roles:manage_permissions',
+      'case_files:view',
+      'case_files:upload',
+      'case_files:update',
+      'case_files:download',
+      'case_files:delete',
+      'case_activity:view',
+      'case_activity:add_note',
       'doctors:view',
       'doctors:create',
       'doctors:update',

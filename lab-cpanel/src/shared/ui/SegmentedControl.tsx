@@ -43,7 +43,7 @@ export function SegmentedControl<Value extends string>({
     <div
       role="group"
       aria-label={label}
-      className={`inline-flex shrink-0 items-center gap-1 rounded-md shadow-sm p-1 transition-colors ${containerVariant}`}
+      className={`inline-flex shrink-0 items-center gap-1 rounded-md border border-border-subtle p-1 transition-colors ${containerVariant}`}
     >
       {options.map((option) => {
         const isSelected = option.value === value

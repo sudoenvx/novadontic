@@ -1,8 +1,6 @@
 import { useMemo, useState } from 'react'
 
 import { toast } from '../../../../shared/ui/Toast'
-import { workflowTemplateFixtures } from '../../../appliance-workflow-templates/data/workflowTemplates'
-import { casePipelineStages } from '../../domain/casePipeline'
 import type {
   CasePipelineCase,
   CasePipelineFile,
@@ -17,34 +15,31 @@ import { WorkflowStageCard } from './WorkflowStageCard'
 type CaseWorkflowStagesProps = {
   caseItem: CasePipelineCase
   onUpdateSteps: (steps: CaseProductionStep[]) => void
-  onUpdateStage?: (stageName: CasePipelineCase['stage']) => void
+  onUploadFile: (file: File, stepId: string) => Promise<boolean>
+  onRenameFile: (fileId: string, name: string) => Promise<boolean>
+  onDownloadFile: (file: CasePipelineFile) => Promise<void>
+  onDeleteFile: (file: CasePipelineFile) => Promise<boolean>
+  canUploadFiles: boolean
+  canRenameFiles: boolean
+  canDownloadFiles: boolean
+  canDeleteFiles: boolean
+  canAssignTechnicians: boolean
 }
 
 export function CaseWorkflowStages({
   caseItem,
   onUpdateSteps,
-  onUpdateStage,
+  onUploadFile,
+  onRenameFile,
+  onDownloadFile,
+  onDeleteFile,
+  canUploadFiles,
+  canRenameFiles,
+  canDownloadFiles,
+  canDeleteFiles,
+  canAssignTechnicians,
 }: CaseWorkflowStagesProps) {
-  const initialSteps = useMemo(() => {
-    if (caseItem.productionSteps?.length) return caseItem.productionSteps
-
-    const workflow = workflowTemplateFixtures.find(
-      (item) =>
-        item.id === caseItem.workflowTemplateId ||
-        item.applianceId === caseItem.applianceId,
-    ) ?? workflowTemplateFixtures[0]
-
-    return workflow?.steps.map((step, index) => ({
-      id: `${caseItem.id}-${step.id}`,
-      name: step.name,
-      description: step.description,
-      status: index === 0 ? 'active' as const : 'pending' as const,
-      files: [],
-      technicians: [],
-    })) ?? []
-  }, [caseItem.applianceId, caseItem.id, caseItem.productionSteps, caseItem.workflowTemplateId])
-
-  const [steps, setSteps] = useState<CaseProductionStep[]>(initialSteps)
+  const steps = caseItem.productionSteps
   const [editingFile, setEditingFile] = useState<EditingStageFile>()
   const [statusConfirmation, setStatusConfirmation] = useState<{
     stepId: string
@@ -61,11 +56,10 @@ export function CaseWorkflowStages({
   }, [caseItem.stage, steps])
 
   const [openStages, setOpenStages] = useState<Record<string, boolean>>(() =>
-    Object.fromEntries(initialSteps.map((step) => [step.id, step.id === activeStepId])),
+    Object.fromEntries(steps.map((step) => [step.id, step.id === activeStepId])),
   )
 
   function updateSteps(updatedSteps: CaseProductionStep[]) {
-    setSteps(updatedSteps)
     onUpdateSteps(updatedSteps)
   }
 
@@ -151,13 +145,6 @@ export function CaseWorkflowStages({
       type: 'success',
     })
 
-    const activeStep = nextStep ?? step
-    if (
-      (nextStatus === 'active' || nextStep) &&
-      casePipelineStages.includes(activeStep.name as CasePipelineCase['stage'])
-    ) {
-      onUpdateStage?.(activeStep.name as CasePipelineCase['stage'])
-    }
   }
 
   function requestStepStatusChange(stepId: string, nextStatus: 'active' | 'completed') {
@@ -176,65 +163,22 @@ export function CaseWorkflowStages({
   }
 
   function addFile(file: File, stepId: string) {
-    const stageFile: CasePipelineFile = {
-      id: `file-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-      name: file.name,
-      type: getFileType(file.name),
-      size: formatFileSize(file.size),
-      uploadedBy: 'Current Lab User',
-      uploadedAt: 'Today',
-      url: URL.createObjectURL(file),
-    }
-    const updatedSteps = steps.map((step) =>
-      step.id === stepId ? { ...step, files: [...step.files, stageFile] } : step,
-    )
-
-    updateSteps(updatedSteps)
-    toast.add({
-      title: 'File added to stage',
-      description: `"${stageFile.name}" attached successfully.`,
-      type: 'success',
-    })
+    void onUploadFile(file, stepId)
   }
 
   function renameFile(stepId: string, fileId: string) {
     if (!editingFile?.name.trim()) return
 
     const nextName = editingFile.name.trim()
-    const updatedSteps = steps.map((step) =>
-      step.id === stepId
-        ? {
-            ...step,
-            files: step.files.map((file) => file.id === fileId ? { ...file, name: nextName } : file),
-          }
-        : step,
-    )
-    updateSteps(updatedSteps)
-    setEditingFile(undefined)
+    const file = steps.find((step) => step.id === stepId)?.files.find(({ id }) => id === fileId)
+    if (!file) return
+    void onRenameFile(fileId, nextName).then((success) => {
+      if (success) setEditingFile(undefined)
+    })
   }
 
-  function deleteFile(stepId: string, fileId: string, fileName: string) {
-    const updatedSteps = steps.map((step) =>
-      step.id === stepId
-        ? { ...step, files: step.files.filter((file) => file.id !== fileId) }
-        : step,
-    )
-    updateSteps(updatedSteps)
-    toast.add({ title: 'File deleted', description: `"${fileName}" was removed from the stage.`, type: 'success' })
-  }
-
-  function downloadFile(file: CasePipelineFile) {
-    const url = file.url ?? URL.createObjectURL(
-      new Blob([`Dummy contents for ${file.name}`], { type: 'text/plain' }),
-    )
-    const anchor = document.createElement('a')
-    anchor.href = url
-    anchor.download = file.name
-    document.body.appendChild(anchor)
-    anchor.click()
-    document.body.removeChild(anchor)
-    if (!file.url) URL.revokeObjectURL(url)
-    toast.add({ title: 'Downloading file', description: `Downloading ${file.name} (${file.size}).`, type: 'info' })
+  function deleteFile(file: CasePipelineFile) {
+    void onDeleteFile(file)
   }
 
   const confirmationStep = steps.find((step) => step.id === statusConfirmation?.stepId)
@@ -260,8 +204,13 @@ export function CaseWorkflowStages({
             onRename={(fileId) => renameFile(step.id, fileId)}
             onCancelRename={() => setEditingFile(undefined)}
             onRenameChange={(name) => setEditingFile((current) => current ? { ...current, name } : current)}
-            onDownloadFile={downloadFile}
-            onDeleteFile={(file) => deleteFile(step.id, file.id, file.name)}
+            onDownloadFile={onDownloadFile}
+            onDeleteFile={deleteFile}
+            canUploadFiles={canUploadFiles}
+            canRenameFiles={canRenameFiles}
+            canDownloadFiles={canDownloadFiles}
+            canDeleteFiles={canDeleteFiles}
+            canAssignTechnicians={canAssignTechnicians}
             caseNumberCode={caseItem.id}
             doctorName={caseItem.doctorName}
           />
@@ -280,18 +229,4 @@ export function CaseWorkflowStages({
       />
     </section>
   )
-}
-
-function getFileType(fileName: string): CasePipelineFile['type'] {
-  const extension = fileName.split('.').pop()?.toLowerCase()
-  if (['stl', 'ply', 'obj', '3mf'].includes(extension ?? '')) return 'STL'
-  if (['png', 'jpg', 'jpeg', 'webp', 'gif', 'bmp', 'tif', 'tiff'].includes(extension ?? '')) return 'IMG'
-  if (extension === 'pdf') return 'PDF'
-  if (['doc', 'docx', 'txt', 'rtf', 'xls', 'xlsx', 'csv'].includes(extension ?? '')) return 'DOC'
-  return 'OTHER'
-}
-
-function formatFileSize(size: number) {
-  if (size < 1024 * 1024) return `${Math.max(1, Math.round(size / 1024))} KB`
-  return `${(size / (1024 * 1024)).toFixed(1)} MB`
 }

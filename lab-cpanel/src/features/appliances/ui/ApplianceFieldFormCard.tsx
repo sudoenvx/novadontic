@@ -7,6 +7,7 @@ import { Label } from '../../../shared/ui/Label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../shared/ui/Select'
 import { Switch } from '../../../shared/ui/Switch'
 import { Textarea } from '../../../shared/ui/Textarea'
+import { getApiErrorMessage } from '../../../shared/api/apiError'
 import {
   isApplianceFieldKeyAvailable,
   type Appliance,
@@ -18,8 +19,9 @@ type ApplianceFieldFormCardProps = {
   appliance: Appliance
   initialGroupId: string
   field?: ApplianceField
-  onSave: (groupId: string, field: ApplianceField) => void
+  onSave: (groupId: string, field: ApplianceField) => Promise<void>
   onCancel: () => void
+  isPending?: boolean
 }
 
 const fieldTypes: { value: ApplianceFieldType; label: string }[] = [
@@ -40,6 +42,7 @@ export function ApplianceFieldFormCard({
   field,
   onSave,
   onCancel,
+  isPending = false,
 }: ApplianceFieldFormCardProps) {
   const [label, setLabel] = useState(field?.label ?? '')
   const [key, setKey] = useState(field?.key ?? '')
@@ -51,7 +54,7 @@ export function ApplianceFieldFormCard({
   const [newOption, setNewOption] = useState('')
   const [error, setError] = useState('')
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     const normalizedKey = key.trim().toLowerCase().replace(/\s+/g, '_')
 
@@ -64,18 +67,24 @@ export function ApplianceFieldFormCard({
       return
     }
 
-    onSave(initialGroupId, {
-      id: field?.id ?? `${normalizedKey}-${Date.now()}`,
-      label: label.trim(),
-      key: normalizedKey,
-      type,
-      required,
-      helpText: helpText.trim() || undefined,
-      defaultValue: defaultValue.trim() || undefined,
-      dependsOn: null,
-      dependsOnValue: null,
-      options: type === 'select' || type === 'multiselect' ? options : [],
-    })
+    try {
+      await onSave(initialGroupId, {
+        id: field?.id ?? '',
+        groupId: initialGroupId,
+        sortOrder: field?.sortOrder ?? 0,
+        label: label.trim(),
+        key: normalizedKey,
+        type,
+        required,
+        helpText: helpText.trim() || null,
+        defaultValue: defaultValue.trim() || null,
+        dependsOn: field?.dependsOn ?? null,
+        dependsOnValue: field?.dependsOnValue ?? null,
+        options: type === 'select' || type === 'multiselect' ? options : [],
+      })
+    } catch (saveError) {
+      setError(getApiErrorMessage(saveError, 'Could not save field.'))
+    }
   }
 
   return (
@@ -147,8 +156,10 @@ export function ApplianceFieldFormCard({
 
         {error && <p className="text-xs text-destructive" role="alert">{error}</p>}
         <div className="flex justify-end gap-2">
-          <Button type="button" variant="neutral" onClick={onCancel}>Cancel</Button>
-          <Button type="submit">{field ? 'Save changes' : 'Save field'}</Button>
+          <Button type="button" variant="neutral" onClick={onCancel} disabled={isPending}>Cancel</Button>
+          <Button type="submit" disabled={isPending}>
+            {isPending ? 'Saving…' : field ? 'Save changes' : 'Save field'}
+          </Button>
         </div>
       </form>
     </Card>

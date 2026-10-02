@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { getApiErrorMessage } from '../../../shared/api/apiError'
 import { Button } from '../../../shared/ui/Button'
 import { Card } from '../../../shared/ui/Card'
+import { FormLoading } from '../../../shared/ui/Loading'
 import { PageHeader } from '../../../shared/ui/PageHeader'
 import { Page } from '../../../shared/ui/Page'
 import { toast } from '../../../shared/ui/Toast'
@@ -68,7 +69,7 @@ export function LabSettingsPage() {
         <section className="grid min-w-0 gap-3">
             <PageHeader title={getLabSettingsSectionLabel(selectedSection)} description={sectionDescriptions[selectedSection]} />
             <Card className="gap-3">
-              {settingsQuery.isPending && <p role="status">Loading lab settings…</p>}
+              {settingsQuery.isPending && <FormLoading label="Loading lab settings" />}
               {settingsQuery.isError && (
                 <div role="alert" className="grid gap-2">
                   <p>{getApiErrorMessage(settingsQuery.error, 'Unable to load lab settings.')}</p>

@@ -83,42 +83,36 @@ const columns: DataTableColumn<CaseListItem>[] = [
 export function CasesTable({
   cases,
   footer,
-  totalCount,
-  onResetFilters,
+  toolbar,
 }: {
   cases: CaseListItem[];
   footer: ReactNode;
-  totalCount: number;
-  onResetFilters: () => void;
+  toolbar: ReactNode;
 }) {
   return (
     <DataTable
       columns={columns}
       data={cases}
       title="All cases"
+      toolbar={toolbar}
+      persistenceKey="cases-table"
       bulkActions={(row) => (
         <>
           <Button
             type="button"
             variant="secondary"
-            size="sm"
+            size="xs"
             onClick={() => console.log("Selected rows:", row.selectedRows)}
           >
             Export selected
           </Button>
         </>
       )}
-      // bodyMaxHeight={400}
-      description={`${totalCount} case${totalCount === 1 ? "" : "s"} match the current filters.`}
+      description="Review and manage cases moving through the lab."
       emptyState={
         <DataTableEmptyState
           title="No cases match these filters"
-          description="Try a different search, or clear the filters to see every case."
-          action={
-            <Button type="button" variant="neutral" size="sm" onClick={onResetFilters}>
-              Clear filters
-            </Button>
-          }
+          description="Try a different search or condition."
         />
       }
       getRowId={(caseItem) => caseItem.id}

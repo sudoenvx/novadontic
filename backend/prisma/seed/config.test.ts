@@ -14,13 +14,24 @@ describe('seed account configuration', () => {
     assert.deepEqual(accounts.map(({ email }) => email), [
       'owner@example.test',
       'administrator@example.test',
-      'developer@example.test',
+      'technician@example.test',
     ]);
     assert.deepEqual(accounts.map(({ roleCode }) => roleCode), [
       'owner',
       'administrator',
-      'developer',
+      'technician',
     ]);
+  });
+
+  it('prefers the renamed technician seed configuration', () => {
+    const accounts = getSeedAccounts({
+      SEED_OWNER_PASSWORD: 'owner-password-123',
+      SEED_ADMINISTRATOR_PASSWORD: 'admin-password-123',
+      SEED_TECHNICIAN_EMAIL: 'tech@example.test',
+      SEED_TECHNICIAN_PASSWORD: 'tech-password-123',
+    });
+    assert.equal(accounts[2]?.email, 'tech@example.test');
+    assert.equal(accounts[2]?.roleCode, 'technician');
   });
 
   it('reports missing or invalid environment variable names without values', () => {

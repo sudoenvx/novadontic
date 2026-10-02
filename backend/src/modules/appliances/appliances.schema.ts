@@ -50,13 +50,11 @@ export const listApplianceTypesQuerySchema = z.object({
 export const createApplianceTypeSchema = z.object({
   name: z.string().trim().min(1).max(100),
   color: z.string().regex(/^#[0-9a-fA-F]{6}$/).nullable().optional(),
-  sortOrder: sortOrder.optional(),
 });
 
 export const updateApplianceTypeSchema = z.object({
   name: z.string().trim().min(1).max(100).optional(),
   color: z.string().regex(/^#[0-9a-fA-F]{6}$/).nullable().optional(),
-  sortOrder: sortOrder.optional(),
 }).refine((input) => Object.keys(input).length > 0, 'At least one field is required');
 
 export const setApplianceTypeActiveSchema = z.object({ isActive: z.boolean() });

@@ -1,4 +1,6 @@
 export { DataTable } from './DataTable'
+export { DataTableColumnVisualizer } from './DataTableColumnVisualizer'
+export { useDataTableColumns } from './useDataTableColumns'
 export { DataTableActions } from './DataTableActions'
 export { DataTableEmptyState } from './DataTableEmptyState'
 export { DataTableFooter } from './DataTableFooter'

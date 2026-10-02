@@ -62,8 +62,8 @@ const buttonVariants = cva(
         "neutral-outline": OUTLINE,
       },
       size: {
-        xs: "h-control-xs rounded-xs px-2 text-xs gap-1 has-data-[icon=inline-start]:ps-1.5 has-data-[icon=inline-end]:pe-1.5 [&_svg:not([class*='size-'])]:size-(--icon-size-sm)",
-        sm: "h-control-sm px-2.5 text-xs has-data-[icon=inline-start]:ps-2 has-data-[icon=inline-end]:pe-2 [&_svg:not([class*='size-'])]:size-(--icon-size-sm)",
+        xs: "h-control-xs rounded-xs px-2 text-sm!  gap-1 has-data-[icon=inline-start]:ps-1.5 has-data-[icon=inline-end]:pe-1.5 [&_svg:not([class*='size-'])]:size-(--icon-size-sm)",
+        sm: "h-control-sm px-2.5 text-sm! has-data-[icon=inline-start]:ps-2 has-data-[icon=inline-end]:pe-2 [&_svg:not([class*='size-'])]:size-(--icon-size-sm)",
         md: SIZE_MD,
         lg: "h-control-lg px-4.5 text-base has-data-[icon=inline-start]:ps-3.5 has-data-[icon=inline-end]:pe-3.5",
 

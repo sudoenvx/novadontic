@@ -6,6 +6,13 @@ import { createDoctorsRoutes, type DoctorsServiceContract } from '../modules/doc
 import { createRolesRoutes, type RolesServiceContract } from '../modules/roles/index.ts';
 import { createSettingsRoutes, type SettingsServiceContract } from '../modules/settings/index.ts';
 import { createStaffRoutes, type StaffServiceContract } from '../modules/staff/index.ts';
+import { createWorkflowsRoutes, type WorkflowsServiceContract } from '../modules/workflows/index.ts';
+import {
+  createCasesRoutes,
+  type CaseAssetsServiceContract,
+  type CaseFileStorage,
+  type CasesServiceContract,
+} from '../modules/cases/index.ts';
 
 export function createApiRoutes(
   auth: AuthServiceContract,
@@ -15,6 +22,10 @@ export function createApiRoutes(
   roles: RolesServiceContract,
   settings: SettingsServiceContract,
   staff: StaffServiceContract,
+  workflows: WorkflowsServiceContract,
+  cases: CasesServiceContract,
+  caseAssets: CaseAssetsServiceContract,
+  caseFileStorage: CaseFileStorage,
 ): Router {
   const router = Router();
   router.use('/auth', createAuthRoutes(auth));
@@ -24,5 +35,7 @@ export function createApiRoutes(
   router.use('/roles', createRolesRoutes(auth, roles));
   router.use('/settings', createSettingsRoutes(auth, settings));
   router.use('/staff', createStaffRoutes(auth, staff));
+  router.use('/workflows', createWorkflowsRoutes(auth, workflows));
+  router.use('/cases', createCasesRoutes(auth, cases, caseAssets, caseFileStorage));
   return router;
 }

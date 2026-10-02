@@ -6,13 +6,13 @@ import { Field, FieldContent, FieldLabel } from "../../../../shared/ui/Field";
 import { Textarea } from "../../../../shared/ui/Textarea";
 import { getApiErrorMessage } from "../../../../shared/api/apiError";
 import { useDoctors } from "../../../doctors/queries/doctor.queries";
-import { appliances } from "../../../appliances/data/appliances";
+import type { Appliance } from "../../../appliances/domain/appliance";
 import { getCaseCategoriesForAppliance } from "../../domain/caseCategory";
 import type {
   CasePipelineCase,
 } from "../../domain/casePipeline";
 import { caseCategoryFixtures } from "../../data/caseCategories";
-import { workflowTemplateFixtures } from "../../../appliance-workflow-templates/data/workflowTemplates";
+import type { WorkflowTemplateOption } from "../../../appliance-workflow-templates/domain/workflowTemplate";
 import { OriginalCaseSelect } from "./OriginalCaseSelect";
 import { CreateCaseOptions } from "./CreateCaseOptions";
 import { CreateCasePatientFields } from "./CreateCasePatientFields";
@@ -23,32 +23,32 @@ export type { CreateCaseValues } from "./createCase.types";
 
 type CreateCaseFormProps = {
   cases: CasePipelineCase[];
+  appliances: Appliance[];
+  workflows: WorkflowTemplateOption[];
   defaultTurnaroundDays: number;
+  isSubmitting: boolean;
   onCancel: () => void;
-  onSubmit: (values: CreateCaseValues) => void;
+  onSubmit: (values: CreateCaseValues) => Promise<void>;
 };
 
-const activeAppliances = appliances.filter((appliance) => appliance.isActive);
 const unavailableCategoryIds = new Set([
   'duplicate',
   'remake',
   'clear-aligner-refinement',
 ])
-const firstAppliance = activeAppliances[0];
-const firstCategories = firstAppliance
-  ? getCreateCaseCategories(firstAppliance.id)
-  : [];
-const firstCategory = firstCategories[0];
-const firstWorkflow =
-  workflowTemplateFixtures.find(
-    (workflow) =>
-      workflow.applianceId === firstAppliance?.id && workflow.isDefault,
-  ) ??
-  workflowTemplateFixtures.find(
-    (workflow) => workflow.applianceId === firstAppliance?.id,
+function getInitialValues(
+  appliances: Appliance[],
+  workflows: WorkflowTemplateOption[],
+  defaultTurnaroundDays: number,
+): CreateCaseValues {
+  const firstAppliance = appliances[0];
+  const firstCategory = firstAppliance
+    ? getCreateCaseCategories(firstAppliance.id)[0]
+    : undefined;
+  const applianceWorkflows = workflows.filter(
+    (workflow) => workflow.applianceId === firstAppliance?.id || workflow.applianceId === null,
   );
-
-function getInitialValues(defaultTurnaroundDays: number): CreateCaseValues {
+  const firstWorkflow = applianceWorkflows.find((workflow) => workflow.isDefault) ?? applianceWorkflows[0];
   return {
     patientName: "",
     patientCode: "",
@@ -83,7 +83,10 @@ function getDueDateAfterDays(days: number) {
 
 export function CreateCaseForm({
   cases,
+  appliances,
+  workflows: workflowOptions,
   defaultTurnaroundDays,
+  isSubmitting,
   onCancel,
   onSubmit,
 }: CreateCaseFormProps) {
@@ -93,7 +96,7 @@ export function CreateCaseForm({
     [doctorsQuery.data?.data],
   )
   const [values, setValues] = useState(() =>
-    getInitialValues(defaultTurnaroundDays),
+    getInitialValues(appliances, workflowOptions, defaultTurnaroundDays),
   );
   const [error, setError] = useState("");
   const categories = useMemo(
@@ -101,9 +104,9 @@ export function CreateCaseForm({
     [values.applianceId],
   );
   const category = categories.find((item) => item.id === values.categoryId);
-  const workflows = workflowTemplateFixtures.filter(
+  const workflows = workflowOptions.filter(
     (workflow) =>
-      workflow.applianceId === values.applianceId && workflow.isActive,
+      workflow.applianceId === values.applianceId || workflow.applianceId === null,
   );
   const availableDoctors = useMemo(
     () =>
@@ -130,12 +133,18 @@ export function CreateCaseForm({
     const nextCategories = getCreateCaseCategories(applianceId);
     const nextCategory = nextCategories[0];
     const nextWorkflow =
-      workflowTemplateFixtures.find(
+      workflowOptions.find(
         (workflow) =>
           workflow.applianceId === applianceId && workflow.isDefault,
       ) ??
-      workflowTemplateFixtures.find(
-        (workflow) => workflow.applianceId === applianceId,
+      workflowOptions.find(
+        (workflow) => workflow.applianceId === applianceId && workflow.applianceId !== null,
+      ) ??
+      workflowOptions.find(
+        (workflow) => workflow.applianceId === null && workflow.isDefault,
+      ) ??
+      workflowOptions.find(
+        (workflow) => workflow.applianceId === null,
       );
 
     setValues((current) => ({
@@ -192,7 +201,7 @@ export function CreateCaseForm({
     setError("");
   }
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     if (
@@ -213,13 +222,18 @@ export function CreateCaseForm({
       setError("Add a reason for the remake.");
       return;
     }
-    onSubmit({
-      ...values,
-      patientName: values.patientName.trim(),
-      patientCode: values.patientCode.trim(),
-      originalCaseId: values.originalCaseId || undefined,
-      remakeReason: values.remakeReason?.trim() || undefined,
-    });
+    try {
+      await onSubmit({
+        ...values,
+        categoryName: category?.name,
+        patientName: values.patientName.trim(),
+        patientCode: values.patientCode.trim(),
+        originalCaseId: values.originalCaseId || undefined,
+        remakeReason: values.remakeReason?.trim() || undefined,
+      });
+    } catch (submitError) {
+      setError(getApiErrorMessage(submitError, "Could not create case. Please try again."));
+    }
   }
 
   return (
@@ -229,11 +243,6 @@ export function CreateCaseForm({
       onSubmit={handleSubmit}
     >
       <div className="grid min-w-0 gap-3">
-        {doctorsQuery.isPending && (
-          <p role="status" className="text-sm text-text-muted">
-            Loading doctors…
-          </p>
-        )}
         {doctorsQuery.isError && (
           <p role="alert" className="text-sm text-destructive">
             Could not load doctors: {getApiErrorMessage(doctorsQuery.error, 'Please try again.')}
@@ -242,13 +251,14 @@ export function CreateCaseForm({
         <CreateCasePatientFields
           values={values}
           doctors={availableDoctors}
+          doctorsLoading={doctorsQuery.isPending}
           onClinicChange={handleClinicChange}
           onUpdateValue={updateValue}
         />
 
         <CreateCaseSetupFields
           values={values}
-          appliances={activeAppliances}
+          appliances={appliances}
           categories={categories}
           workflows={workflows}
           onApplianceChange={handleApplianceChange}
@@ -301,7 +311,7 @@ export function CreateCaseForm({
           <Button type="button" variant="neutral" onClick={onCancel}>
             Cancel
           </Button>
-          <Button type="submit">Create case</Button>
+          <Button type="submit" disabled={isSubmitting}>{isSubmitting ? 'Creating…' : 'Create case'}</Button>
         </div>
       </div>
 

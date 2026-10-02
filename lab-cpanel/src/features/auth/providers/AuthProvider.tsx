@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState, type PropsWithChildren } from
 
 import { getApiErrorMessage, isUnauthorizedApiError } from '../../../shared/api/apiError'
 import { setAccessToken } from '../../../shared/api/accessToken'
+import { UserPreferenceScopeProvider } from '../../../shared/providers/UserPreferenceScopeProvider'
 import { refreshAuthSession, signIn as createAuthSession, signOut as endAuthSession } from '../api/authApi'
 import {
   clearStoredRefreshToken,
@@ -144,7 +145,9 @@ export function AuthProvider({ children }: PropsWithChildren) {
         clearSession,
       }}
     >
-      {children}
+      <UserPreferenceScopeProvider userId={session?.user.id}>
+        {children}
+      </UserPreferenceScopeProvider>
     </AuthContext.Provider>
   )
 }

@@ -7,12 +7,21 @@ import {
   Trash2,
 } from "lucide-react";
 import { useState } from "react";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 import { Badge } from "../../../shared/ui/Badge";
 import { Button } from "../../../shared/ui/Button";
 import { Card } from "../../../shared/ui/Card";
 import { Collapsible, CollapsiblePanel, CollapsibleTrigger } from "../../../shared/ui/Collapsible";
+import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "../../../shared/ui/AlertDialog";
 import {
   Dialog,
   DialogContent,
@@ -22,58 +31,76 @@ import {
   DialogTitle,
 } from "../../../shared/ui/Dialog";
 import { Input } from "../../../shared/ui/Input";
+import { PageLoading } from "../../../shared/ui/Loading";
 import { Page } from "../../../shared/ui/Page";
 import { Switch } from "../../../shared/ui/Switch";
 import { toast } from "../../../shared/ui/Toast";
-import { appliances } from "../data/appliances";
+import { getApiErrorMessage } from "../../../shared/api/apiError";
 import {
   getApplianceFieldCount,
   getApplianceGroupCount,
-  isApplianceNameAvailable,
-  type Appliance,
   type ApplianceField,
+  type ApplianceFieldInput,
   type ApplianceFieldGroup,
 } from "../domain/appliance";
+import {
+  useAppliance,
+  useCreateApplianceField,
+  useCreateApplianceGroup,
+  useDeleteAppliance,
+  useDeleteApplianceField,
+  useDeleteApplianceGroup,
+  useSetApplianceActive,
+  useUpdateAppliance,
+  useUpdateApplianceField,
+  useUpdateApplianceGroup,
+} from "../queries/appliance.queries";
 import { ApplianceFieldFormCard } from "./ApplianceFieldFormCard";
 import { FieldGroupDialog } from "./FieldGroupDialog";
 import { FieldTypeBadge } from "./FieldTypeBadge";
 
-type ApplianceLocationState = { appliance?: Appliance };
 type FieldFormState = { groupId: string; field?: ApplianceField };
 type FieldDeleteState = { groupId: string; field: ApplianceField };
-
-function createId(prefix: string) {
-  return `${prefix}-${Date.now()}`;
-}
 
 export function ApplianceDetailsPage() {
   const navigate = useNavigate();
   const { applianceId } = useParams();
-  const location = useLocation();
-  const locationState = location.state as ApplianceLocationState | null;
-  const initialAppliance =
-    locationState?.appliance ??
-    appliances.find((item) => item.id === applianceId);
-  const [appliance, setAppliance] = useState<Appliance | undefined>(
-    initialAppliance,
-  );
+  const applianceQuery = useAppliance(applianceId ?? "");
+  const updateApplianceMutation = useUpdateAppliance();
+  const deleteApplianceMutation = useDeleteAppliance();
+  const setApplianceActiveMutation = useSetApplianceActive();
+  const createGroupMutation = useCreateApplianceGroup();
+  const updateGroupMutation = useUpdateApplianceGroup();
+  const deleteGroupMutation = useDeleteApplianceGroup();
+  const createFieldMutation = useCreateApplianceField();
+  const updateFieldMutation = useUpdateApplianceField();
+  const deleteFieldMutation = useDeleteApplianceField();
+  const appliance = applianceQuery.data;
   const [isGroupDialogOpen, setIsGroupDialogOpen] = useState(false);
   const [groupToEdit, setGroupToEdit] = useState<ApplianceFieldGroup>();
   const [fieldForm, setFieldForm] = useState<FieldFormState>();
   const [fieldToDelete, setFieldToDelete] = useState<FieldDeleteState>();
-  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>(() =>
-    Object.fromEntries(
-      (initialAppliance?.groups ?? []).map((group) => [group.id, true]),
-    ),
-  );
+  const [isDeleteTypeOpen, setIsDeleteTypeOpen] = useState(false);
+  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({});
   const [isRenaming, setIsRenaming] = useState(false);
-  const [name, setName] = useState(initialAppliance?.name ?? "");
+  const [name, setName] = useState("");
 
   if (!appliance) {
+    if (applianceQuery.isPending) {
+      return (
+        <Page size="full">
+          <PageLoading label="Loading appliance type" />
+        </Page>
+      );
+    }
     return (
       <Page size="full">
         <Card className="items-start gap-3">
-          <p className="font-medium text-text">Appliance type not found</p>
+          <p role="alert" className="font-medium text-text">
+            {applianceQuery.isError
+              ? `Could not load appliance type: ${getApiErrorMessage(applianceQuery.error, "Please try again.")}`
+              : "Appliance type not found"}
+          </p>
           <Button onClick={() => navigate("/appliances")}>
             <ArrowLeft /> Back to appliances
           </Button>
@@ -84,47 +111,62 @@ export function ApplianceDetailsPage() {
 
   const selectedAppliance = appliance;
 
-  function updateAppliance(update: (current: Appliance) => Appliance) {
-    setAppliance((current) => (current ? update(current) : current));
+  function showMutationError(title: string, error: unknown) {
+    toast.add({
+      title,
+      description: getApiErrorMessage(error, "Please try again."),
+      type: "error",
+    });
   }
 
-  function handleAddGroup(groupName: string) {
-    const groupId = createId("group");
-    updateAppliance((current) => ({
-      ...current,
-      groups: [...current.groups, { id: groupId, name: groupName, fields: [] }],
-    }));
-    setOpenGroups((current) => ({ ...current, [groupId]: true }));
+  async function handleSaveGroup(groupName: string) {
+    if (groupToEdit) {
+      await updateGroupMutation.mutateAsync({
+        applianceTypeId: selectedAppliance.id,
+        groupId: groupToEdit.id,
+        input: { name: groupName },
+      });
+      setGroupToEdit(undefined);
+      toast.add({ title: "Field group renamed", type: "success" });
+      return;
+    }
+
+    const group = await createGroupMutation.mutateAsync({
+      applianceTypeId: selectedAppliance.id,
+      input: { name: groupName },
+    });
+    setOpenGroups((current) => ({ ...current, [group.id]: true }));
     toast.add({ title: "Field group added", type: "success" });
   }
 
-  function handleSaveGroup(groupName: string) {
-    if (groupToEdit) {
-      updateAppliance((current) => ({
-        ...current,
-        groups: current.groups.map((group) => group.id === groupToEdit.id ? { ...group, name: groupName } : group),
-      }))
-      setGroupToEdit(undefined)
-      toast.add({ title: 'Field group renamed', type: 'success' })
-      return
-    }
-
-    handleAddGroup(groupName)
-  }
-
-  function handleSaveField(groupId: string, field: ApplianceField) {
+  async function handleSaveField(groupId: string, field: ApplianceField) {
+    const input: ApplianceFieldInput = {
+      key: field.key,
+      label: field.label,
+      type: field.type,
+      options: field.options,
+      defaultValue: field.defaultValue,
+      dependsOn: field.dependsOn,
+      dependsOnValue: field.dependsOnValue,
+      required: field.required,
+      sortOrder: field.sortOrder,
+      helpText: field.helpText,
+    };
     const isEditing = Boolean(fieldForm?.field);
-    updateAppliance((current) => ({
-      ...current,
-      groups: current.groups.map((group) => {
-        const fields = isEditing
-          ? group.fields.filter((item) => item.id !== field.id)
-          : group.fields;
-        return group.id === groupId
-          ? { ...group, fields: [...fields, field] }
-          : { ...group, fields };
-      }),
-    }));
+    if (fieldForm?.field) {
+      await updateFieldMutation.mutateAsync({
+        applianceTypeId: selectedAppliance.id,
+        groupId,
+        fieldId: fieldForm.field.id,
+        input,
+      });
+    } else {
+      await createFieldMutation.mutateAsync({
+        applianceTypeId: selectedAppliance.id,
+        groupId,
+        input,
+      });
+    }
     setFieldForm(undefined);
     toast.add({
       title: isEditing ? "Field updated" : "Field added",
@@ -133,59 +175,81 @@ export function ApplianceDetailsPage() {
     });
   }
 
-  function handleConfirmDeleteField() {
+  async function handleConfirmDeleteField() {
     if (!fieldToDelete) return;
-    const { groupId, field } = fieldToDelete;
-    updateAppliance((current) => ({
-      ...current,
-      groups: current.groups.map((group) =>
-        group.id === groupId
-          ? {
-              ...group,
-              fields: group.fields.filter((item) => item.id !== field.id),
-            }
-          : group,
-      ),
-    }));
-    setFieldToDelete(undefined);
-    toast.add({
-      title: "Field removed",
-      description: field.label,
-      type: "success",
-    });
+    try {
+      await deleteFieldMutation.mutateAsync({
+        applianceTypeId: selectedAppliance.id,
+        groupId: fieldToDelete.groupId,
+        fieldId: fieldToDelete.field.id,
+      });
+      toast.add({ title: "Field removed", description: fieldToDelete.field.label, type: "success" });
+      setFieldToDelete(undefined);
+    } catch (error) {
+      showMutationError("Could not remove field", error);
+    }
   }
 
-  function handleDeleteGroup(groupId: string) {
+  async function handleDeleteGroup(groupId: string) {
     const group = selectedAppliance.groups.find((item) => item.id === groupId);
-    updateAppliance((current) => ({
-      ...current,
-      groups: current.groups.filter((item) => item.id !== groupId),
-    }));
-    setOpenGroups((current) => ({ ...current, [groupId]: false }));
-    toast.add({
-      title: "Field group removed",
-      description: group?.name,
-      type: "success",
-    });
+    try {
+      await deleteGroupMutation.mutateAsync({
+        applianceTypeId: selectedAppliance.id,
+        groupId,
+      });
+      setOpenGroups((current) => ({ ...current, [groupId]: false }));
+      toast.add({ title: "Field group removed", description: group?.name, type: "success" });
+    } catch (error) {
+      showMutationError("Could not remove field group", error);
+    }
   }
 
-  function handleRename(event: React.FormEvent<HTMLFormElement>) {
+  async function handleRename(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const nextName = name.trim();
-    if (
-      !nextName ||
-      !isApplianceNameAvailable(appliances, nextName, selectedAppliance.id)
-    ) {
-      toast.add({
-        title: "Name is not available",
-        description: "Choose a unique appliance name.",
-        type: "error",
-      });
+    if (!nextName) {
+      toast.add({ title: "Name is required", type: "error" });
       return;
     }
-    updateAppliance((current) => ({ ...current, name: nextName }));
-    setIsRenaming(false);
-    toast.add({ title: "Appliance renamed", type: "success" });
+    try {
+      await updateApplianceMutation.mutateAsync({
+        applianceTypeId: selectedAppliance.id,
+        input: { name: nextName },
+      });
+      setIsRenaming(false);
+      toast.add({ title: "Appliance renamed", type: "success" });
+    } catch (error) {
+      showMutationError("Could not rename appliance", error);
+    }
+  }
+
+  async function handleToggleActive() {
+    try {
+      const updated = await setApplianceActiveMutation.mutateAsync({
+        applianceTypeId: selectedAppliance.id,
+        isActive: !selectedAppliance.isActive,
+      });
+      toast.add({
+        title: `${updated.name} ${updated.isActive ? "activated" : "deactivated"}`,
+        type: "success",
+      });
+    } catch (error) {
+      showMutationError("Could not update appliance status", error);
+    }
+  }
+
+  async function handleDeleteType() {
+    try {
+      await deleteApplianceMutation.mutateAsync(selectedAppliance.id);
+      toast.add({
+        title: "Appliance type deleted",
+        description: selectedAppliance.name,
+        type: "success",
+      });
+      navigate("/appliances");
+    } catch (error) {
+      showMutationError("Could not delete appliance type", error);
+    }
   }
 
   return (
@@ -219,7 +283,7 @@ export function ApplianceDetailsPage() {
                     autoFocus
                   />
                   <Button type="submit" size="sm">
-                    Save
+                    {updateApplianceMutation.isPending ? "Saving…" : "Save"}
                   </Button>
                   <Button
                     type="button"
@@ -243,35 +307,51 @@ export function ApplianceDetailsPage() {
           <div className="flex items-center gap-2">
             <Switch
               checked={appliance.isActive}
+              disabled={setApplianceActiveMutation.isPending}
               aria-label={`${appliance.isActive ? "Deactivate" : "Activate"} ${appliance.name}`}
-              onCheckedChange={() =>
-                updateAppliance((current) => ({
-                  ...current,
-                  isActive: !current.isActive,
-                }))
-              }
+              onCheckedChange={() => void handleToggleActive()}
             />
             {!isRenaming && (
-              <Button variant="neutral" onClick={() => setIsRenaming(true)}>
-                Rename
-              </Button>
+              <>
+                <Button
+                  variant="neutral"
+                  onClick={() => {
+                    setName(appliance.name);
+                    setIsRenaming(true);
+                  }}
+                >
+                  Rename
+                </Button>
+                <Button
+                  variant="danger"
+                  onClick={() => setIsDeleteTypeOpen(true)}
+                >
+                  Delete type
+                </Button>
+              </>
             )}
           </div>
         </div>
         <div className="flex flex-wrap gap-2">
           <Badge tone="info">{getApplianceGroupCount(appliance)} field groups</Badge>
           <Badge tone="info">{getApplianceFieldCount(appliance)} fields</Badge>
-          <Badge tone="info">{appliance.casesUsing} cases using this type</Badge>
+          <Badge tone="info">
+            {appliance.casesUsing === null
+              ? "Case usage not tracked"
+              : `${appliance.casesUsing} cases using this type`}
+          </Badge>
         </div>
       </Card>
 
       {fieldForm && (
         <ApplianceFieldFormCard
+          key={fieldForm.field?.id ?? `new-${fieldForm.groupId}`}
           appliance={appliance}
           initialGroupId={fieldForm.groupId}
           field={fieldForm.field}
           onSave={handleSaveField}
           onCancel={() => setFieldForm(undefined)}
+          isPending={createFieldMutation.isPending || updateFieldMutation.isPending}
         />
       )}
 
@@ -324,7 +404,8 @@ export function ApplianceDetailsPage() {
                     size="sm"
                     variant="ghost"
                     className="text-destructive hover:text-destructive"
-                    onClick={() => handleDeleteGroup(group.id)}
+                    disabled={deleteGroupMutation.isPending}
+                    onClick={() => void handleDeleteGroup(group.id)}
                   >
                     <Trash2 /> Delete
                   </Button>
@@ -386,6 +467,7 @@ export function ApplianceDetailsPage() {
                             variant="ghost"
                             className="text-destructive hover:text-destructive"
                             aria-label={`Delete ${field.label}`}
+                            disabled={deleteFieldMutation.isPending}
                             onClick={(event) => {
                               event.stopPropagation();
                               setFieldToDelete({ groupId: group.id, field });
@@ -431,6 +513,7 @@ export function ApplianceDetailsPage() {
         initialName={groupToEdit?.name}
         title={groupToEdit ? 'Rename field group' : 'Add field group'}
         submitLabel={groupToEdit ? 'Save name' : 'Add group'}
+        isPending={createGroupMutation.isPending || updateGroupMutation.isPending}
         isNameAvailable={(groupName) =>
           !appliance.groups.some(
             (group) =>
@@ -439,6 +522,33 @@ export function ApplianceDetailsPage() {
           )
         }
       />
+      <AlertDialog
+        open={isDeleteTypeOpen}
+        onOpenChange={(open) => {
+          if (!deleteApplianceMutation.isPending) setIsDeleteTypeOpen(open);
+        }}
+      >
+        <AlertDialogContent size="sm">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete appliance type?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This permanently deletes {appliance.name}, its field groups, and its fields.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteApplianceMutation.isPending}>
+              Cancel
+            </AlertDialogCancel>
+            <Button
+              variant="destructive"
+              disabled={deleteApplianceMutation.isPending}
+              onClick={() => void handleDeleteType()}
+            >
+              {deleteApplianceMutation.isPending ? "Deleting…" : "Delete type"}
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
       <Dialog
         open={Boolean(fieldToDelete)}
         onOpenChange={(open) => !open && setFieldToDelete(undefined)}
@@ -456,6 +566,7 @@ export function ApplianceDetailsPage() {
             <Button
               type="button"
               variant="neutral"
+              disabled={deleteFieldMutation.isPending}
               onClick={() => setFieldToDelete(undefined)}
             >
               Cancel
@@ -463,9 +574,10 @@ export function ApplianceDetailsPage() {
             <Button
               type="button"
               variant="destructive"
-              onClick={handleConfirmDeleteField}
+              disabled={deleteFieldMutation.isPending}
+              onClick={() => void handleConfirmDeleteField()}
             >
-              Delete field
+              {deleteFieldMutation.isPending ? "Deleting…" : "Delete field"}
             </Button>
           </DialogFooter>
         </DialogContent>

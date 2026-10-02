@@ -24,6 +24,11 @@ type WorkflowStageCardProps = {
   onRenameChange: (name: string) => void
   onDownloadFile: (file: CaseProductionStep['files'][number]) => void
   onDeleteFile: (file: CaseProductionStep['files'][number]) => void
+  canUploadFiles: boolean
+  canRenameFiles: boolean
+  canDownloadFiles: boolean
+  canDeleteFiles: boolean
+  canAssignTechnicians: boolean
   caseNumberCode: string
   doctorName: string
 }
@@ -57,6 +62,11 @@ export function WorkflowStageCard({
   onRenameChange,
   onDownloadFile,
   onDeleteFile,
+  canUploadFiles,
+  canRenameFiles,
+  canDownloadFiles,
+  canDeleteFiles,
+  canAssignTechnicians,
   caseNumberCode,
   doctorName,
 }: WorkflowStageCardProps) {
@@ -73,7 +83,7 @@ export function WorkflowStageCard({
       }`}
     >
       <div
-        className={`flex min-h-[var(--row-height)] items-center justify-between gap-2.5 px-2.5 ${
+        className={`flex min-h-[var(--row-height)] items-center justify-between gap-2.5 px-2 ${
           isActive ? 'bg-primary-soft/40' : ''
         }`}
       >
@@ -143,6 +153,7 @@ export function WorkflowStageCard({
             technicians={technicians}
             onAssign={onAssignTechnician}
             onRemove={onRemoveTechnician}
+            canAssign={canAssignTechnicians}
           />
           <StageFiles
             stepId={step.id}
@@ -155,6 +166,10 @@ export function WorkflowStageCard({
             onRenameChange={onRenameChange}
             onDownload={onDownloadFile}
             onDelete={onDeleteFile}
+            canUpload={canUploadFiles}
+            canRename={canRenameFiles}
+            canDownload={canDownloadFiles}
+            canDelete={canDeleteFiles}
             caseNumberCode={caseNumberCode}
             doctorName={doctorName}
           />

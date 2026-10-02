@@ -2,6 +2,10 @@ import assert from 'node:assert/strict';
 import { createServer, type Server } from 'node:http';
 import { once } from 'node:events';
 import { after, before, describe, it } from 'node:test';
+import { rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import path from 'node:path';
+import { randomUUID } from 'node:crypto';
 import type {
   AuthenticatedStaffUser,
   AuthServiceContract,
@@ -61,6 +65,35 @@ import type {
   RoleUpdateInput,
   RolesServiceContract,
 } from '../modules/roles/roles.domain.ts';
+import type {
+  WorkflowListInput,
+  WorkflowStage,
+  WorkflowStageInput,
+  WorkflowStageUpdateInput,
+  WorkflowTemplate,
+  WorkflowTemplateInput,
+  WorkflowTemplateUpdateInput,
+  WorkflowsServiceContract,
+} from '../modules/workflows/workflows.domain.ts';
+import type {
+  CaseListInput,
+  CaseListResult,
+  CaseRecord,
+  CaseStage,
+  CasesServiceContract,
+  CreateCaseInput,
+  UpdateCaseInput,
+} from '../modules/cases/cases.domain.ts';
+import type {
+  CaseActivityActor,
+  CaseAssetsServiceContract,
+  CaseFile,
+  CaseFileKind,
+  CaseFileUpload,
+  CaseTimelineEntry,
+  StoredCaseFile,
+} from '../modules/cases/case-assets.domain.ts';
+import { CaseFileStorage } from '../modules/cases/case-file-storage.ts';
 
 process.env['AUTH_JWT_SECRET'] = 'http-test-secret-that-is-at-least-32-characters';
 process.env['DATABASE_URL'] ??= 'mysql://127.0.0.1:3306/test';
@@ -93,6 +126,25 @@ const user = {
     'appliance_fields:create',
     'appliance_fields:update',
     'appliance_fields:delete',
+    'workflows:view',
+    'workflows:create',
+    'workflows:update',
+    'workflows:delete',
+    'workflow_steps:create',
+    'workflow_steps:update',
+    'workflow_steps:delete',
+    'workflow_steps:reorder',
+    'cases:view',
+    'cases:create',
+    'cases:update',
+    'cases:move',
+    'case_files:view',
+    'case_files:upload',
+    'case_files:update',
+    'case_files:download',
+    'case_files:delete',
+    'case_activity:view',
+    'case_activity:add_note',
     'clinics:view',
     'clinics:create',
     'clinics:update',
@@ -421,7 +473,7 @@ class InMemoryAppliancesService implements AppliancesServiceContract {
       .filter((type) => input.isActive === undefined || type.isActive === input.isActive)
       .filter((type) => !input.search || type.name.toLowerCase().includes(input.search.toLowerCase()))
       .filter((type) => !input.cursor || BigInt(type.id) > BigInt(input.cursor))
-      .sort((left, right) => left.sortOrder - right.sortOrder);
+      .sort((left, right) => BigInt(left.id) < BigInt(right.id) ? -1 : 1);
     const data = filtered.slice(0, input.limit);
     return {
       data,
@@ -451,7 +503,6 @@ class InMemoryAppliancesService implements AppliancesServiceContract {
       source: 'Custom type',
       color: input.color ?? '#1e88f5',
       isActive: true,
-      sortOrder: input.sortOrder ?? this.types.size,
       fieldGroups: [],
     };
     this.types.set(type.id, type);
@@ -594,6 +645,365 @@ class InMemoryAppliancesService implements AppliancesServiceContract {
   }
 }
 
+class InMemoryWorkflowsService implements WorkflowsServiceContract {
+  readonly templates = new Map<string, WorkflowTemplate>();
+  private templateSequence = 0;
+  private stageSequence = 0;
+
+  async list(input: WorkflowListInput): Promise<WorkflowTemplate[]> {
+    return [...this.templates.values()]
+      .filter((template) =>
+        input.applianceTypeId === undefined ||
+        template.applianceTypeId === input.applianceTypeId)
+      .sort((left, right) => left.name.localeCompare(right.name));
+  }
+
+  async getById(id: string): Promise<WorkflowTemplate> {
+    const template = this.templates.get(id);
+    if (!template) throw new AppError('Workflow template was not found', 404, 'WORKFLOW_NOT_FOUND');
+    return template;
+  }
+
+  async create(input: WorkflowTemplateInput): Promise<WorkflowTemplate> {
+    if ([...this.templates.values()].some(({ name }) => name === input.name)) {
+      throw new AppError('A workflow template with this name already exists', 409, 'WORKFLOW_NAME_EXISTS');
+    }
+    if (input.isDefault) this.clearDefault(input.applianceTypeId);
+    const template: WorkflowTemplate = {
+      id: String(++this.templateSequence),
+      applianceTypeId: input.applianceTypeId,
+      name: input.name,
+      isDefault: input.isDefault,
+      stages: [],
+    };
+    this.templates.set(template.id, template);
+    return template;
+  }
+
+  async update(id: string, input: WorkflowTemplateUpdateInput): Promise<WorkflowTemplate> {
+    const current = await this.getById(id);
+    const updated = { ...current, ...input };
+    if (updated.isDefault) this.clearDefault(updated.applianceTypeId, id);
+    this.templates.set(id, updated);
+    return updated;
+  }
+
+  async delete(id: string): Promise<void> {
+    await this.getById(id);
+    this.templates.delete(id);
+  }
+
+  async createStage(templateId: string, input: WorkflowStageInput): Promise<WorkflowStage> {
+    const template = await this.getById(templateId);
+    const stage: WorkflowStage = {
+      id: String(++this.stageSequence),
+      sortOrder: template.stages.length,
+      ...input,
+    };
+    this.templates.set(templateId, { ...template, stages: [...template.stages, stage] });
+    return stage;
+  }
+
+  async updateStage(
+    templateId: string,
+    stageId: string,
+    input: WorkflowStageUpdateInput,
+  ): Promise<WorkflowStage> {
+    const template = await this.getById(templateId);
+    const stage = template.stages.find(({ id }) => id === stageId);
+    if (!stage) throw new AppError('Workflow stage was not found', 404, 'WORKFLOW_STAGE_NOT_FOUND');
+    const updated = { ...stage, ...input };
+    this.templates.set(templateId, {
+      ...template,
+      stages: template.stages.map((item) => item.id === stageId ? updated : item),
+    });
+    return updated;
+  }
+
+  async deleteStage(templateId: string, stageId: string): Promise<void> {
+    const template = await this.getById(templateId);
+    const stages = template.stages.filter(({ id }) => id !== stageId);
+    if (stages.length === template.stages.length) {
+      throw new AppError('Workflow stage was not found', 404, 'WORKFLOW_STAGE_NOT_FOUND');
+    }
+    this.templates.set(templateId, { ...template, stages });
+  }
+
+  async reorderStages(templateId: string, stageIds: string[]): Promise<WorkflowStage[]> {
+    const template = await this.getById(templateId);
+    if (
+      stageIds.length !== template.stages.length ||
+      stageIds.some((id) => !template.stages.some((stage) => stage.id === id))
+    ) {
+      throw new AppError('Invalid workflow stage order', 422, 'INVALID_WORKFLOW_STAGE_ORDER');
+    }
+    const reordered = stageIds.map((id, sortOrder) => {
+      const stage = template.stages.find((item) => item.id === id);
+      if (!stage) throw new Error('Validated workflow stage was not found');
+      return { ...stage, sortOrder };
+    });
+    this.templates.set(templateId, { ...template, stages: reordered });
+    return reordered;
+  }
+
+  private clearDefault(applianceTypeId: string | null, exceptId?: string): void {
+    for (const [id, template] of this.templates) {
+      if (id !== exceptId && template.applianceTypeId === applianceTypeId && template.isDefault) {
+        this.templates.set(id, { ...template, isDefault: false });
+      }
+    }
+  }
+}
+
+class InMemoryCasesService implements CasesServiceContract {
+  readonly cases = new Map<string, CaseRecord>();
+  private sequence = 0;
+  private stageSequence = 0;
+
+  constructor(private readonly workflowsService: InMemoryWorkflowsService) {}
+
+  async list(input: CaseListInput): Promise<CaseListResult> {
+    const filtered = [...this.cases.values()]
+      .filter((item) => !input.search || `${item.id} ${item.patientName}`.toLowerCase().includes(input.search.toLowerCase()))
+      .filter((item) => !input.priority || item.priority === input.priority)
+      .filter((item) => !input.applianceTypeId || item.applianceTypeId === input.applianceTypeId)
+      .filter((item) => !input.clinicId || item.clinicId === input.clinicId)
+      .filter((item) => !input.stage || item.stage === input.stage)
+      .filter((item) => !input.cursor || Number(item.id.slice(3)) > Number(input.cursor))
+      .sort((left, right) => left.id.localeCompare(right.id));
+    const data = filtered.slice(0, input.limit);
+    return {
+      data,
+      nextCursor: filtered.length > input.limit
+        ? String(Number(data[data.length - 1]?.id.slice(3)))
+        : null,
+      total: filtered.length,
+    };
+  }
+
+  async getByNumber(caseNumber: string): Promise<CaseRecord> {
+    const record = this.cases.get(caseNumber);
+    if (!record) throw new AppError('Case was not found', 404, 'CASE_NOT_FOUND');
+    return record;
+  }
+
+  async create(input: CreateCaseInput, _createdById: string): Promise<CaseRecord> {
+    const template = this.workflowsService.templates.get(input.workflowTemplateId);
+    if (!template) throw new AppError('Workflow template was not found', 404, 'WORKFLOW_NOT_FOUND');
+    const id = `OR-${String(++this.sequence).padStart(6, '0')}`;
+    const now = new Date();
+    const stages: CaseStage[] = template.stages.map((stage, index) => ({
+      id: String(++this.stageSequence),
+      sourceStageId: stage.id,
+      sortOrder: index,
+      name: stage.name,
+      slaHours: stage.slaHours,
+      requiresApproval: stage.requiresApproval,
+      allowedFileKinds: [...stage.allowedFileKinds],
+      status: index === 0 ? 'active' : 'pending',
+      startedAt: index === 0 ? now : null,
+      completedAt: null,
+    }));
+    const record: CaseRecord = {
+      id,
+      patientName: input.patientName,
+      patientCode: input.patientCode ?? '',
+      request: `${input.categoryName ?? 'New case'} · Test appliance`,
+      clinicId: input.clinicId ?? null,
+      clinicName: 'Portal request',
+      doctorId: input.doctorId,
+      doctorName: 'Test doctor',
+      applianceTypeId: input.applianceTypeId,
+      applianceName: 'Test appliance',
+      workflowTemplateId: template.id,
+      workflowName: template.name,
+      categoryId: input.categoryId ?? 'new',
+      categoryName: input.categoryName ?? 'New case',
+      dueDate: input.dueDate ?? null,
+      priority: input.priority,
+      priceRule: input.priceRule,
+      billable: input.billable,
+      originalCaseId: null,
+      remakeReason: input.remakeReason ?? null,
+      caseFieldValues: input.caseFieldValues ?? {},
+      arch: 'Not provided',
+      units: 0,
+      stage: stages[0]?.name ?? 'Received',
+      stages,
+      createdAt: now,
+      updatedAt: now,
+    };
+    this.cases.set(record.id, record);
+    return record;
+  }
+
+  async update(caseNumber: string, input: UpdateCaseInput): Promise<CaseRecord> {
+    const current = await this.getByNumber(caseNumber);
+    const updated: CaseRecord = {
+      ...current,
+      ...(input.priority !== undefined ? { priority: input.priority } : {}),
+      ...(input.dueDate !== undefined ? { dueDate: input.dueDate } : {}),
+      ...(input.caseFieldValues !== undefined ? { caseFieldValues: input.caseFieldValues } : {}),
+      updatedAt: new Date(),
+    };
+    this.cases.set(caseNumber, updated);
+    return updated;
+  }
+
+  async updateStageStatus(
+    caseNumber: string,
+    stageId: string,
+    status: 'active' | 'completed',
+    _actorId: string,
+  ): Promise<CaseRecord> {
+    const current = await this.getByNumber(caseNumber);
+    const index = current.stages.findIndex((stage) => stage.id === stageId);
+    if (index < 0) throw new AppError('Case stage was not found', 404, 'CASE_STAGE_NOT_FOUND');
+    const now = new Date();
+    const stages = current.stages.map((stage) => ({
+      ...stage,
+      ...(stage.id === stageId
+        ? { status, startedAt: stage.startedAt ?? now, completedAt: status === 'completed' ? now : null }
+        : stage.status === 'active' ? { status: 'pending' as const, completedAt: null } : {}),
+    }));
+    if (status === 'completed' && stages[index + 1] && stages[index + 1]?.status !== 'completed') {
+      const nextStage = stages[index + 1];
+      if (nextStage) stages[index + 1] = { ...nextStage, status: 'active', startedAt: nextStage.startedAt ?? now };
+    }
+    const updated = {
+      ...current,
+      stages,
+      stage: stages.find((stage) => stage.status === 'active')?.name ?? stages[stages.length - 1]?.name ?? 'Received',
+      updatedAt: now,
+    };
+    this.cases.set(caseNumber, updated);
+    return updated;
+  }
+}
+
+class InMemoryCaseAssetsService implements CaseAssetsServiceContract {
+  readonly files = new Map<string, StoredCaseFile>();
+  readonly activity: CaseTimelineEntry[] = [];
+  private fileSequence = 0;
+  private activitySequence = 0;
+
+  constructor(
+    private readonly cases: InMemoryCasesService,
+    private readonly storage: CaseFileStorage,
+  ) {}
+
+  async listFiles(caseNumber: string, kind?: CaseFileKind): Promise<CaseFile[]> {
+    this.assertCaseExists(caseNumber);
+    return [...this.files.values()]
+      .filter((file) => file.caseNumber === caseNumber && (!kind || file.kind === kind))
+      .map(({ storagePath: _storagePath, ...file }) => file);
+  }
+
+  async uploadFile(
+    caseNumber: string,
+    stageId: string | null,
+    upload: CaseFileUpload,
+    actor: CaseActivityActor,
+  ): Promise<CaseFile> {
+    const caseItem = this.assertCaseExists(caseNumber);
+    const stage = stageId ? caseItem.stages.find((item) => item.id === stageId) : undefined;
+    if (stageId && !stage) throw new AppError('Case production stage was not found', 404, 'CASE_STAGE_NOT_FOUND');
+    const file: StoredCaseFile = {
+      id: String(++this.fileSequence),
+      caseNumber,
+      stageId,
+      stageName: stage?.name ?? null,
+      name: upload.originalName,
+      mimeType: upload.mimeType,
+      kind: upload.kind,
+      sizeBytes: upload.sizeBytes,
+      uploadedBy: actor.fullName,
+      createdAt: new Date(),
+      storagePath: this.storage.pathForKey(upload.storageKey),
+    };
+    this.files.set(file.id, file);
+    this.addActivity(caseNumber, 'event', `Uploaded ${file.name}`, actor);
+    return this.toPublicFile(file);
+  }
+
+  async getFile(caseNumber: string, fileId: string): Promise<StoredCaseFile> {
+    this.assertCaseExists(caseNumber);
+    const file = this.files.get(fileId);
+    if (!file || file.caseNumber !== caseNumber) {
+      throw new AppError('Case file was not found', 404, 'CASE_FILE_NOT_FOUND');
+    }
+    return file;
+  }
+
+  async renameFile(
+    caseNumber: string,
+    fileId: string,
+    name: string,
+    actor: CaseActivityActor,
+  ): Promise<CaseFile> {
+    const file = await this.getFile(caseNumber, fileId);
+    const renamed = { ...file, name };
+    this.files.set(fileId, renamed);
+    this.addActivity(caseNumber, 'event', `Renamed ${file.name} to ${name}`, actor);
+    return this.toPublicFile(renamed);
+  }
+
+  async deleteFile(
+    caseNumber: string,
+    fileId: string,
+    actor: CaseActivityActor,
+  ): Promise<void> {
+    const file = await this.getFile(caseNumber, fileId);
+    this.files.delete(fileId);
+    this.addActivity(caseNumber, 'event', `Removed ${file.name}`, actor);
+    await rm(file.storagePath, { force: true });
+  }
+
+  async listActivity(caseNumber: string): Promise<CaseTimelineEntry[]> {
+    this.assertCaseExists(caseNumber);
+    return this.activity.filter((entry) => entry.message.startsWith(`${caseNumber}:`))
+      .map((entry) => ({ ...entry, message: entry.message.slice(caseNumber.length + 1) }));
+  }
+
+  async addComment(
+    caseNumber: string,
+    message: string,
+    actor: CaseActivityActor,
+  ): Promise<CaseTimelineEntry> {
+    this.assertCaseExists(caseNumber);
+    return this.addActivity(caseNumber, 'comment', message, actor);
+  }
+
+  private assertCaseExists(caseNumber: string): CaseRecord {
+    const caseItem = this.cases.cases.get(caseNumber);
+    if (!caseItem) throw new AppError('Case was not found', 404, 'CASE_NOT_FOUND');
+    return caseItem;
+  }
+
+  private addActivity(
+    caseNumber: string,
+    kind: CaseTimelineEntry['kind'],
+    message: string,
+    actor: CaseActivityActor,
+  ): CaseTimelineEntry {
+    const entry: CaseTimelineEntry = {
+      id: String(++this.activitySequence),
+      kind,
+      eventType: kind === 'event' ? 'case_file_changed' : null,
+      message: `${caseNumber}:${message}`,
+      author: actor.fullName,
+      createdAt: new Date(),
+    };
+    this.activity.push(entry);
+    return { ...entry, message };
+  }
+
+  private toPublicFile(file: StoredCaseFile): CaseFile {
+    const { storagePath: _storagePath, ...publicFile } = file;
+    return publicFile;
+  }
+}
+
 class InMemoryStaffService implements StaffServiceContract {
   readonly staff = new Map<string, StaffMember>([
     ['12', {
@@ -722,11 +1132,29 @@ const appliances = new InMemoryAppliancesService();
 const roles = new InMemoryRolesService();
 const settings = new InMemorySettingsService();
 const staff = new InMemoryStaffService();
+const workflows = new InMemoryWorkflowsService();
+const cases = new InMemoryCasesService(workflows);
+const caseFileStorage = new CaseFileStorage(
+  path.join(tmpdir(), `novadontic-case-files-${randomUUID()}`),
+);
+const caseAssets = new InMemoryCaseAssetsService(cases, caseFileStorage);
 let server: Server;
 let baseUrl: string;
 
 before(async () => {
-  server = createServer(createApp(createApiRoutes(auth, appliances, clinics, doctors, roles, settings, staff)));
+  server = createServer(createApp(createApiRoutes(
+    auth,
+    appliances,
+    clinics,
+    doctors,
+    roles,
+    settings,
+    staff,
+    workflows,
+    cases,
+    caseAssets,
+    caseFileStorage,
+  )));
   server.listen(0, '127.0.0.1');
   await once(server, 'listening');
   const address = server.address();
@@ -737,6 +1165,7 @@ before(async () => {
 after(async () => {
   server.close();
   await once(server, 'close');
+  await rm(caseFileStorage.directory, { recursive: true, force: true });
 });
 
 async function signIn(credentials: Record<string, string>) {
@@ -1112,6 +1541,7 @@ describe('single-client auth API', () => {
       const createdBody = await created.json() as { data: ApplianceType };
       assert.equal(createdBody.data.code, 'night-guard');
       assert.equal(Object.hasOwn(createdBody.data, 'isSystem'), false);
+      assert.equal(Object.hasOwn(createdBody.data, 'sortOrder'), false);
 
       const groupResponse = await fetch(
         `${baseUrl}/appliances/${createdBody.data.id}/field-groups`,
@@ -1220,6 +1650,355 @@ describe('single-client auth API', () => {
         headers,
       });
       assert.equal(typeDelete.status, 204);
+    });
+  });
+
+  describe('workflow templates API', () => {
+    it('requires authentication to access workflow templates', async () => {
+      const response = await fetch(`${baseUrl}/workflows`);
+      assert.equal(response.status, 401);
+    });
+
+    it('validates permissions and supports template and stage lifecycle operations', async () => {
+      const login = await signIn({ email: user.email, password: 'secret-password' });
+      const headers = {
+        authorization: login.body.data.accessToken,
+        'content-type': 'application/json',
+      };
+
+      auth.permissionOverride = ['workflows:view'];
+      const forbidden = await fetch(`${baseUrl}/workflows`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ applianceTypeId: null, name: 'Forbidden workflow' }),
+      });
+      auth.permissionOverride = undefined;
+      assert.equal(forbidden.status, 403);
+
+      const invalid = await fetch(`${baseUrl}/workflows`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ applianceTypeId: '0', name: '' }),
+      });
+      assert.equal(invalid.status, 422);
+
+      const created = await fetch(`${baseUrl}/workflows`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          applianceTypeId: null,
+          name: 'Standard production',
+          isDefault: true,
+        }),
+      });
+      assert.equal(created.status, 201);
+      const createdBody = await created.json() as { data: WorkflowTemplate };
+      assert.equal(createdBody.data.name, 'Standard production');
+      assert.equal(createdBody.data.applianceTypeId, null);
+      assert.deepEqual(createdBody.data.stages, []);
+
+      const invalidStage = await fetch(
+        `${baseUrl}/workflows/${createdBody.data.id}/stages`,
+        {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({ name: 'Design', allowedFileKinds: ['exe'] }),
+        },
+      );
+      assert.equal(invalidStage.status, 422);
+
+      const firstStageResponse = await fetch(
+        `${baseUrl}/workflows/${createdBody.data.id}/stages`,
+        {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({ name: 'Design', requiresApproval: true }),
+        },
+      );
+      assert.equal(firstStageResponse.status, 201);
+      const firstStageBody = await firstStageResponse.json() as { data: WorkflowStage };
+      assert.equal(firstStageBody.data.sortOrder, 0);
+      assert.equal(firstStageBody.data.requiresApproval, true);
+      assert.equal(firstStageBody.data.slaHours, null);
+      assert.deepEqual(firstStageBody.data.allowedFileKinds, ['stl', 'photo', 'pdf', 'doc']);
+
+      const secondStageResponse = await fetch(
+        `${baseUrl}/workflows/${createdBody.data.id}/stages`,
+        {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({
+            name: 'Finishing',
+            slaHours: 24,
+            allowedFileKinds: ['photo'],
+          }),
+        },
+      );
+      const secondStageBody = await secondStageResponse.json() as { data: WorkflowStage };
+
+      const reordered = await fetch(
+        `${baseUrl}/workflows/${createdBody.data.id}/stages/order`,
+        {
+          method: 'PUT',
+          headers,
+          body: JSON.stringify({ stageIds: [secondStageBody.data.id, firstStageBody.data.id] }),
+        },
+      );
+      assert.equal(reordered.status, 200);
+      const reorderedBody = await reordered.json() as { data: WorkflowStage[] };
+      assert.deepEqual(reorderedBody.data.map(({ id, sortOrder }) => [id, sortOrder]), [
+        [secondStageBody.data.id, 0],
+        [firstStageBody.data.id, 1],
+      ]);
+
+      const updatedStage = await fetch(
+        `${baseUrl}/workflows/${createdBody.data.id}/stages/${firstStageBody.data.id}`,
+        {
+          method: 'PATCH',
+          headers,
+          body: JSON.stringify({ name: 'Digital design' }),
+        },
+      );
+      assert.equal(updatedStage.status, 200);
+      const updatedStageBody = await updatedStage.json() as { data: WorkflowStage };
+      assert.equal(updatedStageBody.data.name, 'Digital design');
+
+      const updatedWorkflow = await fetch(`${baseUrl}/workflows/${createdBody.data.id}`, {
+        method: 'PATCH',
+        headers,
+        body: JSON.stringify({ name: 'Updated production flow' }),
+      });
+      assert.equal(updatedWorkflow.status, 200);
+      const updatedWorkflowBody = await updatedWorkflow.json() as { data: WorkflowTemplate };
+      assert.equal(updatedWorkflowBody.data.name, 'Updated production flow');
+
+      const listed = await fetch(`${baseUrl}/workflows?applianceTypeId=1`, { headers });
+      assert.equal(listed.status, 200);
+      const listedBody = await listed.json() as { data: WorkflowTemplate[] };
+      assert.deepEqual(listedBody.data, []);
+
+      const deletedStage = await fetch(
+        `${baseUrl}/workflows/${createdBody.data.id}/stages/${secondStageBody.data.id}`,
+        { method: 'DELETE', headers },
+      );
+      assert.equal(deletedStage.status, 204);
+
+      const deletedWorkflow = await fetch(`${baseUrl}/workflows/${createdBody.data.id}`, {
+        method: 'DELETE',
+        headers,
+      });
+      assert.equal(deletedWorkflow.status, 204);
+      const missingWorkflow = await fetch(`${baseUrl}/workflows/${createdBody.data.id}`, { headers });
+      assert.equal(missingWorkflow.status, 404);
+    });
+  });
+
+  describe('cases API', () => {
+    it('requires authentication to access cases', async () => {
+      const response = await fetch(`${baseUrl}/cases`);
+      assert.equal(response.status, 401);
+    });
+
+    it('creates cases with copied workflow stages and persists stage progress', async () => {
+      const login = await signIn({ email: user.email, password: 'secret-password' });
+      const headers = {
+        authorization: login.body.data.accessToken,
+        'content-type': 'application/json',
+      };
+      const workflow = await workflows.create({
+        applianceTypeId: '1',
+        name: 'Case snapshot workflow',
+        isDefault: false,
+      });
+      const firstTemplateStage = await workflows.createStage(workflow.id, {
+        name: 'Design',
+        slaHours: 48,
+        requiresApproval: true,
+        allowedFileKinds: ['stl', 'pdf'],
+      });
+      const secondTemplateStage = await workflows.createStage(workflow.id, {
+        name: 'Finish',
+        slaHours: 24,
+        requiresApproval: false,
+        allowedFileKinds: ['photo'],
+      });
+
+      auth.permissionOverride = ['cases:view'];
+      const forbidden = await fetch(`${baseUrl}/cases`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          patientName: 'Test patient',
+          doctorId: '1',
+          applianceTypeId: '1',
+          workflowTemplateId: workflow.id,
+        }),
+      });
+      auth.permissionOverride = undefined;
+      assert.equal(forbidden.status, 403);
+
+      const invalid = await fetch(`${baseUrl}/cases`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          patientName: '',
+          doctorId: '1',
+          applianceTypeId: '1',
+          workflowTemplateId: workflow.id,
+          dueDate: '2026-02-30',
+        }),
+      });
+      assert.equal(invalid.status, 422);
+
+      const created = await fetch(`${baseUrl}/cases`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          patientName: 'Snapshot patient',
+          patientCode: 'PT-9001',
+          doctorId: '1',
+          applianceTypeId: '1',
+          workflowTemplateId: workflow.id,
+          categoryId: 'new',
+          categoryName: 'New case',
+          dueDate: '2026-12-31',
+          priority: 'Rush',
+          priceRule: 'discounted',
+          billable: true,
+          caseFieldValues: { arch: 'upper', removable: false, requested_units: ['one', 'two'] },
+        }),
+      });
+      assert.equal(created.status, 201);
+      const createdBody = await created.json() as { data: CaseRecord };
+      const createdCase = createdBody.data;
+      assert.match(createdCase.id, /^OR-\d{6,}$/);
+      assert.equal(createdCase.stage, 'Design');
+      assert.equal(createdCase.stages.length, 2);
+      assert.deepEqual(createdCase.stages.map(({ name, status }) => [name, status]), [
+        ['Design', 'active'],
+        ['Finish', 'pending'],
+      ]);
+      assert.equal(createdCase.stages[0]?.sourceStageId, firstTemplateStage.id);
+      assert.deepEqual(createdCase.caseFieldValues, {
+        arch: 'upper',
+        removable: false,
+        requested_units: ['one', 'two'],
+      });
+
+      await workflows.updateStage(workflow.id, firstTemplateStage.id, { name: 'Digital design' });
+      await workflows.deleteStage(workflow.id, secondTemplateStage.id);
+      const fetched = await fetch(`${baseUrl}/cases/${createdCase.id}`, { headers });
+      assert.equal(fetched.status, 200);
+      const fetchedBody = await fetched.json() as { data: CaseRecord };
+      assert.deepEqual(fetchedBody.data.stages.map(({ name }) => name), ['Design', 'Finish']);
+
+      auth.permissionOverride = ['cases:view'];
+      const forbiddenFileList = await fetch(`${baseUrl}/cases/${createdCase.id}/files`, { headers });
+      auth.permissionOverride = undefined;
+      assert.equal(forbiddenFileList.status, 403);
+
+      const unsupportedFile = new FormData();
+      unsupportedFile.set('file', new Blob(['not allowed']), 'payload.exe');
+      const rejectedUpload = await fetch(`${baseUrl}/cases/${createdCase.id}/files`, {
+        method: 'POST',
+        headers: { authorization: login.body.data.accessToken },
+        body: unsupportedFile,
+      });
+      assert.equal(rejectedUpload.status, 422);
+
+      const upload = new FormData();
+      upload.set('stageId', createdCase.stages[0]?.id ?? '');
+      upload.set('file', new Blob(['solid model'], { type: 'model/stl' }), 'jaw.stl');
+      const uploaded = await fetch(`${baseUrl}/cases/${createdCase.id}/files`, {
+        method: 'POST',
+        headers: { authorization: login.body.data.accessToken },
+        body: upload,
+      });
+      assert.equal(uploaded.status, 201);
+      const uploadedBody = await uploaded.json() as { data: CaseFile };
+      assert.equal(uploadedBody.data.kind, 'model');
+      assert.equal(uploadedBody.data.stageName, 'Design');
+
+      const filteredFiles = await fetch(
+        `${baseUrl}/cases/${createdCase.id}/files?kind=model`,
+        { headers },
+      );
+      const filteredFilesBody = await filteredFiles.json() as { data: CaseFile[] };
+      assert.equal(filteredFilesBody.data.length, 1);
+      assert.equal(filteredFilesBody.data[0]?.name, 'jaw.stl');
+
+      const downloaded = await fetch(
+        `${baseUrl}/cases/${createdCase.id}/files/${uploadedBody.data.id}/download`,
+        { headers },
+      );
+      assert.equal(downloaded.status, 200);
+      assert.equal(await downloaded.text(), 'solid model');
+
+      const renamed = await fetch(
+        `${baseUrl}/cases/${createdCase.id}/files/${uploadedBody.data.id}`,
+        {
+          method: 'PATCH',
+          headers,
+          body: JSON.stringify({ name: 'jaw-final.stl' }),
+        },
+      );
+      assert.equal(renamed.status, 200);
+      const renamedBody = await renamed.json() as { data: CaseFile };
+      assert.equal(renamedBody.data.name, 'jaw-final.stl');
+
+      const comment = await fetch(`${baseUrl}/cases/${createdCase.id}/activity`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ message: 'Setup approved, ready for production.' }),
+      });
+      assert.equal(comment.status, 201);
+      const commentBody = await comment.json() as { data: CaseTimelineEntry };
+      assert.equal(commentBody.data.kind, 'comment');
+      assert.equal(commentBody.data.author, user.fullName);
+
+      const completed = await fetch(
+        `${baseUrl}/cases/${createdCase.id}/stages/${createdCase.stages[0]?.id}/status`,
+        {
+          method: 'PATCH',
+          headers,
+          body: JSON.stringify({ status: 'completed' }),
+        },
+      );
+      assert.equal(completed.status, 200);
+      const completedBody = await completed.json() as { data: CaseRecord };
+      assert.deepEqual(completedBody.data.stages.map(({ status }) => status), [
+        'completed',
+        'active',
+      ]);
+      assert.equal(completedBody.data.stage, 'Finish');
+
+      const updated = await fetch(`${baseUrl}/cases/${createdCase.id}`, {
+        method: 'PATCH',
+        headers,
+        body: JSON.stringify({ priority: 'Normal', dueDate: null }),
+      });
+      assert.equal(updated.status, 200);
+      const updatedBody = await updated.json() as { data: CaseRecord };
+      assert.equal(updatedBody.data.priority, 'Normal');
+      assert.equal(updatedBody.data.dueDate, null);
+
+      const listed = await fetch(`${baseUrl}/cases?search=Snapshot%20patient&limit=1`, { headers });
+      assert.equal(listed.status, 200);
+      const listedBody = await listed.json() as { data: CaseListResult };
+      assert.equal(listedBody.data.total, 1);
+      assert.equal(listedBody.data.data[0]?.id, createdCase.id);
+
+      const deleted = await fetch(
+        `${baseUrl}/cases/${createdCase.id}/files/${uploadedBody.data.id}`,
+        { method: 'DELETE', headers },
+      );
+      assert.equal(deleted.status, 204);
+      const activityResponse = await fetch(`${baseUrl}/cases/${createdCase.id}/activity`, { headers });
+      const activityBody = await activityResponse.json() as { data: CaseTimelineEntry[] };
+      assert.ok(activityBody.data.some(({ kind, message }) =>
+        kind === 'comment' && message === 'Setup approved, ready for production.',
+      ));
+      assert.ok(activityBody.data.some(({ message }) => message.includes('Uploaded jaw.stl')));
     });
   });
 

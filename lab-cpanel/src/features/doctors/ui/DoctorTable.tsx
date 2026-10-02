@@ -11,10 +11,10 @@ import {
 } from "../../../shared/ui/DropdownMenu";
 import type { Doctor } from "../domain/doctor";
 import { DoctorPortalStatusBadge } from "./DoctorPortalStatusBadge";
-import { PersonAvatar } from "./PersonAvatar";
 
 type DoctorTableProps = {
   doctors: Doctor[];
+  loading?: boolean;
   getClinicName: (doctor: Doctor) => string | undefined;
   onDelete: (doctor: Doctor) => void;
   onEdit: (doctor: Doctor) => void;
@@ -27,6 +27,7 @@ type DoctorTableProps = {
 export function DoctorTable({
   description,
   doctors,
+  loading = false,
   getClinicName,
   onDelete,
   onEdit,
@@ -47,7 +48,6 @@ export function DoctorTable({
           className="flex items-center gap-2 text-left"
           onClick={() => onView(doctor)}
         >
-          <PersonAvatar name={doctor.fullName} size="sm" />
           <span>
             <span className="block truncate font-semibold text-text">
               {doctor.fullName}
@@ -112,6 +112,7 @@ export function DoctorTable({
     {
       id: "actions",
       header: "",
+      showInColumnVisualizer: false,
       pinnable: false,
       headerClassName: "w-10",
       className: "w-10",
@@ -155,8 +156,10 @@ export function DoctorTable({
     <DataTable
       columns={columns}
       data={doctors}
+      persistenceKey="doctor-list"
       description={description}
       getRowId={(doctor) => doctor.id}
+      loading={loading}
       title={title}
     />
   );

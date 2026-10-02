@@ -4,13 +4,13 @@ model ApplianceType {
   name        String                    @db.VarChar(100)
   color       String?                   @default("#1e88f5") @db.VarChar(7)
   isActive    Boolean                   @default(true) @map("is_active")
-  sortOrder   Int                       @default(0) @map("sort_order") @db.SmallInt
   fields      ApplianceTypeField[]
   fieldGroups ApplianceTypeFieldGroup[]
   workflows  WorkflowTemplate[]
+  cases      CaseRecord[]
 
   @@index([name])
-  @@index([isActive, sortOrder])
+  @@index([isActive])
   @@map("appliance_types")
 }
 

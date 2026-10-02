@@ -9,6 +9,8 @@ model User {
   updatedAt          DateTime     @default(now()) @updatedAt @map("updated_at")
   sessions           AuthSession[]
   roles              UserRole[]
+  uploadedCaseFiles  CaseFile[]          @relation("CaseFileUploader")
+  caseTimelineEntries CaseTimelineEntry[] @relation("CaseTimelineActor")
 
   @@map("users")
 }

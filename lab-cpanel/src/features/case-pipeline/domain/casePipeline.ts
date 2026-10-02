@@ -1,10 +1,4 @@
-export type CasePipelineStage =
-  | 'Received'
-  | 'Design'
-  | 'Production'
-  | 'Quality check'
-  | 'Ready to ship'
-  | 'Delivered'
+export type CasePipelineStage = string
 
 export type CasePipelineStatus = 'On track' | 'Due today' | 'Needs attention'
 export type CasePipelinePriority = 'Normal' | 'Rush'
@@ -20,6 +14,10 @@ export type CasePipelineFile = {
   uploadedBy: string
   uploadedAt: string
   url?: string
+  kind?: 'model' | 'image' | 'document'
+  stageId?: string | null
+  stageName?: string | null
+  sizeBytes?: number
 }
 
 export type CaseProductionStep = {
@@ -30,6 +28,9 @@ export type CaseProductionStep = {
   files: CasePipelineFile[]
   technician?: string
   technicians?: string[]
+  slaHours?: number | null
+  requiresApproval?: boolean
+  allowedFileKinds?: Array<'stl' | 'photo' | 'pdf' | 'doc'>
 }
 
 export type CaseActivityItem = {
@@ -102,14 +103,14 @@ export function filterCasePipelineCases(
   })
 }
 
-export function getStageIndex(stage: CasePipelineStage) {
-  return casePipelineStages.indexOf(stage)
+export function getStageIndex(stage: CasePipelineStage, stages = casePipelineStages) {
+  return stages.indexOf(stage)
 }
 
-export function getNextStage(stage: CasePipelineStage) {
-  return casePipelineStages[Math.min(getStageIndex(stage) + 1, casePipelineStages.length - 1)]
+export function getNextStage(stage: CasePipelineStage, stages = casePipelineStages) {
+  return stages[Math.min(getStageIndex(stage, stages) + 1, stages.length - 1)]
 }
 
-export function getPreviousStage(stage: CasePipelineStage) {
-  return casePipelineStages[Math.max(getStageIndex(stage) - 1, 0)]
+export function getPreviousStage(stage: CasePipelineStage, stages = casePipelineStages) {
+  return stages[Math.max(getStageIndex(stage, stages) - 1, 0)]
 }

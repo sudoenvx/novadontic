@@ -11,9 +11,10 @@ import {
   Triangle,
   X,
 } from 'lucide-react'
-import { useCallback, useMemo, useRef, useState, type ReactNode } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { useSearchParams } from 'react-router-dom'
 
+import { getApiErrorMessage } from '../../../../shared/api/apiError'
 import { Button } from '../../../../shared/ui/Button'
 import ColorPicker from '../../../../shared/ui/ColorPicker'
 import {
@@ -23,6 +24,7 @@ import {
   type ModelStatistics,
   type ModelSource,
 } from '../../../../shared/ui/ModelRenderer'
+import { downloadCaseFile } from '../../api/case-assets.api'
 import {
   Tooltip,
   TooltipContent,
@@ -126,9 +128,32 @@ const modelViewerStyles = `
 
 export function ModelViewerPage() {
   const [searchParams] = useSearchParams()
-  const modelName = searchParams.get('fileName') || 'Sample model.stl'
+  const fileId = searchParams.get('fileId')
   const caseNumber = searchParams.get('caseNumber')
-  const doctorName = searchParams.get('doctorName')
+  return (
+    <ModelViewerContent
+      key={`${caseNumber ?? ''}:${fileId ?? 'demo'}`}
+      modelName={searchParams.get('fileName') || 'Sample model.stl'}
+      caseNumber={caseNumber}
+      fileId={fileId}
+      doctorName={searchParams.get('doctorName')}
+    />
+  )
+}
+
+type ModelViewerContentProps = {
+  modelName: string
+  caseNumber: string | null
+  fileId: string | null
+  doctorName: string | null
+}
+
+function ModelViewerContent({
+  modelName,
+  caseNumber,
+  fileId,
+  doctorName,
+}: ModelViewerContentProps) {
   const rendererRef = useRef<ModelRendererHandle>(null)
   const [wireframe, setWireframe] = useState(false)
   const [flatShading, setFlatShading] = useState(false)
@@ -140,11 +165,36 @@ export function ModelViewerPage() {
   const [showModelInfo, setShowModelInfo] = useState(true)
   const [isLoading, setIsLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState<string>()
+  const [fileSourceUrl, setFileSourceUrl] = useState<string>()
   const [modelStats, setModelStats] = useState<ModelStatistics>()
+  useEffect(() => {
+    if (!fileId || !caseNumber) return
+
+    let isActive = true
+    let createdUrl: string | undefined
+
+    void downloadCaseFile(caseNumber, fileId).then((blob) => {
+      if (!isActive) return
+      createdUrl = URL.createObjectURL(blob)
+      setFileSourceUrl(createdUrl)
+    }).catch((error: unknown) => {
+      if (!isActive) return
+      setIsLoading(false)
+      setErrorMessage(getApiErrorMessage(error, 'The model file could not be loaded.'))
+    })
+
+    return () => {
+      isActive = false
+      if (createdUrl) URL.revokeObjectURL(createdUrl)
+    }
+  }, [caseNumber, fileId])
+  const displayedErrorMessage = errorMessage ??
+    (fileId && !caseNumber ? 'A case number is required to load this file.' : undefined)
+  const shouldShowLoading = isLoading && !(fileId && !caseNumber)
   const source = useMemo<ModelSource>(() => ({
     name: modelName,
-    url: DEMO_STL_MODEL_URL,
-  }), [modelName])
+    url: fileSourceUrl ?? DEMO_STL_MODEL_URL,
+  }), [fileSourceUrl, modelName])
   const settings = useMemo<ModelRendererSettings>(() => ({
     autoRotate: false,
     wireframe,
@@ -240,15 +290,17 @@ export function ModelViewerPage() {
       </header>
 
       <section className="relative min-h-0 flex-1 overflow-hidden" aria-label="3D model preview">
-        <ModelRenderer
-          ref={rendererRef}
-          source={source}
-          settings={settings}
-          toolbar={toolbar}
-          onLoad={handleLoad}
-          onError={handleError}
-        />
-        {isLoading && !errorMessage && (
+        {(!fileId || fileSourceUrl) && (
+          <ModelRenderer
+            ref={rendererRef}
+            source={source}
+            settings={settings}
+            toolbar={toolbar}
+            onLoad={handleLoad}
+            onError={handleError}
+          />
+        )}
+        {shouldShowLoading && !displayedErrorMessage && (
           <p
             className="absolute inset-0 z-20 grid place-items-center bg-canvas text-sm text-text-secondary"
             role="status"
@@ -256,15 +308,15 @@ export function ModelViewerPage() {
             Loading 3D model…
           </p>
         )}
-        {errorMessage && (
+        {displayedErrorMessage && (
           <p
             className="absolute inset-0 z-20 grid place-items-center bg-canvas px-6 text-center text-sm text-destructive"
             role="alert"
           >
-            {errorMessage}
+            {displayedErrorMessage}
           </p>
         )}
-        {!isLoading && !errorMessage && modelStats && (
+        {!shouldShowLoading && !displayedErrorMessage && modelStats && (
           showModelInfo ? (
             <section
               className="model-viewer-info absolute bottom-3 left-3 z-10 w-[min(17rem,calc(100%-1.5rem))] rounded-lg border p-3 shadow-sm"

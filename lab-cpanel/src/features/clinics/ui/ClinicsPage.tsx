@@ -117,18 +117,18 @@ export function ClinicsPage() {
         </PageHeaderActions>
       </PageHeader>
 
-      {clinicsQuery.isPending && <p role="status">Loading clinics…</p>}
       {clinicsQuery.isError && (
         <p role="alert" className="text-destructive">
           Could not load clinics: {getApiErrorMessage(clinicsQuery.error, 'Please try again.')}
         </p>
       )}
-      {clinicsQuery.data && (
+      {(clinicsQuery.data || clinicsQuery.isPending) && (
         <ClinicTable
           clinics={visibleClinics}
+          loading={clinicsQuery.isPending}
           onEdit={setEditingClinic}
           onSetActive={handleSetClinicActive}
-          title={`All clinics (${visibleClinics.length})`}
+          title={clinicsQuery.data ? `All clinics (${visibleClinics.length})` : 'All clinics'}
         />
       )}
 

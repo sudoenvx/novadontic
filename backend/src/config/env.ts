@@ -13,6 +13,7 @@ const environmentSchema = z.object({
   DATABASE_URL: z.string().min(1, "DATABASE_URL is required"),
   AUTH_JWT_SECRET: z.string().min(32, "AUTH_JWT_SECRET must be at least 32 characters"),
   AUTH_ACCESS_TOKEN_TTL_SECONDS: z.coerce.number().int().positive().default(900),
+  CASE_FILES_STORAGE_DIR: z.string().trim().min(1).default("./var/case-files"),
 });
 
 const parsedEnvironment = environmentSchema.safeParse(process.env);

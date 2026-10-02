@@ -4,6 +4,8 @@ import { Badge, type BadgeTone } from '../../../shared/ui/Badge'
 import { Button } from '../../../shared/ui/Button'
 import {
   DataTable,
+  DataTableActions,
+  DataTableColumnVisualizer,
   DataTableEmptyState,
   DataTableFooter,
   DataTablePagination,
@@ -61,6 +63,7 @@ export function DataTablePlaygroundPage() {
         description="Development playground for generic columns, custom cells, and composable table parts."
         columns={columns}
         data={visibleCases}
+        persistenceKey="datatable-playground"
         emptyState={
           <DataTableEmptyState
             title="No cases match these filters"
@@ -90,7 +93,11 @@ export function DataTablePlaygroundPage() {
             />
           </DataTableFooter>
         }
-      />
+      >
+        <DataTableActions>
+          <DataTableColumnVisualizer />
+        </DataTableActions>
+      </DataTable>
       {selectedCaseId && <p className="text-sm text-secondary">Selected case: <span className="font-semibold text-text">{selectedCaseId}</span></p>}
     </Page>
   )

@@ -1,36 +1,71 @@
 import { Plus, ShieldCheck } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 
+import { getApiErrorMessage } from "../../../shared/api/apiError";
 import { PageHeader, PageHeaderActions } from "../../../shared/ui/PageHeader";
 import { Button } from "../../../shared/ui/Button";
 import { Card } from "../../../shared/ui/Card";
 import { Page } from "../../../shared/ui/Page";
 import { toast } from "../../../shared/ui/Toast";
-import { roleFixtures } from "../data/roles";
-import { getVisibleRoles } from "../domain/role";
+import { groupRolePermissions, getVisibleRoles } from "../domain/role";
 import type { Role } from "../domain/role";
+import {
+  useCreateRole,
+  useDeleteRole,
+  useRolePermissions,
+  useRoles,
+  useSetRolePermissions,
+  useUpdateRole,
+} from "../queries/role.queries";
 import { RoleFormDialog, type RoleFormValues } from "./RoleFormDialog";
 import { RolePermissionsEditor } from "./RolePermissionsEditor";
 
 export function RolesPermissionsPage() {
-  const [roles, setRoles] = useState<Role[]>(roleFixtures);
-  const [selectedRoleId, setSelectedRoleId] = useState("administrator");
+  const rolesQuery = useRoles();
+  const permissionsQuery = useRolePermissions();
+  const createMutation = useCreateRole();
+  const updateMutation = useUpdateRole();
+  const permissionsMutation = useSetRolePermissions();
+  const deleteMutation = useDeleteRole();
+  const [selectedRoleId, setSelectedRoleId] = useState("");
+  const [permissionDrafts, setPermissionDrafts] = useState<
+    Record<string, string[]>
+  >({});
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingRole, setEditingRole] = useState<Role>();
-  const visibleRoles = useMemo(() => getVisibleRoles(roles), [roles]);
+  const roles = rolesQuery.data ?? [];
+  const visibleRoles = getVisibleRoles(roles);
   const selectedRole =
     visibleRoles.find((role) => role.id === selectedRoleId) ?? visibleRoles[0];
+  const selectedPermissions = selectedRole
+    ? permissionDrafts[selectedRole.id] ?? selectedRole.permissions
+    : [];
+  const permissionGroups = groupRolePermissions(permissionsQuery.data ?? []);
+  const hasPermissionChanges =
+    Boolean(selectedRole) &&
+    (selectedRole?.permissions.length !== selectedPermissions.length ||
+      selectedRole?.permissions.some(
+        (permission) => !selectedPermissions.includes(permission),
+      ));
+  const isFormSubmitting =
+    createMutation.isPending || updateMutation.isPending;
 
-  function handleCreateRole(values: RoleFormValues) {
-    const role: Role = {
-      id: `${values.name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-${Date.now()}`,
-      name: values.name,
-      description: values.description,
-      type: 'custom',
-      permissions: [],
-      staffCount: 0,
-    };
-    setRoles((currentRoles) => [...currentRoles, role]);
+  async function handleSubmitRole(values: RoleFormValues) {
+    if (editingRole) {
+      const role = await updateMutation.mutateAsync({
+        roleId: editingRole.id,
+        input: values,
+      });
+      setEditingRole(undefined);
+      toast.add({
+        title: "Role updated",
+        description: `${role.name} was updated.`,
+        type: "success",
+      });
+      return;
+    }
+
+    const role = await createMutation.mutateAsync(values);
     setSelectedRoleId(role.id);
     setIsFormOpen(false);
     toast.add({
@@ -40,54 +75,71 @@ export function RolesPermissionsPage() {
     });
   }
 
-  function handleUpdateRole(values: RoleFormValues) {
-    if (!editingRole) return;
+  function handlePermissionToggle(permission: string, checked: boolean) {
+    if (!selectedRole || selectedRole.type === "owner") return;
 
-    setRoles((currentRoles) =>
-      currentRoles.map((role) =>
-        role.id === editingRole.id ? { ...role, ...values } : role,
-      ),
-    );
-    setEditingRole(undefined);
-    toast.add({ title: "Role updated", type: "success" });
+    setPermissionDrafts((drafts) => {
+      const current = drafts[selectedRole.id] ?? selectedRole.permissions;
+      const permissions = checked
+        ? [...new Set([...current, permission])]
+        : current.filter((item) => item !== permission);
+      return { ...drafts, [selectedRole.id]: permissions };
+    });
   }
 
-  function handlePermissionToggle(
-    permissionId: Role["permissions"][number],
-    checked: boolean,
-  ) {
-    if (!selectedRole) return;
+  async function handleDeleteRole(roleId: string): Promise<boolean> {
+    const role = roles.find((item) => item.id === roleId);
+    if (!role || role.type !== "custom" || role.staffCount > 0) return false;
 
-    setRoles((currentRoles) =>
-      currentRoles.map((role) => {
-        if (role.id !== selectedRole.id || role.type === 'owner') return role;
-        const permissions = checked
-          ? [...new Set([...role.permissions, permissionId])]
-          : role.permissions.filter(
-              (permission) => permission !== permissionId,
-            );
-        return { ...role, permissions };
-      }),
-    );
+    try {
+      await deleteMutation.mutateAsync(roleId);
+      setPermissionDrafts((drafts) => {
+        const remainingDrafts = { ...drafts };
+        delete remainingDrafts[roleId];
+        return remainingDrafts;
+      });
+      setSelectedRoleId((currentId) => currentId === roleId ? "" : currentId);
+      toast.add({
+        title: "Role deleted",
+        description: `${role.name} was removed.`,
+        type: "success",
+      });
+      return true;
+    } catch (error) {
+      toast.add({
+        title: "Unable to delete role",
+        description: getApiErrorMessage(error, "Please try again."),
+        type: "error",
+      });
+      return false;
+    }
   }
 
-  function handleDeleteRole(roleId: string) {
-    const role = roles.find((item) => item.id === roleId)
-    if (!role || role.type !== 'custom' || role.staffCount > 0) return
+  async function handleSaveRole() {
+    if (!selectedRole || !hasPermissionChanges) return;
 
-    setRoles((currentRoles) => currentRoles.filter((item) => item.id !== roleId))
-    setSelectedRoleId((currentId) => currentId === roleId ? '' : currentId)
-    toast.add({ title: 'Role deleted', description: `${role.name} was removed.`, type: 'success' })
-  }
-
-  function handleSaveRole() {
-    if (!selectedRole) return
-
-    toast.add({
-      title: "Role saved",
-      description: `${selectedRole.name} permissions are up to date.`,
-      type: "success",
-    })
+    try {
+      await permissionsMutation.mutateAsync({
+        roleId: selectedRole.id,
+        permissionCodes: selectedPermissions,
+      });
+      setPermissionDrafts((drafts) => {
+        const remainingDrafts = { ...drafts };
+        delete remainingDrafts[selectedRole.id];
+        return remainingDrafts;
+      });
+      toast.add({
+        title: "Role saved",
+        description: `${selectedRole.name} permissions are up to date.`,
+        type: "success",
+      });
+    } catch (error) {
+      toast.add({
+        title: "Unable to save permissions",
+        description: getApiErrorMessage(error, "Please try again."),
+        type: "error",
+      });
+    }
   }
 
   return (
@@ -108,43 +160,76 @@ export function RolesPermissionsPage() {
         </PageHeaderActions>
       </PageHeader>
 
-      <div className="grid min-w-0 gap-3 xl:grid-cols-[18rem_minmax(0,1fr)]">
-        <RoleList
-          roles={visibleRoles}
-          selectedRoleId={selectedRole?.id}
-          onSelect={setSelectedRoleId}
-        />
-        {selectedRole ? (
-          <RolePermissionsEditor
-            role={selectedRole}
-            onDelete={handleDeleteRole}
-            onEdit={() => setEditingRole(selectedRole)}
-            onSave={handleSaveRole}
-            onPermissionToggle={handlePermissionToggle}
+      {rolesQuery.isPending ? (
+        <Card role="status">Loading roles...</Card>
+      ) : rolesQuery.isError ? (
+        <Card role="alert" className="gap-3">
+          <p>{getApiErrorMessage(rolesQuery.error, "Unable to load roles.")}</p>
+          <Button variant="outline" onClick={() => rolesQuery.refetch()}>
+            Retry
+          </Button>
+        </Card>
+      ) : (
+        <div className="grid min-w-0 gap-3 xl:grid-cols-[18rem_minmax(0,1fr)]">
+          <RoleList
+            roles={visibleRoles}
+            selectedRoleId={selectedRole?.id}
+            onSelect={setSelectedRoleId}
           />
-        ) : (
-          <Card className="items-center justify-center gap-2 py-12 text-center">
-            <ShieldCheck className="text-primary" />
-            <p className="font-medium text-text">No editable roles yet</p>
-            <p className="text-sm text-text-muted">
-              Create a role to start selecting permissions.
-            </p>
-          </Card>
-        )}
-      </div>
+          {permissionsQuery.isPending ? (
+            <Card role="status">Loading permission catalog...</Card>
+          ) : permissionsQuery.isError ? (
+            <Card role="alert" className="gap-3">
+              <p>
+                {getApiErrorMessage(
+                  permissionsQuery.error,
+                  "Unable to load permissions.",
+                )}
+              </p>
+              <Button
+                variant="outline"
+                onClick={() => permissionsQuery.refetch()}
+              >
+                Retry
+              </Button>
+            </Card>
+          ) : selectedRole ? (
+            <RolePermissionsEditor
+              role={{ ...selectedRole, permissions: selectedPermissions }}
+              permissionGroups={permissionGroups}
+              onDelete={handleDeleteRole}
+              onEdit={() => setEditingRole(selectedRole)}
+              onSave={handleSaveRole}
+              onPermissionToggle={handlePermissionToggle}
+              isSaving={permissionsMutation.isPending}
+              isDeleting={deleteMutation.isPending}
+              hasPermissionChanges={hasPermissionChanges}
+            />
+          ) : (
+            <Card className="items-center justify-center gap-2 py-12 text-center">
+              <ShieldCheck className="text-primary" />
+              <p className="font-medium text-text">No editable roles yet</p>
+              <p className="text-sm text-text-muted">
+                Create a role to start selecting permissions.
+              </p>
+            </Card>
+          )}
+        </div>
+      )}
 
       <RoleFormDialog
         key={editingRole?.id ?? "new-role-form"}
         mode={editingRole ? "edit" : "create"}
         open={isFormOpen || editingRole !== undefined}
         role={editingRole}
+        isSubmitting={isFormSubmitting}
         onOpenChange={(open) => {
           if (!open) {
             setIsFormOpen(false);
             setEditingRole(undefined);
           }
         }}
-        onSubmit={editingRole ? handleUpdateRole : handleCreateRole}
+        onSubmit={handleSubmitRole}
       />
     </Page>
   );
@@ -174,13 +259,13 @@ function RoleList({
           <button
             key={role.id}
             type="button"
-            className={`grid gap-1 rounded-sm px-2 py-2 text-left transition-colors ${selectedRoleId === role.id ? "bg-primary-soft" : "hover:bg-surface"}`}
+            className={`grid gap-1 rounded-sm px-2 py-2 text-left transition-colors ${selectedRoleId === role.id ? "bg-primary-soft" : "hover:bg-neutral-50"}`}
             onClick={() => onSelect(role.id)}
             aria-pressed={selectedRoleId === role.id}
-            >
-              <span className="flex items-center justify-between gap-2">
-                <span className="font-semibold text-text">{role.name}</span>
-              </span>
+          >
+            <span className="flex items-center justify-between gap-2">
+              <span className="font-semibold text-text">{role.name}</span>
+            </span>
             <span className="line-clamp-2 text-xs text-text-muted">
               {role.description}
             </span>

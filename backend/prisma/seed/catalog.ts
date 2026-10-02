@@ -10,9 +10,14 @@ export const roleDefinitions = [
     description: 'Manage the lab workspace, people, and day-to-day operations.',
   },
   {
-    code: 'developer',
-    name: 'Developer',
-    description: 'Access development and operational features without account-level controls.',
+    code: 'technician',
+    name: 'Technician',
+    description: 'Work on assigned production stages and case files.',
+  },
+  {
+    code: 'quality_controller',
+    name: 'Quality Controller',
+    description: 'Review completed work and approve cases for delivery.',
   },
 ] as const;
 
@@ -26,6 +31,7 @@ export const permissionDefinitions = [
   ['cases:move', 'cases', 'Move cases through production'],
   ['case_files:view', 'case_files', 'View case files'],
   ['case_files:upload', 'case_files', 'Upload case files'],
+  ['case_files:update', 'case_files', 'Rename case files'],
   ['case_files:download', 'case_files', 'Download case files'],
   ['case_files:delete', 'case_files', 'Delete case files'],
   ['case_activity:view', 'case_activity', 'View case activity'],

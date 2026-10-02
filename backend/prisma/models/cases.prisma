@@ -1,0 +1,105 @@
+model CaseRecord {
+  id                  BigInt          @id @default(autoincrement()) @db.BigInt
+  caseNumber          String?         @unique @map("case_number") @db.VarChar(30)
+  patientName         String          @map("patient_name") @db.VarChar(150)
+  patientCode         String?         @map("patient_code") @db.VarChar(60)
+  request             String?         @db.VarChar(255)
+  clinicId            BigInt?         @map("clinic_id") @db.BigInt
+  clinicName          String?         @map("clinic_name") @db.VarChar(150)
+  doctorId            BigInt?         @map("doctor_id") @db.BigInt
+  doctorName          String?         @map("doctor_name") @db.VarChar(100)
+  applianceTypeId     BigInt?         @map("appliance_type_id") @db.BigInt
+  applianceName       String?         @map("appliance_name") @db.VarChar(100)
+  workflowTemplateId  BigInt?         @map("workflow_template_id") @db.BigInt
+  workflowName        String?         @map("workflow_name") @db.VarChar(100)
+  categoryId          String?         @map("category_id") @db.VarChar(60)
+  categoryName        String?         @map("category_name") @db.VarChar(100)
+  dueDate             DateTime?       @map("due_date") @db.Date
+  priority            String          @default("normal") @db.VarChar(20)
+  priceRule           String          @default("full") @map("price_rule") @db.VarChar(20)
+  billable            Boolean         @default(true)
+  originalCaseId      BigInt?         @map("original_case_id") @db.BigInt
+  remakeReason        String?         @map("remake_reason") @db.Text
+  caseFieldValues     Json            @default("{}") @map("case_field_values")
+  arch                String?         @db.VarChar(30)
+  units               Int             @default(0)
+  createdById         BigInt?         @map("created_by_id") @db.BigInt
+  createdAt           DateTime        @default(now()) @map("created_at")
+  updatedAt           DateTime        @default(now()) @updatedAt @map("updated_at")
+  clinic              Clinic?         @relation(fields: [clinicId], references: [id], onDelete: SetNull)
+  doctor              Doctor?         @relation(fields: [doctorId], references: [id], onDelete: SetNull)
+  applianceType       ApplianceType?  @relation(fields: [applianceTypeId], references: [id], onDelete: SetNull)
+  workflowTemplate    WorkflowTemplate? @relation(fields: [workflowTemplateId], references: [id], onDelete: SetNull)
+  originalCase        CaseRecord?     @relation("CaseRemakes", fields: [originalCaseId], references: [id], onDelete: SetNull)
+  remakes             CaseRecord[]    @relation("CaseRemakes")
+  stages              CaseStage[]
+  files               CaseFile[]
+  timelineEntries     CaseTimelineEntry[]
+
+  @@index([createdAt, id])
+  @@index([priority, dueDate])
+  @@index([clinicId])
+  @@index([doctorId])
+  @@index([applianceTypeId])
+  @@index([workflowTemplateId])
+  @@map("cases")
+}
+
+model CaseStage {
+  id                 BigInt      @id @default(autoincrement()) @db.BigInt
+  caseId             BigInt      @map("case_id") @db.BigInt
+  sourceStageId      BigInt?     @map("source_stage_id") @db.BigInt
+  sortOrder          Int         @map("sort_order") @db.SmallInt
+  name               String      @db.VarChar(80)
+  slaHours           Int?        @map("sla_hours")
+  requiresApproval   Boolean     @default(false) @map("requires_approval")
+  allowedFileKinds   Json        @default("[\"stl\", \"photo\", \"pdf\", \"doc\"]") @map("allowed_file_kinds")
+  status             String      @default("pending") @db.VarChar(20)
+  startedAt          DateTime?   @map("started_at")
+  completedAt        DateTime?   @map("completed_at")
+  createdAt          DateTime    @default(now()) @map("created_at")
+  updatedAt          DateTime    @default(now()) @updatedAt @map("updated_at")
+  case               CaseRecord  @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  files              CaseFile[]
+
+  @@unique([caseId, sortOrder])
+  @@index([caseId, status])
+  @@map("case_stages")
+}
+
+model CaseFile {
+  id             BigInt      @id @default(autoincrement()) @db.BigInt
+  caseId         BigInt      @map("case_id") @db.BigInt
+  stageId        BigInt?     @map("stage_id") @db.BigInt
+  storageKey     String      @unique @map("storage_key") @db.VarChar(36)
+  originalName   String      @map("original_name") @db.VarChar(255)
+  mimeType       String      @map("mime_type") @db.VarChar(127)
+  kind           String      @db.VarChar(20)
+  sizeBytes      BigInt      @map("size_bytes") @db.BigInt
+  uploadedById   BigInt?     @map("uploaded_by_id") @db.BigInt
+  uploadedByName String      @map("uploaded_by_name") @db.VarChar(150)
+  createdAt      DateTime    @default(now()) @map("created_at")
+  case           CaseRecord  @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  stage          CaseStage?  @relation(fields: [stageId], references: [id], onDelete: SetNull)
+  uploadedBy     User?       @relation("CaseFileUploader", fields: [uploadedById], references: [id], onDelete: SetNull)
+
+  @@index([caseId, kind, createdAt])
+  @@index([stageId])
+  @@map("case_files")
+}
+
+model CaseTimelineEntry {
+  id         BigInt     @id @default(autoincrement()) @db.BigInt
+  caseId     BigInt     @map("case_id") @db.BigInt
+  kind       String     @db.VarChar(20)
+  eventType  String?    @map("event_type") @db.VarChar(60)
+  message    String     @db.Text
+  actorId    BigInt?    @map("actor_id") @db.BigInt
+  actorName  String     @map("actor_name") @db.VarChar(150)
+  createdAt  DateTime   @default(now()) @map("created_at")
+  case       CaseRecord @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  actor      User?      @relation("CaseTimelineActor", fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([caseId, createdAt, id])
+  @@map("case_timeline_entries")
+}

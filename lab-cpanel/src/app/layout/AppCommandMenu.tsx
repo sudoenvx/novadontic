@@ -1,5 +1,5 @@
-import { formatForDisplay, useHotkey } from '@tanstack/react-hotkeys'
-import { useEffect, useState } from 'react'
+import { useHotkey } from '@tanstack/react-hotkeys'
+import { useState } from 'react'
 import {
   Building2,
   ClipboardList,
@@ -16,10 +16,9 @@ import {
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 
-import { appliances } from '../../features/appliances/data/appliances'
-import { staffFixtures } from '../../features/staff/data/staff'
-import { roleFixtures } from '../../features/roles-permissions/data/roles'
-import type { DashboardCase } from '../../features/dashboard/domain/case'
+import { useAppliances } from '../../features/appliances/queries/appliance.queries'
+import { useStaff } from '../../features/staff/queries/staff.queries'
+import { useCases } from '../../features/case-pipeline'
 import { useClinicOptions } from '../../features/clinics/queries/clinic.queries'
 import { useDoctors } from '../../features/doctors/queries/doctor.queries'
 import { getApiErrorMessage } from '../../shared/api/apiError'
@@ -43,38 +42,18 @@ type AppCommandMenuProps = {
 export function AppCommandMenu({ open, onOpenChange }: AppCommandMenuProps) {
   const navigate = useNavigate()
   const clinicsQuery = useClinicOptions()
-  const roleNames = new Map(roleFixtures.map((role) => [role.id, role.name]))
+  const staffQuery = useStaff(undefined, open)
   const [searchTerm, setSearchTerm] = useState('')
-  const [searchRecords, setSearchRecords] = useState<{
-    query: string
-    cases: DashboardCase[]
-  }>()
   const debouncedSearchTerm = useDebounce(searchTerm.trim())
+  const casesQuery = useCases(
+    debouncedSearchTerm || undefined,
+    open && Boolean(debouncedSearchTerm),
+  )
+  const appliancesQuery = useAppliances(debouncedSearchTerm)
   const doctorsQuery = useDoctors(
     debouncedSearchTerm,
     Boolean(debouncedSearchTerm),
   )
-
-  useEffect(() => {
-    if (!debouncedSearchTerm) {
-      return
-    }
-
-    let cancelled = false
-    import('../../features/dashboard/data/cases')
-      .then((casesModule) => {
-        if (cancelled) return
-
-        setSearchRecords({
-          query: debouncedSearchTerm,
-          cases: casesModule.caseFixtures,
-        })
-      })
-
-    return () => {
-      cancelled = true
-    }
-  }, [debouncedSearchTerm])
 
   useHotkey('Mod+K', (event) => {
     event.preventDefault()
@@ -101,7 +80,6 @@ export function AppCommandMenu({ open, onOpenChange }: AppCommandMenuProps) {
           <CommandGroup heading="Navigate">
             <CommandItem onSelect={() => navigateTo('/')}>
               <LayoutDashboard /> Dashboard
-              <CommandShortcut>{formatForDisplay('G D')}</CommandShortcut>
             </CommandItem>
             <CommandItem onSelect={() => navigateTo('/doctors')}>
               <Stethoscope /> Doctors
@@ -111,7 +89,6 @@ export function AppCommandMenu({ open, onOpenChange }: AppCommandMenuProps) {
             </CommandItem>
             <CommandItem onSelect={() => navigateTo('/cases')}>
               <ClipboardList /> Cases
-              <CommandShortcut>{formatForDisplay('G C')}</CommandShortcut>
             </CommandItem>
             <CommandItem onSelect={() => navigateTo('/appliances')}>
               <SlidersHorizontal /> Appliances &amp; fields
@@ -208,12 +185,20 @@ export function AppCommandMenu({ open, onOpenChange }: AppCommandMenuProps) {
             </CommandGroup>
           )}
 
-          {debouncedSearchTerm && searchRecords?.query === debouncedSearchTerm && (
+          {debouncedSearchTerm && (
             <CommandGroup heading="Cases">
-            {searchRecords.cases.map((caseItem) => (
+            {casesQuery.isPending && (
+              <CommandItem disabled>Searching cases…</CommandItem>
+            )}
+            {casesQuery.isError && (
+              <CommandItem disabled>
+                {getApiErrorMessage(casesQuery.error, 'Unable to search cases.')}
+              </CommandItem>
+            )}
+            {(casesQuery.data ?? []).map((caseItem) => (
               <CommandItem
                 key={caseItem.id}
-                value={`${caseItem.id} case ${caseItem.patientName} ${caseItem.clinic}`}
+                value={`${caseItem.id} case ${caseItem.patientName} ${caseItem.clinicName} ${caseItem.doctorName} ${caseItem.patientCode}`}
                 onSelect={() => navigateTo(`/cases/${caseItem.id}`)}
               >
                 <ClipboardList />
@@ -221,13 +206,22 @@ export function AppCommandMenu({ open, onOpenChange }: AppCommandMenuProps) {
                 <CommandShortcut>{caseItem.caseType}</CommandShortcut>
               </CommandItem>
             ))}
+            {!casesQuery.isPending && !casesQuery.isError && casesQuery.data?.length === 0 && (
+              <CommandItem disabled>No matching cases.</CommandItem>
+            )}
             </CommandGroup>
           )}
 
-          {debouncedSearchTerm && searchRecords?.query !== debouncedSearchTerm && <CommandGroup heading="Records"><CommandItem disabled>Searching records…</CommandItem></CommandGroup>}
-
           <CommandGroup heading="Appliances">
-            {appliances.map((appliance) => (
+            {appliancesQuery.isPending && (
+              <CommandItem disabled>Loading appliances…</CommandItem>
+            )}
+            {appliancesQuery.isError && (
+              <CommandItem disabled>
+                {getApiErrorMessage(appliancesQuery.error, 'Unable to load appliances.')}
+              </CommandItem>
+            )}
+            {(appliancesQuery.data ?? []).map((appliance) => (
               <CommandItem
                 key={appliance.id}
                 value={`${appliance.name} appliance fields`}
@@ -241,15 +235,21 @@ export function AppCommandMenu({ open, onOpenChange }: AppCommandMenuProps) {
           </CommandGroup>
 
           <CommandGroup heading="Staff">
-            {staffFixtures.map((member) => (
+            {staffQuery.isPending && <CommandItem disabled>Loading staff…</CommandItem>}
+            {staffQuery.isError && (
+              <CommandItem disabled>
+                {getApiErrorMessage(staffQuery.error, 'Unable to load staff members.')}
+              </CommandItem>
+            )}
+            {(staffQuery.data?.data ?? []).map((member) => (
               <CommandItem
                 key={member.id}
-                value={`${member.name} staff ${member.email} ${member.roleId}`}
+                value={`${member.fullName} staff ${member.email} ${member.roles.map((role) => role.name).join(' ')}`}
                 onSelect={() => navigateTo('/staff')}
               >
                 <UsersRound />
-                <span>{member.name}</span>
-                <CommandShortcut>{roleNames.get(member.roleId) ?? member.roleId}</CommandShortcut>
+                <span>{member.fullName}</span>
+                <CommandShortcut>{member.roles.map((role) => role.name).join(', ')}</CommandShortcut>
               </CommandItem>
             ))}
           </CommandGroup>

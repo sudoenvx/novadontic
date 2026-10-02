@@ -12,13 +12,11 @@ export async function seedApplianceTypes(
         name: fixture.name,
         color: fixture.color,
         isActive: true,
-        sortOrder: fixture.sortOrder,
       },
       update: {
         name: fixture.name,
         color: fixture.color,
         isActive: true,
-        sortOrder: fixture.sortOrder,
       },
       select: { id: true },
     });

@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from "react";
 
+import { getApiErrorMessage } from "../../../shared/api/apiError";
 import { Button } from "../../../shared/ui/Button";
 import {
   Dialog,
@@ -23,7 +24,8 @@ type RoleFormDialogProps = {
   open: boolean;
   role?: Role;
   onOpenChange: (open: boolean) => void;
-  onSubmit: (values: RoleFormValues) => void;
+  onSubmit: (values: RoleFormValues) => Promise<void>;
+  isSubmitting: boolean;
 };
 
 export function RoleFormDialog({
@@ -32,6 +34,7 @@ export function RoleFormDialog({
   onSubmit,
   open,
   role,
+  isSubmitting,
 }: RoleFormDialogProps) {
   const [values, setValues] = useState<RoleFormValues>(() =>
     getInitialValues(role),
@@ -39,7 +42,7 @@ export function RoleFormDialog({
   const [error, setError] = useState("");
   const isEditing = mode === "edit";
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const normalized = {
       name: values.name.trim(),
@@ -49,12 +52,22 @@ export function RoleFormDialog({
       setError("Enter a role name and description.");
       return;
     }
-    onSubmit(normalized);
-    onOpenChange(false);
+    setError("");
+    try {
+      await onSubmit(normalized);
+      onOpenChange(false);
+    } catch (submitError) {
+      setError(getApiErrorMessage(submitError, "Unable to save this role."));
+    }
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog
+      open={open}
+      onOpenChange={(nextOpen) => {
+        if (!isSubmitting) onOpenChange(nextOpen);
+      }}
+    >
       <DialogContent>
         <form className="grid gap-4" onSubmit={handleSubmit}>
           <DialogHeader>
@@ -70,6 +83,7 @@ export function RoleFormDialog({
               <Input
                 id="role-name"
                 value={values.name}
+                disabled={isSubmitting}
                 onChange={(event) => {
                   const name = event.currentTarget.value;
                   setValues((current) => ({
@@ -86,6 +100,7 @@ export function RoleFormDialog({
               <Input
                 id="role-description"
                 value={values.description}
+                disabled={isSubmitting}
                 onChange={(event) => {
                   const description = event.currentTarget.value;
                   setValues((current) => ({
@@ -108,11 +123,16 @@ export function RoleFormDialog({
               type="button"
               variant="neutral"
               onClick={() => onOpenChange(false)}
+              disabled={isSubmitting}
             >
               Cancel
             </Button>
-            <Button type="submit">
-              {isEditing ? "Save changes" : "Create role"}
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting
+                ? "Saving..."
+                : isEditing
+                  ? "Save changes"
+                  : "Create role"}
             </Button>
           </DialogFooter>
         </form>

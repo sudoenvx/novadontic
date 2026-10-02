@@ -10,9 +10,15 @@ type ApplianceCardProps = {
   appliance: Appliance
   onOpen: () => void
   onToggle: () => void
+  isPending?: boolean
 }
 
-export function ApplianceCard({ appliance, onOpen, onToggle }: ApplianceCardProps) {
+export function ApplianceCard({
+  appliance,
+  onOpen,
+  onToggle,
+  isPending = false,
+}: ApplianceCardProps) {
   const fieldCount = getApplianceFieldCount(appliance)
   const groupCount = getApplianceGroupCount(appliance)
   const isConfigured = fieldCount > 0
@@ -59,6 +65,7 @@ export function ApplianceCard({ appliance, onOpen, onToggle }: ApplianceCardProp
         </div>
         <Switch
           checked={appliance.isActive}
+          disabled={isPending}
           aria-label={`${appliance.isActive ? 'Deactivate' : 'Activate'} ${appliance.name}`}
           onCheckedChange={() => {
             onToggle()
@@ -81,8 +88,12 @@ export function ApplianceCard({ appliance, onOpen, onToggle }: ApplianceCardProp
           <Badge tone={appliance.isActive ? 'success' : 'destructive'}>
             {appliance.isActive ? 'Active' : 'Inactive'}
           </Badge>
-          <Badge tone={appliance.casesUsing > 0 ? 'info' : 'neutral'}>
-            {appliance.casesUsing > 0 ? `${appliance.casesUsing} cases used it` : 'Not used yet'}
+          <Badge tone={appliance.casesUsing && appliance.casesUsing > 0 ? 'info' : 'neutral'}>
+            {appliance.casesUsing === null
+              ? 'Usage not tracked'
+              : appliance.casesUsing > 0
+                ? `${appliance.casesUsing} cases used it`
+                : 'Not used yet'}
           </Badge>
           <Badge tone="info">{groupCount} groups</Badge>
           <Badge tone="info">{fieldCount} fields</Badge>

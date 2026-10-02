@@ -1,11 +1,11 @@
 import { Card, CardHeader, CardTitle } from '../../../../shared/ui/Card'
+import { Badge } from '../../../../shared/ui/Badge'
 import {
   DescriptionItem,
   DescriptionItemDescription,
   DescriptionItemTitle,
   DescriptionList,
 } from '../../../../shared/ui/DescriptionList'
-import { getCaseBillingRuleLabel } from '../../domain/caseCategory'
 import type { ReactNode } from 'react'
 import type { CasePipelineCase } from '../../domain/casePipeline'
 
@@ -22,12 +22,9 @@ export function CasePipelineSidebarDetails({ caseItem }: { caseItem: CasePipelin
       <InfoCard title="Case meta">
         <DescriptionList>
           <DescriptionItem><DescriptionItemTitle>Patient code</DescriptionItemTitle><DescriptionItemDescription>{caseItem.patientCode}</DescriptionItemDescription></DescriptionItem>
-          <DescriptionItem><DescriptionItemTitle>Type</DescriptionItemTitle><DescriptionItemDescription>{caseItem.caseType}</DescriptionItemDescription></DescriptionItem>
-          {caseItem.categoryName && <DescriptionItem><DescriptionItemTitle>Category</DescriptionItemTitle><DescriptionItemDescription>{caseItem.categoryName}</DescriptionItemDescription></DescriptionItem>}
+          <DescriptionItem><DescriptionItemTitle>Type</DescriptionItemTitle><DescriptionItemDescription><Badge size="xs" tone="neutral">{caseItem.caseType}</Badge></DescriptionItemDescription></DescriptionItem>
+          {caseItem.categoryName && <DescriptionItem><DescriptionItemTitle>Category</DescriptionItemTitle><DescriptionItemDescription><Badge size="xs" tone="accent">{caseItem.categoryName}</Badge></DescriptionItemDescription></DescriptionItem>}
           {caseItem.workflowName && <DescriptionItem><DescriptionItemTitle>Workflow</DescriptionItemTitle><DescriptionItemDescription>{caseItem.workflowName}</DescriptionItemDescription></DescriptionItem>}
-          {caseItem.priceRule && <DescriptionItem><DescriptionItemTitle>Price</DescriptionItemTitle><DescriptionItemDescription>{getCaseBillingRuleLabel(caseItem.priceRule)}</DescriptionItemDescription></DescriptionItem>}
-          {caseItem.billable !== undefined && <DescriptionItem><DescriptionItemTitle>Billing</DescriptionItemTitle><DescriptionItemDescription>{caseItem.billable ? 'Billable' : 'Not billable'}</DescriptionItemDescription></DescriptionItem>}
-          <DescriptionItem><DescriptionItemTitle>Units</DescriptionItemTitle><DescriptionItemDescription>{caseItem.units ? `${caseItem.units} items` : 'Pending'}</DescriptionItemDescription></DescriptionItem>
           <DescriptionItem>
             <DescriptionItemTitle>Due</DescriptionItemTitle>
             <DescriptionItemDescription className={caseItem.status !== 'On track' ? 'font-semibold text-warning' : undefined}>
@@ -36,8 +33,13 @@ export function CasePipelineSidebarDetails({ caseItem }: { caseItem: CasePipelin
           </DescriptionItem>
           <DescriptionItem>
             <DescriptionItemTitle>Priority</DescriptionItemTitle>
-            <DescriptionItemDescription className={caseItem.priority === 'Rush' ? 'font-semibold text-destructive' : undefined}>
-              {caseItem.priority}
+            <DescriptionItemDescription>
+              <Badge
+                size="xs"
+                tone={caseItem.priority === 'Rush' ? 'destructive' : 'neutral'}
+              >
+                {caseItem.priority}
+              </Badge>
             </DescriptionItemDescription>
           </DescriptionItem>
         </DescriptionList>
@@ -54,4 +56,3 @@ function InfoCard({ children, title }: { children: ReactNode; title: string }) {
     </Card>
   )
 }
-

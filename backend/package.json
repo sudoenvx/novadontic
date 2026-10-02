@@ -8,12 +8,14 @@
     "dev": "tsx watch src/server.ts",
     "postinstall": "prisma generate",
     "prisma:generate": "prisma generate",
+    "prisma:push": "prisma db push",
     "prisma:validate": "prisma validate",
     "prisma:migrate:dev": "prisma migrate dev",
     "db:seed": "prisma db seed",
+    "db:reset": "prisma migrate reset",
     "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.prisma.json",
     "build": "tsc -p tsconfig.json",
-    "test": "tsx --test src/app/api.test.ts src/modules/auth/auth.domain.test.ts src/shared/realtime/socket-server.test.ts prisma/seed/*.test.ts"
+    "test": "tsx --test src/app/api.test.ts src/modules/auth/auth.domain.test.ts src/shared/security/passwords.test.ts src/shared/realtime/socket-server.test.ts prisma/seed/*.test.ts"
   },
   "keywords": [],
   "author": "",
@@ -29,8 +31,10 @@
   "devDependencies": {
     "@types/compression": "^1.8.1",
     "@types/cors": "^2.8.19",
+    "@types/bcrypt": "^5.0.2",
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.10",
+    "@types/multer": "^2.3.0",
     "@types/node": "^24.13.6",
     "prisma": "^7.10.0",
     "typescript": "^7.0.2"
@@ -38,7 +42,7 @@
   "dependencies": {
     "@prisma/adapter-mariadb": "^7.10.0",
     "@prisma/client": "^7.10.0",
-    "argon2": "^0.45.1",
+    "bcrypt": "^6.0.0",
     "body-parser": "^2.3.0",
     "bullmq": "^6.3.8",
     "compression": "^1.8.2",

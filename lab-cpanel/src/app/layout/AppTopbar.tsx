@@ -1,12 +1,12 @@
-import { formatForDisplay } from '@tanstack/react-hotkeys'
 import { Search } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 
 import { Brand } from '../../shared/ui/Brand'
 import { Button } from '../../shared/ui/Button'
-import { Kbd } from '../../shared/ui/Kbd'
 import { ThemeSwitcher } from '../../shared/ui/ThemeSwitcher'
 import { AppUserMenu } from './AppUserMenu'
+import { formatForDisplay } from '@tanstack/react-hotkeys'
+import { Badge } from '../../shared/ui/Badge'
 
 type AppTopbarProps = {
   context?: string
@@ -23,7 +23,7 @@ export function AppTopbar({ context, onOpenCommandMenu }: AppTopbarProps) {
         <Button
           variant="outline"
           size="md"
-          className="min-w-48 px-1.5 py-1.5 rounded-md border-none shadow-sm justify-between bg-surface hover:bg-surface text-secondary max-sm:min-w-0 max-sm:flex-1"
+          className="min-w-48 px-1.5 py-1 rounded-md border border-border-subtle gap-2 bg-surface hover:bg-surface text-secondary max-sm:min-w-0 max-sm:flex-1 flex items-center justify-between"
           onClick={onOpenCommandMenu}
           aria-label="Open command menu"
         >
@@ -31,7 +31,12 @@ export function AppTopbar({ context, onOpenCommandMenu }: AppTopbarProps) {
             <Search size={14} />
             <span className="">Search</span>
           </span>
-          <Kbd>{formatForDisplay('Mod+K')}</Kbd>
+
+          <Badge className="">
+              {
+                formatForDisplay("Mod+K")
+              }
+            </Badge>
         </Button>
         <ThemeSwitcher size="compact" />
         <AppUserMenu />

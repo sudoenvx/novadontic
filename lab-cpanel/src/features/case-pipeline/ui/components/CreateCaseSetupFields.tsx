@@ -10,13 +10,13 @@ import {
 import type { Appliance } from '../../../appliances/domain/appliance'
 import { getCaseCategoriesForAppliance } from '../../domain/caseCategory'
 import type { CreateCaseValueUpdater, CreateCaseValues } from './createCase.types'
-import type { WorkflowTemplate } from '../../../appliance-workflow-templates/domain/workflowTemplate'
+import type { WorkflowTemplateOption } from '../../../appliance-workflow-templates/domain/workflowTemplate'
 
 type CreateCaseSetupFieldsProps = {
   values: CreateCaseValues
   appliances: Appliance[]
   categories: ReturnType<typeof getCaseCategoriesForAppliance>
-  workflows: WorkflowTemplate[]
+  workflows: WorkflowTemplateOption[]
   onApplianceChange: (applianceId: string) => void
   onCategoryChange: (categoryId: string) => void
   onUpdateValue: CreateCaseValueUpdater
@@ -100,8 +100,14 @@ export function CreateCaseSetupFields({
               value={values.workflowTemplateId}
               onValueChange={(value) => onUpdateValue('workflowTemplateId', value ?? '')}
             >
-              <SelectTrigger id="case-workflow" className="w-full">
-                <SelectValue placeholder="Select workflow" />
+              <SelectTrigger
+                id="case-workflow"
+                className="w-full"
+                disabled={workflows.length === 0}
+              >
+                <SelectValue
+                  placeholder={workflows.length > 0 ? 'Select workflow' : 'No workflows available'}
+                />
               </SelectTrigger>
               <SelectContent>
                 {workflows.map((workflow) => (
@@ -111,6 +117,11 @@ export function CreateCaseSetupFields({
                 ))}
               </SelectContent>
             </Select>
+            {workflows.length === 0 && (
+              <p className="text-xs text-text-muted">
+                No workflow templates are configured for this appliance. Add a template in Workflow templates first.
+              </p>
+            )}
           </FieldContent>
         </Field>
       </div>

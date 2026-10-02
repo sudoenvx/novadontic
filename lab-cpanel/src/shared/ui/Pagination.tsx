@@ -1,5 +1,3 @@
-import { Button } from './Button'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { cn } from 'cn'
 import {
   Select,
@@ -74,49 +72,49 @@ export function Pagination({
             </Select>
           </label>
         )}
-        <Button
+        <button
           type="button"
-          variant="neutral"
-          size="icon-xs"
-          className="bg-neutral-50 hover:bg-neutral-100 aria-expanded:bg-neutral-100"
+          className={cn(pageButtonClassName(), 'px-3')}
           aria-label="Previous page"
           disabled={page <= 1}
           onClick={() => onPageChange(page - 1)}
         >
-          <ChevronLeft aria-hidden="true" />
-        </Button>
+          Previous
+        </button>
         {pages.map((pageNumber, index) => pageNumber === '…' ? (
           <span key={`ellipsis-${index}`} aria-hidden="true" className="px-1 text-xs text-text-faint">…</span>
         ) : (
-          <Button
+          <button
             key={pageNumber}
             type="button"
-            variant="neutral"
-            size="icon-xs"
-            className={cn(
-              'bg-neutral-50 hover:bg-neutral-100 aria-expanded:bg-neutral-100',
-              pageNumber === page && 'border-border-strong font-bold',
-            )}
+            className={pageButtonClassName(pageNumber === page)}
             aria-label={`Page ${pageNumber}`}
             aria-current={pageNumber === page ? 'page' : undefined}
             onClick={() => onPageChange(pageNumber)}
           >
             {pageNumber}
-          </Button>
+          </button>
         ))}
-        <Button
+        <button
           type="button"
-          variant="neutral"
-          size="icon-xs"
-          className="bg-neutral-50 hover:bg-neutral-100 aria-expanded:bg-neutral-100"
+          className={cn(pageButtonClassName(), 'px-3')}
           aria-label="Next page"
           disabled={page >= pageCount}
           onClick={() => onPageChange(page + 1)}
         >
-          <ChevronRight aria-hidden="true" />
-        </Button>
+          Next
+        </button>
       </div>
     </nav>
+  )
+}
+
+function pageButtonClassName(isCurrent = false) {
+  return cn(
+    'inline-flex h-6 min-w-6 items-center justify-center rounded-xs px-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-neutral-200 disabled:text-text-muted',
+    isCurrent
+      ? 'bg-primary text-primary-foreground hover:bg-primary-hover'
+      : 'bg-neutral-200 text-text-primary hover:bg-neutral-300',
   )
 }
 
