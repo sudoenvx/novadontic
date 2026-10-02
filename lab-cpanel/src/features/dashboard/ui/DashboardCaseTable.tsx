@@ -68,8 +68,6 @@ const columns: DataTableColumn<DashboardCase>[] = [
   {
     id: "case-type",
     header: "Case type",
-    sortable: true,
-    pinnable: true,
     accessorKey: "caseType",
     cell: (dashboardCase) => (
       <Badge
@@ -83,8 +81,6 @@ const columns: DataTableColumn<DashboardCase>[] = [
   {
     id: "category",
     header: "Category",
-    sortable: true,
-    pinnable: true,
     accessorKey: "category",
     cell: (dashboardCase) => (
       <Badge tone="accent">{dashboardCase.category}</Badge>
@@ -93,8 +89,6 @@ const columns: DataTableColumn<DashboardCase>[] = [
   {
     id: "stage",
     header: "Stage",
-    sortable: true,
-    pinnable: true,
     accessorKey: "stage",
     className: "text-secondary",
   },
@@ -102,7 +96,6 @@ const columns: DataTableColumn<DashboardCase>[] = [
     id: "due-date",
     header: "Due",
     sortable: true,
-    pinnable: true,
     accessorKey: "dueDate",
     className: "text-secondary",
     cell: (dashboardCase) => (
@@ -119,7 +112,6 @@ const columns: DataTableColumn<DashboardCase>[] = [
     id: "status",
     header: "Status",
     sortable: true,
-    pinnable: true,
     accessorKey: "status",
     cell: (dashboardCase) => (
       <Badge tone={statusTone[dashboardCase.status]}>
@@ -146,8 +138,7 @@ export function DashboardCaseTable({ cases }: DashboardCaseTableProps) {
       getRowId={(dashboardCase) => dashboardCase.id}
       title="Orthodontic cases"
       description="Track active lab cases by appliance type and stage."
-    >
-      <DataTableActions>
+      toolbar={
         <Select
           value={selectedAppliance}
           onValueChange={(value) => setSelectedAppliance(value ?? "all")}
@@ -168,6 +159,9 @@ export function DashboardCaseTable({ cases }: DashboardCaseTableProps) {
             ))}
           </SelectContent>
         </Select>
+      }
+    >
+      <DataTableActions>
         <Button variant="neutral" onClick={() => navigate("/cases")}>
           <List /> View all cases
         </Button>

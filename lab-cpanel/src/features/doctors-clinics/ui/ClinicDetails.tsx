@@ -48,11 +48,11 @@ export function ClinicDetails({
         </div>
 
         <div className="grid gap-3 border-t border-border-soft pt-3 sm:grid-cols-3">
-          <ContactDetail icon={<Phone size={16} />} label="Phone" value={clinic.phone} />
+          <ContactDetail icon={<Phone size={16} />} label="Phone" value={clinic.phone ?? 'Not provided'} />
           <ContactDetail
             icon={<Mail size={16} />}
             label="Email"
-            value={clinic.email}
+            value={clinic.email ?? 'Not provided'}
           />
           <ContactDetail
             label="Active doctors"

@@ -22,13 +22,13 @@ import { cn } from "cn"
  * Titles are ink, sentence case. Never link-blue, never uppercase.
  */
 const cardVariants = cva(
-  "group/card flex flex-col gap-(--card-spacing) overflow-hidden rounded-lg border p-(--card-spacing) text-base text-text-primary data-[disabled]:pointer-events-none data-[disabled]:opacity-70",
+  "group/card flex flex-col gap-(--card-spacing) overflow-hidden rounded-lg  border border-border-subtle! p-(--card-spacing) text-base text-text-primary data-[disabled]:pointer-events-none data-[disabled]:opacity-70",
   {
     variants: {
       variant: {
-        default: "border-border bg-surface",
+        default: "border-border-subtle bg-surface",
         transparent: "border-transparent bg-transparent",
-        window: "border-border bg-surface shadow-card",
+        window: "border-border-subtle bg-surface shadow-sm",
       },
       size: {
         xs: "[--card-spacing:--spacing(2)]",
@@ -82,7 +82,7 @@ function CardTitle({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="card-title"
       className={cn(
-        "text-md font-extrabold tracking-tight text-text-primary group-data-[size=xs]/card:text-base",
+        "text-md font-semibold tracking-tight text-text-primary group-data-[size=xs]/card:text-base",
         className
       )}
       {...props}

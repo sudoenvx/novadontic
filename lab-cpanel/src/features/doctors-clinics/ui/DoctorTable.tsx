@@ -40,13 +40,13 @@ export function DoctorTable({
       header: 'Doctor',
       sortable: true,
       pinnable: true,
-      sortValue: (doctor) => doctor.name,
+      sortValue: (doctor) => doctor.fullName,
       cell: (doctor) => (
         <button type="button" className="flex items-center gap-2 text-left" onClick={() => onView(doctor)}>
-          <PersonAvatar name={doctor.name} size="sm" />
+          <PersonAvatar name={doctor.fullName} size="sm" />
           <span className="min-w-0">
-            <span className="block truncate font-semibold text-text">{doctor.name}</span>
-            <span className="block truncate text-xs text-text-muted">{doctor.specialty}</span>
+            <span className="block truncate font-semibold text-text">{doctor.fullName}</span>
+            <span className="block truncate text-xs text-text-muted">{doctor.specialty ?? 'No specialty'}</span>
           </span>
         </button>
       ),
@@ -54,9 +54,6 @@ export function DoctorTable({
     {
       id: 'source',
       header: 'Added via',
-      sortable: true,
-      pinnable: true,
-      sortValue: (doctor) => doctor.source,
       cell: (doctor) => (
         <span className="text-sm text-secondary">
           {doctor.source === 'portal' ? 'Website / portal' : getClinicName(doctor) ?? 'No clinic assigned'}
@@ -65,41 +62,28 @@ export function DoctorTable({
     },
     {
       id: 'status',
-      header: 'Portal access',
-      pinnable: true,
-      cell: (doctor) => <DoctorPortalStatusBadge status={doctor.status} />,
-    },
-    {
-      id: 'active-cases',
-      header: 'Active cases',
-      sortable: true,
-      pinnable: true,
-      accessorKey: 'activeCases',
-      cell: (doctor) => (
-        <span className="text-sm text-secondary">
-          <strong className="text-text">{doctor.activeCases}</strong> {doctor.activeCases === 1 ? 'case' : 'cases'}
-        </span>
-      ),
+      header: 'Status',
+      cell: (doctor) => <DoctorPortalStatusBadge isActive={doctor.isActive} />,
     },
     {
       id: 'email',
       header: 'Email',
-      sortable: true,
-      pinnable: true,
       accessorKey: 'email',
       cell: (doctor) => (
-        <a href={`mailto:${doctor.email}`} className="inline-flex items-center gap-1 text-sm text-primary hover:underline">
-          <Mail size={13} /> {doctor.email}
-        </a>
+        doctor.email ? (
+          <a href={`mailto:${doctor.email}`} className="inline-flex items-center gap-1 text-sm text-primary hover:underline">
+            <Mail size={13} /> {doctor.email}
+          </a>
+        ) : <span className="text-sm text-text-muted">Not provided</span>
       ),
     },
     {
       id: 'phone',
       header: 'Phone',
-      sortable: true,
-      pinnable: true,
-      accessorKey: 'phoneNumber',
-      cell: (doctor) => <a href={`tel:${doctor.phoneNumber}`} className="text-sm text-primary hover:underline">{doctor.phoneNumber}</a>,
+      accessorKey: 'phone',
+      cell: (doctor) => doctor.phone
+        ? <a href={`tel:${doctor.phone}`} className="text-sm text-primary hover:underline">{doctor.phone}</a>
+        : <span className="text-sm text-text-muted">Not provided</span>,
     },
     {
       id: 'actions',
@@ -109,12 +93,12 @@ export function DoctorTable({
       className: 'w-10',
       cell: (doctor) => (
         <DropdownMenu>
-          <DropdownMenuTrigger render={<Button variant="ghost" size="icon-sm" aria-label={`More actions for ${doctor.name}`} />}>
+          <DropdownMenuTrigger render={<Button variant="ghost" size="icon-sm" aria-label={`More actions for ${doctor.fullName}`} />}>
             <MoreHorizontal />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem onClick={() => onEdit(doctor)}><Pencil /> Edit doctor</DropdownMenuItem>
-            <DropdownMenuItem disabled={doctor.status === 'inactive'} onClick={() => onRevokePortalAccess(doctor)}><ShieldOff /> Revoke portal access</DropdownMenuItem>
+            <DropdownMenuItem disabled={!doctor.isActive} onClick={() => onRevokePortalAccess(doctor)}><ShieldOff /> Deactivate doctor</DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem variant="destructive" onClick={() => onDelete(doctor)}><Trash2 /> Delete doctor</DropdownMenuItem>
           </DropdownMenuContent>

@@ -33,6 +33,12 @@ export function useDataTable<TData>({
     () => new Set((selectedRowIds ?? Array.from(internalSelectedRowIds)).map(String)),
     [internalSelectedRowIds, selectedRowIds],
   )
+  const selectedRows = useMemo(
+    () => sortedData.filter((row, index) =>
+      selectedIds.has(getRowKey(row, index, getRowId)),
+    ),
+    [getRowId, selectedIds, sortedData],
+  )
   const rowIds = sortedData.map((row, index) => getRowKey(row, index, getRowId))
   const selectedVisibleCount = rowIds.filter((rowId) => selectedIds.has(rowId)).length
   const allRowsSelected = selectable && rowIds.length > 0 && selectedVisibleCount === rowIds.length
@@ -60,9 +66,15 @@ export function useDataTable<TData>({
     updateSelection(nextIds)
   }
 
+  function clearSelection() {
+    updateSelection(new Set())
+  }
+
   return {
     allRowsSelected,
+    clearSelection,
     selectedIds,
+    selectedRows,
     setSortState,
     someRowsSelected,
     sortState,

@@ -68,6 +68,7 @@ export function SignInForm({
           placeholder="name@yourlab.com"
           autoComplete="email"
           autoFocus
+          size="md"
           aria-invalid={Boolean(error)}
         />
       </div>
@@ -85,6 +86,7 @@ export function SignInForm({
             placeholder="Enter your password"
             autoComplete="current-password"
             className="pe-10"
+            size="md"
             aria-invalid={Boolean(error)}
           />
           <Button

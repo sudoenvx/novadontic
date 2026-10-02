@@ -20,8 +20,9 @@ import { appliances } from '../../features/appliances/data/appliances'
 import { staffFixtures } from '../../features/staff/data/staff'
 import { roleFixtures } from '../../features/roles-permissions/data/roles'
 import type { DashboardCase } from '../../features/dashboard/domain/case'
-import type { Clinic } from '../../features/clinics/domain/clinic'
-import type { Doctor } from '../../features/doctors/domain/doctor'
+import { useClinicOptions } from '../../features/clinics/queries/clinic.queries'
+import { useDoctors } from '../../features/doctors/queries/doctor.queries'
+import { getApiErrorMessage } from '../../shared/api/apiError'
 import { useDebounce } from '../../shared/lib/time/useDebounce'
 import {
   Command,
@@ -41,15 +42,18 @@ type AppCommandMenuProps = {
 
 export function AppCommandMenu({ open, onOpenChange }: AppCommandMenuProps) {
   const navigate = useNavigate()
+  const clinicsQuery = useClinicOptions()
   const roleNames = new Map(roleFixtures.map((role) => [role.id, role.name]))
   const [searchTerm, setSearchTerm] = useState('')
   const [searchRecords, setSearchRecords] = useState<{
     query: string
-    clinics: Clinic[]
-    doctors: Doctor[]
     cases: DashboardCase[]
   }>()
   const debouncedSearchTerm = useDebounce(searchTerm.trim())
+  const doctorsQuery = useDoctors(
+    debouncedSearchTerm,
+    Boolean(debouncedSearchTerm),
+  )
 
   useEffect(() => {
     if (!debouncedSearchTerm) {
@@ -57,18 +61,12 @@ export function AppCommandMenu({ open, onOpenChange }: AppCommandMenuProps) {
     }
 
     let cancelled = false
-    Promise.all([
-      import('../../features/clinics/data/clinics'),
-      import('../../features/doctors/data/doctors'),
-      import('../../features/dashboard/data/cases'),
-    ])
-      .then(([clinicsModule, doctorsModule, casesModule]) => {
+    import('../../features/dashboard/data/cases')
+      .then((casesModule) => {
         if (cancelled) return
 
         setSearchRecords({
           query: debouncedSearchTerm,
-          clinics: clinicsModule.clinicFixtures,
-          doctors: doctorsModule.doctorFixtures,
           cases: casesModule.caseFixtures,
         })
       })
@@ -165,35 +163,48 @@ export function AppCommandMenu({ open, onOpenChange }: AppCommandMenuProps) {
             </CommandItem>
           </CommandGroup>
 
-          {debouncedSearchTerm && searchRecords?.query === debouncedSearchTerm && (
+          {debouncedSearchTerm && (
             <CommandGroup heading="Clinics">
-            {searchRecords.clinics.map((clinic) => (
+            {(clinicsQuery.data ?? [])
+              .filter((clinic) => clinic.name.toLowerCase().includes(debouncedSearchTerm.toLowerCase()))
+              .map((clinic) => (
               <CommandItem
                 key={clinic.id}
-                value={`${clinic.name} clinic ${clinic.address}`}
+                value={`${clinic.name} clinic`}
                 onSelect={() => navigateTo('/clinics')}
               >
                 <Building2 />
                 <span>{clinic.name}</span>
                 <CommandShortcut>Clinic</CommandShortcut>
               </CommandItem>
-            ))}
+              ))}
             </CommandGroup>
           )}
 
-          {debouncedSearchTerm && searchRecords?.query === debouncedSearchTerm && (
+          {debouncedSearchTerm && (
             <CommandGroup heading="Doctors">
-            {searchRecords.doctors.map((doctor) => (
+            {doctorsQuery.isPending && (
+              <CommandItem disabled>Searching doctors…</CommandItem>
+            )}
+            {doctorsQuery.isError && (
+              <CommandItem disabled>
+                {getApiErrorMessage(doctorsQuery.error, 'Unable to search doctors.')}
+              </CommandItem>
+            )}
+            {(doctorsQuery.data?.data ?? []).map((doctor) => (
               <CommandItem
                 key={doctor.id}
-                value={`${doctor.name} doctor ${doctor.specialty} ${doctor.email}`}
+                value={`${doctor.fullName} doctor ${doctor.specialty ?? ''} ${doctor.email ?? ''}`}
                 onSelect={() => navigateTo(`/doctors/${doctor.id}`)}
               >
                 <Stethoscope />
-                <span>{doctor.name}</span>
-                <CommandShortcut>{doctor.specialty}</CommandShortcut>
+                <span>{doctor.fullName}</span>
+                <CommandShortcut>{doctor.specialty ?? 'Doctor'}</CommandShortcut>
               </CommandItem>
             ))}
+            {doctorsQuery.data?.data.length === 0 && (
+              <CommandItem disabled>No matching doctors.</CommandItem>
+            )}
             </CommandGroup>
           )}
 

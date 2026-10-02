@@ -4,7 +4,8 @@ import { Button } from "../../../../shared/ui/Button";
 import { Card, CardHeader, CardTitle } from "../../../../shared/ui/Card";
 import { Field, FieldContent, FieldLabel } from "../../../../shared/ui/Field";
 import { Textarea } from "../../../../shared/ui/Textarea";
-import { doctorFixtures } from "../../../doctors/data/doctors";
+import { getApiErrorMessage } from "../../../../shared/api/apiError";
+import { useDoctors } from "../../../doctors/queries/doctor.queries";
 import { appliances } from "../../../appliances/data/appliances";
 import { getCaseCategoriesForAppliance } from "../../domain/caseCategory";
 import type {
@@ -28,9 +29,14 @@ type CreateCaseFormProps = {
 };
 
 const activeAppliances = appliances.filter((appliance) => appliance.isActive);
+const unavailableCategoryIds = new Set([
+  'duplicate',
+  'remake',
+  'clear-aligner-refinement',
+])
 const firstAppliance = activeAppliances[0];
 const firstCategories = firstAppliance
-  ? getCaseCategoriesForAppliance(caseCategoryFixtures, firstAppliance.id)
+  ? getCreateCaseCategories(firstAppliance.id)
   : [];
 const firstCategory = firstCategories[0];
 const firstWorkflow =
@@ -51,11 +57,28 @@ function getInitialValues(defaultTurnaroundDays: number): CreateCaseValues {
     applianceId: firstAppliance?.id ?? "",
     categoryId: firstCategory?.id ?? "",
     workflowTemplateId: firstWorkflow?.id ?? "",
-    turnaroundDays: defaultTurnaroundDays,
+    dueDate: getDueDateAfterDays(defaultTurnaroundDays),
     priority: firstCategory?.defaultPriority ?? "Normal",
     priceRule: firstCategory?.defaultPriceRule ?? "full",
     billable: firstCategory?.defaultBillable ?? true,
   };
+}
+
+function getCreateCaseCategories(applianceId: string) {
+  return getCaseCategoriesForAppliance(caseCategoryFixtures, applianceId).filter(
+    (category) => !unavailableCategoryIds.has(category.id),
+  )
+}
+
+function getDueDateAfterDays(days: number) {
+  const date = new Date()
+  date.setDate(date.getDate() + days)
+
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+
+  return `${year}-${month}-${day}`
 }
 
 export function CreateCaseForm({
@@ -64,13 +87,17 @@ export function CreateCaseForm({
   onCancel,
   onSubmit,
 }: CreateCaseFormProps) {
+  const doctorsQuery = useDoctors()
+  const doctors = useMemo(
+    () => doctorsQuery.data?.data ?? [],
+    [doctorsQuery.data?.data],
+  )
   const [values, setValues] = useState(() =>
     getInitialValues(defaultTurnaroundDays),
   );
   const [error, setError] = useState("");
   const categories = useMemo(
-    () =>
-      getCaseCategoriesForAppliance(caseCategoryFixtures, values.applianceId),
+    () => getCreateCaseCategories(values.applianceId),
     [values.applianceId],
   );
   const category = categories.find((item) => item.id === values.categoryId);
@@ -81,9 +108,11 @@ export function CreateCaseForm({
   const availableDoctors = useMemo(
     () =>
       values.clinicId
-        ? doctorFixtures.filter((doctor) => doctor.clinicId === values.clinicId)
-        : doctorFixtures,
-    [values.clinicId],
+        ? doctors.filter((doctor) =>
+            doctor.clinics.some((clinic) => clinic.id === values.clinicId),
+          )
+        : doctors,
+    [doctors, values.clinicId],
   );
 
   function updateValue<Key extends keyof CreateCaseValues>(
@@ -98,10 +127,7 @@ export function CreateCaseForm({
     const nextAppliance = appliances.find((item) => item.id === applianceId);
     if (!nextAppliance) return;
 
-    const nextCategories = getCaseCategoriesForAppliance(
-      caseCategoryFixtures,
-      applianceId,
-    );
+    const nextCategories = getCreateCaseCategories(applianceId);
     const nextCategory = nextCategories[0];
     const nextWorkflow =
       workflowTemplateFixtures.find(
@@ -148,8 +174,10 @@ export function CreateCaseForm({
 
   function handleClinicChange(clinicId: string) {
     const nextDoctors = clinicId
-      ? doctorFixtures.filter((doctor) => doctor.clinicId === clinicId)
-      : doctorFixtures;
+      ? doctors.filter((doctor) =>
+          doctor.clinics.some((clinic) => clinic.id === clinicId),
+        )
+      : doctors;
     const hasCurrentDoctor = nextDoctors.some(
       (doctor) => doctor.id === values.doctorId,
     );
@@ -201,6 +229,16 @@ export function CreateCaseForm({
       onSubmit={handleSubmit}
     >
       <div className="grid min-w-0 gap-3">
+        {doctorsQuery.isPending && (
+          <p role="status" className="text-sm text-text-muted">
+            Loading doctors…
+          </p>
+        )}
+        {doctorsQuery.isError && (
+          <p role="alert" className="text-sm text-destructive">
+            Could not load doctors: {getApiErrorMessage(doctorsQuery.error, 'Please try again.')}
+          </p>
+        )}
         <CreateCasePatientFields
           values={values}
           doctors={availableDoctors}
@@ -269,11 +307,8 @@ export function CreateCaseForm({
 
       <CreateCaseOptions
         values={values}
-        applianceName={appliances.find((item) => item.id === values.applianceId)?.name ?? 'Appliance'}
-        category={category}
         onUpdateValue={updateValue}
       />
     </form>
   );
 }
-

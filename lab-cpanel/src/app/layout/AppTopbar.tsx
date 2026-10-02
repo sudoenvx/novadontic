@@ -23,12 +23,12 @@ export function AppTopbar({ context, onOpenCommandMenu }: AppTopbarProps) {
         <Button
           variant="outline"
           size="md"
-          className="min-w-52 px-1.5 py-1.5 justify-between bg-surface hover:bg-surface text-secondary max-sm:min-w-0 max-sm:flex-1"
+          className="min-w-48 px-1.5 py-1.5 rounded-md border-none shadow-sm justify-between bg-surface hover:bg-surface text-secondary max-sm:min-w-0 max-sm:flex-1"
           onClick={onOpenCommandMenu}
           aria-label="Open command menu"
         >
           <span className="flex items-center gap-2 text-sm text-text-muted">
-            <Search size={16} />
+            <Search size={14} />
             <span className="">Search</span>
           </span>
           <Kbd>{formatForDisplay('Mod+K')}</Kbd>

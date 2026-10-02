@@ -92,7 +92,7 @@ export function RolePermissionsEditor({
               {group.permissions.map((permission) => (
                 <label
                   key={permission.id}
-                  className="flex items-start gap-2 rounded-sm px-1.5 py-1.5 transition-colors hover:bg-surface-raised"
+                  className="flex items-start gap-2 rounded-sm px-1.5 py-1.5 transition-colors hover:bg-surface"
                 >
                   <Checkbox
                     checked={role.permissions.includes(permission.id)}

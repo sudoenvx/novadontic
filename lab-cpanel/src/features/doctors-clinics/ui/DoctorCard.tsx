@@ -56,16 +56,16 @@ export function DoctorCard({
       onKeyDown={handleCardKeyDown}
       role={onClick ? 'button' : undefined}
       tabIndex={onClick ? 0 : undefined}
-      aria-label={onClick ? `View details for ${doctor.name}` : undefined}
+      aria-label={onClick ? `View details for ${doctor.fullName}` : undefined}
     >
       <div className="flex items-start gap-2.5">
         <PersonAvatar
-          name={doctor.name}
+          name={doctor.fullName}
           size="md"
         />
         <div className="min-w-0 flex-1">
           <h3 className="truncate text-sm font-semibold text-text">
-            {doctor.name}
+            {doctor.fullName}
           </h3>
           <p className="truncate text-xs text-text-muted">{doctor.specialty}</p>
         </div>
@@ -75,7 +75,7 @@ export function DoctorCard({
               <Button
                 variant="ghost"
                 size="icon-sm"
-                aria-label={`More actions for ${doctor.name}`}
+                aria-label={`More actions for ${doctor.fullName}`}
               />
             }
           >
@@ -87,7 +87,7 @@ export function DoctorCard({
               Edit doctor
             </DropdownMenuItem>
             <DropdownMenuItem
-              disabled={doctor.status === 'inactive'}
+              disabled={!doctor.isActive}
               onClick={onRevokePortalAccess}
             >
               <ShieldOff />
@@ -108,20 +108,19 @@ export function DoctorCard({
             {clinicName}
           </span>
         )}
-        <DoctorPortalStatusBadge status={doctor.status} />
+        <DoctorPortalStatusBadge isActive={doctor.isActive} />
       </div>
 
       <div className="flex items-center justify-between gap-3 border-t border-border-soft pt-2 text-xs text-secondary">
         <span>
-          <strong className="text-text">{doctor.activeCases}</strong>{' '}
-          active {doctor.activeCases === 1 ? 'case' : 'cases'}
+          {doctor.source === 'portal' ? 'Portal doctor' : 'Clinic doctor'}
         </span>
         <a
-          href={`mailto:${doctor.email}`}
+          href={doctor.email ? `mailto:${doctor.email}` : undefined}
           className="inline-flex min-w-0 items-center gap-1 truncate text-primary hover:underline"
         >
           <Mail size={12} />
-          <span className="truncate">{doctor.email}</span>
+          <span className="truncate">{doctor.email ?? 'No email'}</span>
         </a>
       </div>
     </article>

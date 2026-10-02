@@ -41,8 +41,8 @@ export function DoctorsClinicsPage() {
   const [editingDoctor, setEditingDoctor] = useState<Doctor | null>(null)
   const [doctorDisplayMode, setDoctorDisplayMode] = useState<DoctorDisplayMode>('grid')
 
-  const visibleClinics = filterClinics(clinics, doctors, searchTerm)
-  const visibleDoctors = filterDoctors(doctors, clinics, searchTerm)
+  const visibleClinics = filterClinics(clinics, searchTerm)
+  const visibleDoctors = filterDoctors(doctors, searchTerm)
   const activeClinicId = visibleClinics.some((clinic) => clinic.id === selectedClinicId)
     ? selectedClinicId
     : visibleClinics[0]?.id ?? ''
@@ -53,8 +53,19 @@ export function DoctorsClinicsPage() {
 
   function handleCreateClinic(newClinic: NewClinic) {
     const clinic: Clinic = {
-      ...newClinic,
       id: `clinic-${clinics.length + 1}`,
+      name: newClinic.name,
+      legalName: null,
+      address: newClinic.address,
+      city: null,
+      phone: newClinic.phone,
+      email: newClinic.email,
+      website: null,
+      notes: null,
+      isActive: true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      doctors: [],
     }
 
     setClinics((currentClinics) => [...currentClinics, clinic])
@@ -68,19 +79,29 @@ export function DoctorsClinicsPage() {
   }
 
   function handleCreateDoctor(newDoctor: NewDoctor) {
+    const clinic = clinics.find((item) => item.id === newDoctor.clinicId)
     const doctor: Doctor = {
-      ...newDoctor,
       id: `doctor-${doctors.length + 1}`,
-      activeCases: 0,
-      status: 'pending',
+      fullName: newDoctor.name,
+      specialty: newDoctor.specialty || null,
+      email: newDoctor.email || null,
+      phone: newDoctor.phoneNumber || null,
+      address: newDoctor.address || null,
+      country: newDoctor.country || null,
+      notes: null,
+      source: newDoctor.source,
+      isActive: newDoctor.isActive,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      clinics: clinic ? [{ id: clinic.id, name: clinic.name }] : [],
     }
 
     setDoctors((currentDoctors) => [...currentDoctors, doctor])
-    setSelectedClinicId(doctor.clinicId ?? '')
+    setSelectedClinicId(doctor.clinics[0]?.id ?? '')
     setViewMode('clinics')
     toast.add({
       title: 'Doctor invited',
-      description: `${doctor.name} was added to your doctors list.`,
+      description: `${doctor.fullName} was added to your doctors list.`,
       type: 'success',
     })
   }
@@ -95,12 +116,20 @@ export function DoctorsClinicsPage() {
         doctor.id === editingDoctor.id
           ? {
               ...doctor,
-              ...values,
-              status: values.isActive
-                ? doctor.status === 'inactive'
-                  ? 'pending'
-                  : doctor.status
-                : 'inactive',
+              fullName: values.name,
+              specialty: values.specialty || null,
+              email: values.email || null,
+              address: values.address || null,
+              country: values.country || null,
+              phone: values.phoneNumber || null,
+              source: values.source,
+              isActive: values.isActive,
+              updatedAt: new Date(),
+              clinics: values.clinicId
+                ? clinics
+                    .filter((clinic) => clinic.id === values.clinicId)
+                    .map((clinic) => ({ id: clinic.id, name: clinic.name }))
+                : [],
             }
           : doctor,
       ),
@@ -116,7 +145,7 @@ export function DoctorsClinicsPage() {
     setDoctors((currentDoctors) =>
       currentDoctors.map((doctor) =>
         doctor.id === doctorId
-          ? { ...doctor, isActive: false, status: 'inactive' }
+          ? { ...doctor, isActive: false, updatedAt: new Date() }
           : doctor,
       ),
     )
@@ -127,12 +156,7 @@ export function DoctorsClinicsPage() {
   }
 
   function openDoctorDetails(doctor: Doctor) {
-    navigate(`/doctors-clinics/doctors/${doctor.id}`, {
-      state: {
-        doctor,
-        clinic: clinics.find((clinic) => clinic.id === doctor.clinicId),
-      },
-    })
+    navigate(`/doctors/${doctor.id}`)
   }
 
   return (
@@ -224,7 +248,7 @@ export function DoctorsClinicsPage() {
             doctorDisplayMode === 'table' ? (
               <DoctorTable
                 doctors={visibleDoctors}
-                getClinicName={(doctor) => clinics.find((clinic) => clinic.id === doctor.clinicId)?.name}
+                getClinicName={(doctor) => doctor.clinics[0]?.name}
                 onDelete={(doctor) => handleDeleteDoctor(doctor.id)}
                 onEdit={openEditDoctor}
                 onRevokePortalAccess={(doctor) => handleRevokePortalAccess(doctor.id)}
@@ -236,7 +260,7 @@ export function DoctorsClinicsPage() {
                   <DoctorCard
                     key={doctor.id}
                     doctor={doctor}
-                    clinicName={clinics.find((clinic) => clinic.id === doctor.clinicId)?.name}
+                    clinicName={doctor.clinics[0]?.name}
                     showClinic
                     onDelete={() => handleDeleteDoctor(doctor.id)}
                     onEdit={() => openEditDoctor(doctor)}

@@ -244,15 +244,15 @@ export function DoctorFormDialog({
 
 function getInitialValues(doctor: Doctor | undefined, initialClinicId: string): DoctorFormValues {
   return {
-    name: doctor?.name ?? '',
+    name: doctor?.fullName ?? '',
     specialty: doctor?.specialty ?? '',
     email: doctor?.email ?? '',
     address: doctor?.address ?? '',
     country: doctor?.country ?? '',
-    phoneNumber: doctor?.phoneNumber ?? '',
+    phoneNumber: doctor?.phone ?? '',
     isActive: doctor?.isActive ?? true,
-    source: doctor?.source ?? (doctor?.clinicId || initialClinicId ? 'clinic' : 'portal'),
-    clinicId: doctor?.clinicId ?? initialClinicId,
+    source: doctor?.source ?? (initialClinicId ? 'clinic' : 'portal'),
+    clinicId: doctor?.clinics[0]?.id ?? initialClinicId,
   }
 }
 

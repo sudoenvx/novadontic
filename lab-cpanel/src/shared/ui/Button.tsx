@@ -27,7 +27,7 @@ import { cn } from "cn"
 const OUTLINE =
   "border-border bg-surface text-text-primary hover:bg-surface-muted aria-expanded:bg-surface-muted"
 const NEUTRAL =
-  "bg-surface-muted  text-text-primary hover:bg-border aria-expanded:bg-border"
+  "bg-neutral-200  text-text-primary hover:bg-neutral-300 aria-expanded:bg-border"
 const GHOST =
   "text-text-secondary hover:bg-surface-muted hover:text-text-primary aria-expanded:bg-surface-muted"
 
@@ -54,7 +54,7 @@ const buttonVariants = cva(
           "bg-destructive-soft text-destructive-soft-foreground hover:bg-destructive hover:text-destructive-foreground",
         destructive:
           "bg-destructive text-destructive-foreground hover:bg-destructive-hover",
-        link: "text-primary underline-offset-4 hover:underline",
+        link: "text-link underline-offset-4 hover:underline",
 
         // Deprecated aliases, kept so existing call sites compile.
         transparent: GHOST,
@@ -81,7 +81,7 @@ const buttonVariants = cva(
     },
     defaultVariants: {
       variant: "default",
-      size: "md",
+      size: "sm",
     },
   }
 )

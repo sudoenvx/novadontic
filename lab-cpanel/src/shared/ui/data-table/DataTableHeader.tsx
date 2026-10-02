@@ -1,4 +1,5 @@
 import { ArrowDown, ArrowUp, ArrowUpDown, Pin, PinOff } from 'lucide-react'
+import { cn } from 'cn'
 
 import { Checkbox } from '../Checkbox'
 import { TableHead, TableRow } from '../Table'
@@ -34,8 +35,8 @@ export function DataTableHeader<TData>({
       {selectable && (
         <TableHead
           className={cn(
-            'w-10 px-3 text-center align-middle',
-            hasPinnedColumns && 'sticky left-0 z-30 bg-surface-muted',
+            'sticky top-0 z-20 w-10 px-3 text-center bg-neutral-50 align-middle',
+            hasPinnedColumns && 'left-0 z-40 bg-neutral-50',
           )}
           style={hasPinnedColumns ? { left: 0 } : undefined}
         >
@@ -53,9 +54,9 @@ export function DataTableHeader<TData>({
           data-column-id={column.id}
           data-pinned={pinnedColumns.has(column.id) || undefined}
           className={cn(
-            'py-2 text-start text-xs font-bold text-text-secondary',
+            'sticky top-0 z-20 bg-neutral-50 py-1 text-start text-xs font-bold text-text-secondary border-b border-border-soft',
             column.headerClassName,
-            pinnedColumns.has(column.id) && 'sticky z-20 bg-surface-muted shadow-[1px_0_0_var(--border)]',
+            pinnedColumns.has(column.id) && 'z-30 shadow-[1px_0_0_var(--border)]',
           )}
         >
           <HeaderContent
@@ -84,59 +85,51 @@ function HeaderContent<TData>({
   onSortChange: (state: DataTableSortState | undefined) => void
   sortState?: DataTableSortState
 }) {
-  const isSortable = column.sortable === true
   const isActive = sortState?.columnId === column.id
   const nextDirection = isActive && sortState.direction === 'asc' ? 'desc' : 'asc'
 
   return (
-    <div className="flex min-w-0 items-center gap-2">
-      {isSortable ? (
-        <button
-          type="button"
-          className={cn(
-            'group/sort-header inline-flex min-w-0 flex-1 items-center gap-1 text-start text-inherit transition-colors duration-(--duration-fast)',
-            isActive ? 'text-text-primary' : 'hover:text-text-primary',
-          )}
-          onClick={() => onSortChange({ columnId: column.id, direction: nextDirection })}
-          aria-label={`Sort by ${column.id}`}
-        >
-          <span className="truncate">{column.header}</span>
-          {isActive ? (
-            sortState?.direction === 'asc' ? (
-              <ArrowUp size={12} aria-hidden="true" className="text-primary" />
+    <div className="flex min-w-0 items-center gap-3">
+      <span className="min-w-0 truncate">{column.header}</span>
+      <div className="flex shrink-0 items-center gap-1">
+        {column.sortable === true && (
+          <button
+            type="button"
+            className={cn(
+              'grid size-6 place-items-center rounded-xs text-text-secondary transition-colors hover:bg-surface-muted hover:text-text-primary',
+              isActive && 'text-primary',
+            )}
+            onClick={() => onSortChange({ columnId: column.id, direction: nextDirection })}
+            aria-label={`Sort by ${column.id}`}
+            title={`Sort by ${column.id}`}
+          >
+            {isActive ? (
+              sortState?.direction === 'asc' ? (
+                <ArrowUp size={12} aria-hidden="true" />
+              ) : (
+                <ArrowDown size={12} aria-hidden="true" />
+              )
             ) : (
-              <ArrowDown size={12} aria-hidden="true" className="text-primary" />
-            )
-          ) : (
-            <ArrowUpDown
-              size={12}
-              aria-hidden="true"
-              className="text-text-secondary opacity-50 transition-[color,opacity] duration-(--duration-fast) group-hover/sort-header:text-text-primary group-hover/sort-header:opacity-100"
-            />
-          )}
-        </button>
-      ) : (
-        <span className="min-w-0 flex-1 truncate">{column.header}</span>
-      )}
-      {column.pinnable === true && (
-        <button
-          type="button"
-          className={cn(
-            'grid size-6 shrink-0 place-items-center rounded-xs text-text-muted transition-colors hover:bg-surface-muted hover:text-text-primary',
-            isPinned && 'bg-primary-soft text-primary-soft-foreground',
-          )}
-          onClick={onTogglePinned}
-          aria-label={`${isPinned ? 'Unpin' : 'Pin'} ${column.id} column`}
-          aria-pressed={isPinned}
-          title={`${isPinned ? 'Unpin' : 'Pin'} column`}
-        >
-          {isPinned ? <PinOff size={13} aria-hidden="true" /> : <Pin size={13} aria-hidden="true" />}
-        </button>
-      )}
+              <ArrowUpDown size={12} aria-hidden="true" />
+            )}
+          </button>
+        )}
+        {column.pinnable === true && (
+          <button
+            type="button"
+            className={cn(
+              'grid size-6 place-items-center rounded-xs text-text-muted transition-colors hover:bg-surface-muted hover:text-text-primary',
+              isPinned && 'bg-primary-soft text-primary-soft-foreground',
+            )}
+            onClick={onTogglePinned}
+            aria-label={`${isPinned ? 'Unpin' : 'Pin'} ${column.id} column`}
+            aria-pressed={isPinned}
+            title={`${isPinned ? 'Unpin' : 'Pin'} column`}
+          >
+            {isPinned ? <PinOff size={13} aria-hidden="true" /> : <Pin size={13} aria-hidden="true" />}
+          </button>
+        )}
+      </div>
     </div>
   )
-}
-
-function cn(...classes: (string | undefined | null | false)[]) {
-  return classes.filter(Boolean).join(' ')
 }

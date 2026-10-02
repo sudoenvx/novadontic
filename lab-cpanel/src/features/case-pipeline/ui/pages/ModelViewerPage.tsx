@@ -29,7 +29,100 @@ import {
   TooltipTrigger,
 } from '../../../../shared/ui/Tooltip'
 import { DEMO_STL_MODEL_URL } from '../../data/cases'
-import './ModelViewerPage.css'
+
+const modelViewerStyles = `
+.model-viewer-toolbar,
+.model-viewer-info,
+.model-viewer-info-toggle {
+  background-color: var(--surface);
+  color: var(--text-primary);
+  border-color: var(--border-subtle);
+}
+
+.model-viewer-toolbar[data-canvas-theme="dark"],
+.model-viewer-info[data-canvas-theme="dark"],
+.model-viewer-info-toggle[data-canvas-theme="dark"] {
+  --surface: var(--brand-int);
+  --surface-raised: var(--brand-int);
+  --surface-muted: var(--neutral-600);
+  --border: var(--neutral-600);
+  --border-subtle: var(--neutral-600);
+  --field-border: var(--neutral-600);
+  --text-primary: var(--neutral-50);
+  --text-secondary: var(--neutral-500);
+  --primary-soft: var(--primary);
+  --primary-soft-foreground: var(--primary-foreground);
+}
+
+.model-viewer-toolbar {
+  box-shadow: var(--shadow-float-value);
+}
+
+.model-viewer-toolbar [data-slot="button"] {
+  color: var(--text-secondary);
+}
+
+.model-viewer-toolbar [data-slot="button"]:hover,
+.model-viewer-toolbar [data-slot="button"][aria-expanded="true"] {
+  background-color: var(--surface-muted);
+  color: var(--text-primary);
+}
+
+.model-viewer-toolbar [data-slot="button"][aria-pressed="true"] {
+  background-color: var(--primary-soft);
+  color: var(--primary-soft-foreground);
+}
+
+.model-viewer-toolbar [role="dialog"] > div {
+  background-color: var(--surface-raised);
+  border-color: var(--border);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-popover-value);
+}
+
+.model-viewer-toolbar [role="dialog"] .text-text-primary {
+  color: var(--text-primary);
+}
+
+.model-viewer-toolbar [role="dialog"] .text-text-secondary {
+  color: var(--text-secondary);
+}
+
+.model-viewer-toolbar[data-canvas-theme="dark"] [role="dialog"] input {
+  background-color: var(--surface-muted);
+  border-color: var(--field-border);
+  color: var(--text-primary);
+  color-scheme: dark;
+}
+
+.model-viewer-info,
+.model-viewer-info-toggle {
+  box-shadow: var(--shadow-float-value);
+}
+
+.model-viewer-info .text-text-primary {
+  color: var(--text-primary);
+}
+
+.model-viewer-info .text-text-secondary,
+.model-viewer-info .text-text-muted {
+  color: var(--text-secondary);
+}
+
+.model-viewer-info [data-slot="button"] {
+  color: var(--text-secondary);
+}
+
+.model-viewer-info [data-slot="button"]:hover,
+.model-viewer-info-toggle:hover {
+  background-color: var(--surface-muted);
+  color: var(--text-primary);
+}
+
+.model-viewer-info-toggle {
+  color: var(--text-primary);
+}
+`
 
 export function ModelViewerPage() {
   const [searchParams] = useSearchParams()
@@ -57,9 +150,8 @@ export function ModelViewerPage() {
     wireframe,
     flatShading,
     panMode,
-    backgroundColor: canvasTheme === 'dark'
-      ? '--model-viewer-canvas-dark'
-      : '--model-viewer-canvas-light',
+    canvasTheme,
+    backgroundColor: canvasTheme === 'dark' ? '--brand-int' : '--canvas',
     modelColor,
   }), [canvasTheme, flatShading, modelColor, panMode, wireframe])
   const defaultModelColor = getTokenColor('--neutral-400')
@@ -131,6 +223,7 @@ export function ModelViewerPage() {
 
   return (
     <main className="flex h-dvh min-h-0 flex-col overflow-hidden bg-canvas">
+      <style>{modelViewerStyles}</style>
       <header className="flex min-h-navbar shrink-0 flex-wrap items-center justify-between gap-x-5 gap-y-2 border-b border-border bg-surface px-4 py-2.5">
         <div className="flex min-w-0 items-center gap-2 text-sm font-semibold text-text-primary">
           <ClipboardList className="size-4 shrink-0 text-primary" aria-hidden="true" />

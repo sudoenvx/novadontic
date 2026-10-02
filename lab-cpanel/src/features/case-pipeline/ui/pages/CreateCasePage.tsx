@@ -6,24 +6,25 @@ import { Button } from '../../../../shared/ui/Button'
 import { Page } from '../../../../shared/ui/Page'
 import { toast } from '../../../../shared/ui/Toast'
 import { casePipelineFixtures } from '../../data/cases'
-import { labSettings } from '../../../lab-settings/data/labSettings'
 import { caseCategoryFixtures } from '../../data/caseCategories'
 import { workflowTemplateFixtures } from '../../../appliance-workflow-templates/data/workflowTemplates'
 import { appliances } from '../../../appliances/data/appliances'
-import { clinicFixtures } from '../../../clinics/data/clinics'
-import { doctorFixtures } from '../../../doctors/data/doctors'
+import { useClinicOptions } from '../../../clinics/queries/clinic.queries'
+import { useDoctors } from '../../../doctors/queries/doctor.queries'
 import type { CasePipelineCase } from '../../domain/casePipeline'
 import { CreateCaseForm, type CreateCaseValues } from '../components/CreateCaseForm'
 
 export function CreateCasePage() {
   const navigate = useNavigate()
+  const clinicsQuery = useClinicOptions()
+  const doctorsQuery = useDoctors()
 
   function handleSubmit(values: CreateCaseValues) {
     const appliance = appliances.find((item) => item.id === values.applianceId)
     const workflow = workflowTemplateFixtures.find((item) => item.id === values.workflowTemplateId)
     const category = caseCategoryFixtures.find((item) => item.id === values.categoryId)
-    const clinic = clinicFixtures.find((item) => item.id === values.clinicId)
-    const doctor = doctorFixtures.find((item) => item.id === values.doctorId)
+    const clinic = clinicsQuery.data?.find((item) => item.id === values.clinicId)
+    const doctor = doctorsQuery.data?.data.find((item) => item.id === values.doctorId)
     const caseId = `OR-${4821 + casePipelineFixtures.length}`
     const productionSteps = workflow?.steps.map((step, index) => ({
       id: `${caseId}-${step.id}`,
@@ -36,7 +37,7 @@ export function CreateCasePage() {
       patientName: values.patientName,
       patientCode: values.patientCode || 'Not provided',
       clinicName: clinic?.name ?? 'Portal request',
-      doctorName: doctor?.name ?? 'Unassigned doctor',
+      doctorName: doctor?.fullName ?? 'Unassigned doctor',
       request: `${category?.name ?? 'New case'} · ${appliance?.name ?? 'Aligner'}`,
       caseType: appliance?.name ?? 'Appliance case',
       applianceId: values.applianceId,
@@ -53,8 +54,7 @@ export function CreateCasePage() {
       status: 'On track',
       priority: values.priority,
       stage: 'Received',
-      dueDate: values.turnaroundDays === undefined ? 'Not set' : `In ${values.turnaroundDays} days`,
-      turnaroundDays: values.turnaroundDays,
+      dueDate: values.dueDate ? formatDueDate(values.dueDate) : 'Not set',
       createdAt: 'Today',
       productionSteps,
       activities: [{ id: `${caseId}-created`, author: 'System', initials: '◷', message: 'Case created and ready for production.', createdAt: 'Today', isSystem: true }],
@@ -72,7 +72,14 @@ export function CreateCasePage() {
           <Button type="submit" form="create-case-form"><Plus /> Create case</Button>
         </PageHeaderActions>
       </PageHeader>
-      <CreateCaseForm cases={casePipelineFixtures} defaultTurnaroundDays={labSettings.defaultCaseTurnaroundDays} onCancel={() => navigate(-1)} onSubmit={handleSubmit} />
+      <CreateCaseForm cases={casePipelineFixtures} defaultTurnaroundDays={7} onCancel={() => navigate(-1)} onSubmit={handleSubmit} />
     </Page>
+  )
+}
+
+function formatDueDate(dateValue: string) {
+  const [year, month, day] = dateValue.split('-').map(Number)
+  return new Intl.DateTimeFormat(undefined, { dateStyle: 'medium' }).format(
+    new Date(year, month - 1, day),
   )
 }

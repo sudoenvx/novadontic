@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useLocation, useParams } from 'react-router-dom'
 
 import { toast } from '../../../../shared/ui/Toast'
-import { Card, CardDescription, CardHeader, CardTitle } from '../../../../shared/ui/Card'
+import { Card } from '../../../../shared/ui/Card'
 import { Page } from '../../../../shared/ui/Page'
 import { appliances } from '../../../appliances/data/appliances'
 import { casePipelineFixtures } from '../../data/cases'

@@ -65,7 +65,6 @@ export type CasePipelineCase = {
   priority: CasePipelinePriority
   stage: CasePipelineStage
   dueDate: string
-  turnaroundDays?: number
   createdAt: string
   productionSteps: CaseProductionStep[]
   activities: CaseActivityItem[]

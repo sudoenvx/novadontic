@@ -2,35 +2,107 @@ import { Plus, Search } from 'lucide-react'
 import { useMemo, useState } from 'react'
 
 import { Button } from '../../../shared/ui/Button'
-import { PageHeader, PageHeaderActions } from '../../../shared/ui/PageHeader'
+import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '../../../shared/ui/AlertDialog'
+import { getApiErrorMessage } from '../../../shared/api/apiError'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '../../../shared/ui/InputGroup'
 import { Page } from '../../../shared/ui/Page'
+import { PageHeader, PageHeaderActions } from '../../../shared/ui/PageHeader'
 import { toast } from '../../../shared/ui/Toast'
-import { clinicFixtures } from '../data/clinics'
-import { doctorFixtures } from '../../doctors/data/doctors'
+import type { Clinic, ClinicInput } from '../domain/clinic'
 import { filterClinics } from '../domain/clinic'
-import type { Clinic } from '../domain/clinic'
-import { CreateClinicDialog, type NewClinic } from './CreateClinicDialog'
+import {
+  useCreateClinic,
+  useClinics,
+  useDeactivateClinic,
+  useUpdateClinic,
+} from '../queries/clinic.queries'
+import { CreateClinicDialog } from './CreateClinicDialog'
 import { ClinicTable } from './ClinicTable'
 
+const EMPTY_CLINICS: Clinic[] = []
+
 export function ClinicsPage() {
-  const [clinics, setClinics] = useState<Clinic[]>(clinicFixtures)
+  const clinicsQuery = useClinics()
+  const createClinicMutation = useCreateClinic()
+  const updateClinicMutation = useUpdateClinic()
+  const deactivateClinicMutation = useDeactivateClinic()
   const [searchTerm, setSearchTerm] = useState('')
   const [isCreateOpen, setIsCreateOpen] = useState(false)
+  const [editingClinic, setEditingClinic] = useState<Clinic | null>(null)
+  const [clinicToDeactivate, setClinicToDeactivate] = useState<Clinic | null>(null)
+  const clinics = clinicsQuery.data ?? EMPTY_CLINICS
   const visibleClinics = useMemo(
-    () => filterClinics(clinics, doctorFixtures, searchTerm),
+    () => filterClinics(clinics, searchTerm),
     [clinics, searchTerm],
   )
+  const isSaving = createClinicMutation.isPending || updateClinicMutation.isPending
 
-  function getDoctorCount(clinic: Clinic) {
-    return doctorFixtures.filter((doctor) => doctor.clinicId === clinic.id).length
+  async function handleSubmitClinic(input: ClinicInput) {
+    try {
+      if (editingClinic) {
+        await updateClinicMutation.mutateAsync({
+          clinicId: editingClinic.id,
+          input,
+        })
+        toast.add({ title: 'Clinic updated', type: 'success' })
+        setEditingClinic(null)
+      } else {
+        const clinic = await createClinicMutation.mutateAsync(input)
+        toast.add({ title: 'Clinic added', description: `${clinic.name} is ready for doctors.`, type: 'success' })
+        setIsCreateOpen(false)
+      }
+    } catch (error) {
+      toast.add({
+        title: editingClinic ? 'Could not update clinic' : 'Could not create clinic',
+        description: getApiErrorMessage(error, 'Please try again.'),
+        type: 'error',
+      })
+    }
   }
 
-  function handleCreateClinic(newClinic: NewClinic) {
-    const clinic: Clinic = { ...newClinic, id: `clinic-${clinics.length + 1}` }
-    setClinics((currentClinics) => [...currentClinics, clinic])
-    setIsCreateOpen(false)
-    toast.add({ title: 'Clinic added', description: `${clinic.name} is ready for doctors.`, type: 'success' })
+  async function handleSetClinicActive(clinic: Clinic) {
+    if (clinic.isActive) {
+      setClinicToDeactivate(clinic)
+      return
+    }
+
+    try {
+      await updateClinicMutation.mutateAsync({
+        clinicId: clinic.id,
+        input: { isActive: true },
+      })
+      toast.add({ title: 'Clinic reactivated', description: clinic.name, type: 'success' })
+    } catch (error) {
+      toast.add({
+        title: 'Could not reactivate clinic',
+        description: getApiErrorMessage(error, 'Please try again.'),
+        type: 'error',
+      })
+    }
+  }
+
+  async function handleDeactivateClinic() {
+    if (!clinicToDeactivate) return
+
+    try {
+      await deactivateClinicMutation.mutateAsync(clinicToDeactivate.id)
+      toast.add({ title: 'Clinic deactivated', description: clinicToDeactivate.name, type: 'success' })
+      setClinicToDeactivate(null)
+    } catch (error) {
+      toast.add({
+        title: 'Could not deactivate clinic',
+        description: getApiErrorMessage(error, 'Please try again.'),
+        type: 'error',
+      })
+    }
   }
 
   return (
@@ -45,14 +117,67 @@ export function ClinicsPage() {
         </PageHeaderActions>
       </PageHeader>
 
-      <ClinicTable clinics={visibleClinics} getDoctorCount={getDoctorCount} title={`All clinics (${visibleClinics.length})`} />
+      {clinicsQuery.isPending && <p role="status">Loading clinics…</p>}
+      {clinicsQuery.isError && (
+        <p role="alert" className="text-destructive">
+          Could not load clinics: {getApiErrorMessage(clinicsQuery.error, 'Please try again.')}
+        </p>
+      )}
+      {clinicsQuery.data && (
+        <ClinicTable
+          clinics={visibleClinics}
+          onEdit={setEditingClinic}
+          onSetActive={handleSetClinicActive}
+          title={`All clinics (${visibleClinics.length})`}
+        />
+      )}
 
-      <CreateClinicDialog
-        existingNames={clinics.map((clinic) => clinic.name)}
-        onCreate={handleCreateClinic}
-        onOpenChange={setIsCreateOpen}
-        open={isCreateOpen}
-      />
+      {(isCreateOpen || editingClinic !== null) && (
+        <CreateClinicDialog
+          key={editingClinic?.id ?? 'create-clinic'}
+          clinic={editingClinic ?? undefined}
+          existingNames={clinics.map((clinic) => clinic.name)}
+          isPending={isSaving}
+          onSubmit={handleSubmitClinic}
+          onOpenChange={(open) => {
+            if (!open) {
+              setIsCreateOpen(false)
+              setEditingClinic(null)
+            }
+          }}
+          open
+        />
+      )}
+
+      <AlertDialog
+        open={clinicToDeactivate !== null}
+        onOpenChange={(open) => {
+          if (!open && !deactivateClinicMutation.isPending) {
+            setClinicToDeactivate(null)
+          }
+        }}
+      >
+        <AlertDialogContent size="sm">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Deactivate clinic?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {clinicToDeactivate?.name} will be marked inactive. You can reactivate it later.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deactivateClinicMutation.isPending}>
+              Cancel
+            </AlertDialogCancel>
+            <Button
+              variant="destructive"
+              disabled={deactivateClinicMutation.isPending}
+              onClick={handleDeactivateClinic}
+            >
+              {deactivateClinicMutation.isPending ? 'Deactivating…' : 'Deactivate'}
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Page>
   )
 }

@@ -174,7 +174,7 @@ function RoleList({
           <button
             key={role.id}
             type="button"
-            className={`grid gap-1 rounded-sm px-2 py-2 text-left transition-colors ${selectedRoleId === role.id ? "bg-primary-soft" : "hover:bg-surface-raised"}`}
+            className={`grid gap-1 rounded-sm px-2 py-2 text-left transition-colors ${selectedRoleId === role.id ? "bg-primary-soft" : "hover:bg-surface"}`}
             onClick={() => onSelect(role.id)}
             aria-pressed={selectedRoleId === role.id}
             >

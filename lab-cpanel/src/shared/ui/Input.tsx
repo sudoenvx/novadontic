@@ -21,16 +21,16 @@ const inputVariants = cva(
     variants: {
       variant: {
         outline:
-          "rounded-sm border border-border bg-surface hover:border-border-strong focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-focus/25 disabled:bg-surface-muted",
+          "rounded-sm border border-field-border bg-surface hover:border-field-hover focus-visible:border-border-focus focus-visible:ring-2 focus-visible:ring-ring disabled:bg-surface-muted",
         neutral:
-          "rounded-sm border border-transparent bg-surface-muted focus-visible:border-primary focus-visible:bg-surface focus-visible:ring-3 focus-visible:ring-focus/25",
+          "rounded-sm border border-field-border bg-surface-muted hover:border-field-hover focus-visible:border-border-focus focus-visible:bg-surface focus-visible:ring-3 focus-visible:ring-ring",
         "bottom-border":
-          "rounded-none border-0 border-b-2 border-b-border bg-transparent px-0 hover:border-b-border-strong focus-visible:border-b-primary",
+          "rounded-none border-0 border-b-2 border-b-field-border bg-transparent px-0 hover:border-b-field-hover focus-visible:border-b-border-focus",
         bare: "rounded-none border-0 bg-transparent focus-visible:ring-0 aria-invalid:ring-0",
       },
       size: {
         xs: "h-control-xs px-2 text-xs",
-        sm: "h-control-sm px-2.5 text-sm",
+        sm: "h-control-sm px-2.5 text-sm placeholder:text-sm",
         md: SIZE_MD,
         lg: "h-control-lg px-3.5 text-base",
         default: SIZE_MD, // deprecated alias of md
@@ -38,7 +38,7 @@ const inputVariants = cva(
     },
     defaultVariants: {
       variant: "outline",
-      size: "md",
+      size: "sm",
     },
   }
 )

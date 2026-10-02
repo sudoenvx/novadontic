@@ -212,7 +212,7 @@ export default function ImagePicker({
 
       <div className={cn('grid grid-cols-2 gap-2 sm:grid-cols-3 xl:grid-cols-4', isDragging && 'rounded-md ring-2 ring-primary/25')}>
         {images.map((image, index) => (
-          <article key={image.id} className="min-w-0 overflow-hidden rounded-md border border-border bg-surface">
+          <article key={image.id} className="min-w-0 overflow-hidden rounded-md border border-border-subtle bg-surface shadow-sm">
             <div className="relative aspect-square bg-surface-soft">
               <button
                 type="button"

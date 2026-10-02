@@ -24,7 +24,7 @@ const inputGroupVariants = cva(
     // the control fills the box; its own chrome is removed (Input variant="bare")
     "[&>input]:h-full [&>input]:flex-1",
     // focus + error live on the wrapper, not the inner control
-    "focus-within:border-primary focus-within:ring-3 focus-within:ring-focus/25",
+    "focus-within:border-border-focus focus-within:ring-2 focus-within:ring-ring",
     "has-[[data-slot][aria-invalid=true]]:border-destructive has-[[data-slot][aria-invalid=true]]:ring-3 has-[[data-slot][aria-invalid=true]]:ring-destructive/20",
     "data-[disabled=true]:pointer-events-none data-[disabled=true]:cursor-not-allowed data-[disabled=true]:opacity-50",
     // addons above/below the input stack vertically and let the box grow
@@ -34,9 +34,9 @@ const inputGroupVariants = cva(
   {
     variants: {
       variant: {
-        outline: "border-border bg-surface hover:border-border-strong",
+        outline: "border-field-border bg-surface hover:border-field-hover",
         neutral:
-          "border-transparent bg-surface-muted focus-within:bg-surface",
+          "border-field-border bg-surface-muted hover:border-field-hover focus-within:bg-surface",
       },
       size: {
         xs: "h-control-xs text-xs [&>input]:px-1.5 [&>textarea]:px-1.5 [&>textarea]:py-1",
@@ -47,7 +47,7 @@ const inputGroupVariants = cva(
     },
     defaultVariants: {
       variant: "outline",
-      size: "md",
+      size: "sm",
     },
   }
 )

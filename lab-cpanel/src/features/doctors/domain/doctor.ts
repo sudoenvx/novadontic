@@ -1,28 +1,49 @@
-export type DoctorStatus = 'active' | 'pending' | 'inactive'
 export type DoctorSource = 'clinic' | 'portal'
+
+export type DoctorClinic = {
+  id: string
+  name: string
+}
 
 export type Doctor = {
   id: string
-  clinicId?: string
+  fullName: string
   source: DoctorSource
-  name: string
-  specialty: string
-  email: string
-  address: string
-  country: string
-  phoneNumber: string
+  specialty: string | null
+  email: string | null
+  phone: string | null
+  address: string | null
+  country: string | null
+  notes: string | null
   isActive: boolean
-  activeCases: number
-  status: DoctorStatus
+  createdAt: Date
+  updatedAt: Date
+  clinics: DoctorClinic[]
 }
 
+export type DoctorInput = {
+  fullName: string
+  email?: string | null
+  phone?: string | null
+  address?: string | null
+  country?: string | null
+  specialty?: string | null
+  notes?: string | null
+  source?: DoctorSource
+  isActive?: boolean
+  clinicIds?: string[]
+}
+
+export type DoctorUpdateInput = Partial<DoctorInput>
+
 export function getDoctorsForClinic(clinicId: string, doctors: Doctor[]) {
-  return doctors.filter((doctor) => doctor.clinicId === clinicId)
+  return doctors.filter((doctor) =>
+    doctor.clinics.some((clinic) => clinic.id === clinicId),
+  )
 }
 
 export function filterDoctors(
   doctors: Doctor[],
-  clinics: Array<{ id: string; name: string }>,
   searchTerm: string,
 ) {
   const normalizedSearch = searchTerm.trim().toLowerCase()
@@ -30,10 +51,16 @@ export function filterDoctors(
   if (!normalizedSearch) return doctors
 
   return doctors.filter((doctor) => {
-    const clinic = clinics.find((item) => item.id === doctor.clinicId)
-    const searchableValues = [doctor.name, doctor.specialty, doctor.email, clinic?.name]
-      .filter((value): value is string => Boolean(value))
+    const searchableValues: Array<string | null> = [
+      doctor.fullName,
+      doctor.specialty,
+      doctor.email,
+      ...doctor.clinics.map((clinic) => clinic.name),
+    ]
+      .filter((value): value is string => value !== null)
 
-    return searchableValues.some((value) => value.toLowerCase().includes(normalizedSearch))
+    return searchableValues.some((value) =>
+      value?.toLowerCase().includes(normalizedSearch),
+    )
   })
 }

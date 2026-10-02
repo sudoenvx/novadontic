@@ -4,63 +4,139 @@ import { Button } from '../../../shared/ui/Button'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '../../../shared/ui/Dialog'
 import { Input } from '../../../shared/ui/Input'
 import { Label } from '../../../shared/ui/Label'
+import { Textarea } from '../../../shared/ui/Textarea'
+import type { Clinic, ClinicInput } from '../domain/clinic'
 
-export type NewClinic = {
+type ClinicFormValues = {
   name: string
-  address: string
-  phone: string
+  legalName: string
   email: string
+  phone: string
+  website: string
+  address: string
+  city: string
+  notes: string
 }
 
 type CreateClinicDialogProps = {
+  clinic?: Clinic
   existingNames: string[]
-  onCreate: (clinic: NewClinic) => void
+  isPending?: boolean
+  onSubmit: (clinic: ClinicInput) => void
   onOpenChange: (open: boolean) => void
   open: boolean
 }
 
-export function CreateClinicDialog({ existingNames, onCreate, onOpenChange, open }: CreateClinicDialogProps) {
-  const [values, setValues] = useState<NewClinic>({ name: '', address: '', phone: '', email: '' })
+function getInitialValues(clinic?: Clinic): ClinicFormValues {
+  return {
+    name: clinic?.name ?? '',
+    legalName: clinic?.legalName ?? '',
+    email: clinic?.email ?? '',
+    phone: clinic?.phone ?? '',
+    website: clinic?.website ?? '',
+    address: clinic?.address ?? '',
+    city: clinic?.city ?? '',
+    notes: clinic?.notes ?? '',
+  }
+}
+
+export function CreateClinicDialog({
+  clinic,
+  existingNames,
+  isPending = false,
+  onSubmit,
+  onOpenChange,
+  open,
+}: CreateClinicDialogProps) {
+  const [values, setValues] = useState<ClinicFormValues>(() =>
+    getInitialValues(clinic),
+  )
   const [error, setError] = useState('')
 
-  function reset() {
-    setValues({ name: '', address: '', phone: '', email: '' })
-    setError('')
-  }
-
-  function handleOpenChange(nextOpen: boolean) {
-    onOpenChange(nextOpen)
-    if (!nextOpen) reset()
+  function updateValue<K extends keyof ClinicFormValues>(
+    key: K,
+    value: ClinicFormValues[K],
+  ) {
+    setValues((current) => ({ ...current, [key]: value }))
   }
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    const clinic = { name: values.name.trim(), address: values.address.trim(), phone: values.phone.trim(), email: values.email.trim() }
-    if (!clinic.name || !clinic.address || !clinic.phone || !clinic.email) {
-      setError('Complete all clinic details.')
+    const name = values.name.trim()
+    if (!name) {
+      setError('Clinic name is required.')
       return
     }
-    if (existingNames.some((name) => name.toLowerCase() === clinic.name.toLowerCase())) {
+
+    if (
+      existingNames.some(
+        (existingName) =>
+          existingName.toLowerCase() === name.toLowerCase() &&
+          existingName !== clinic?.name,
+      )
+    ) {
       setError('A clinic with this name already exists.')
       return
     }
-    onCreate(clinic)
-    handleOpenChange(false)
+
+    const optionalValue = (value: string) => value.trim() || null
+    onSubmit({
+      name,
+      legalName: optionalValue(values.legalName),
+      email: optionalValue(values.email),
+      phone: optionalValue(values.phone),
+      website: optionalValue(values.website),
+      address: optionalValue(values.address),
+      city: optionalValue(values.city),
+      notes: optionalValue(values.notes),
+    })
   }
 
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg">
         <form className="grid gap-4" onSubmit={handleSubmit}>
-          <DialogHeader><DialogTitle>Add clinic</DialogTitle><DialogDescription>Add a clinic to organize its doctors and production activity.</DialogDescription></DialogHeader>
+          <DialogHeader>
+            <DialogTitle>{clinic ? 'Edit clinic' : 'Add clinic'}</DialogTitle>
+            <DialogDescription>
+              {clinic
+                ? 'Update the clinic details used across your lab.'
+                : 'Add a clinic to organize its doctors and production activity.'}
+            </DialogDescription>
+          </DialogHeader>
           <div className="grid gap-3 sm:grid-cols-2">
-            <Field className="sm:col-span-2" htmlFor="new-clinic-name" label="Clinic name"><Input id="new-clinic-name" value={values.name} onChange={(event) => setValues((current) => ({ ...current, name: event.currentTarget.value }))} autoFocus placeholder="e.g. Nile Orthodontics" /></Field>
-            <Field className="sm:col-span-2" htmlFor="new-clinic-address" label="Address"><Input id="new-clinic-address" value={values.address} onChange={(event) => setValues((current) => ({ ...current, address: event.currentTarget.value }))} placeholder="Street, city" /></Field>
-            <Field htmlFor="new-clinic-phone" label="Phone"><Input id="new-clinic-phone" type="tel" value={values.phone} onChange={(event) => setValues((current) => ({ ...current, phone: event.currentTarget.value }))} placeholder="+20 ..." /></Field>
-            <Field htmlFor="new-clinic-email" label="Email"><Input id="new-clinic-email" type="email" value={values.email} onChange={(event) => setValues((current) => ({ ...current, email: event.currentTarget.value }))} placeholder="hello@clinic.eg" /></Field>
+            <Field className="sm:col-span-2" htmlFor="clinic-name" label="Clinic name">
+              <Input id="clinic-name" maxLength={150} required value={values.name} onChange={(event) => updateValue('name', event.currentTarget.value)} autoFocus placeholder="e.g. Nile Orthodontics" />
+            </Field>
+            <Field className="sm:col-span-2" htmlFor="clinic-legal-name" label="Legal name">
+              <Input id="clinic-legal-name" maxLength={200} value={values.legalName} onChange={(event) => updateValue('legalName', event.currentTarget.value)} />
+            </Field>
+            <Field htmlFor="clinic-email" label="Email">
+              <Input id="clinic-email" type="email" maxLength={150} value={values.email} onChange={(event) => updateValue('email', event.currentTarget.value)} placeholder="hello@clinic.eg" />
+            </Field>
+            <Field htmlFor="clinic-phone" label="Phone">
+              <Input id="clinic-phone" type="tel" maxLength={30} value={values.phone} onChange={(event) => updateValue('phone', event.currentTarget.value)} placeholder="+20 ..." />
+            </Field>
+            <Field className="sm:col-span-2" htmlFor="clinic-website" label="Website">
+              <Input id="clinic-website" type="url" maxLength={255} value={values.website} onChange={(event) => updateValue('website', event.currentTarget.value)} placeholder="https://clinic.example" />
+            </Field>
+            <Field className="sm:col-span-2" htmlFor="clinic-address" label="Address">
+              <Input id="clinic-address" maxLength={200} value={values.address} onChange={(event) => updateValue('address', event.currentTarget.value)} placeholder="Street address" />
+            </Field>
+            <Field className="sm:col-span-2" htmlFor="clinic-city" label="City">
+              <Input id="clinic-city" maxLength={100} value={values.city} onChange={(event) => updateValue('city', event.currentTarget.value)} />
+            </Field>
+            <Field className="sm:col-span-2" htmlFor="clinic-notes" label="Notes">
+              <Textarea id="clinic-notes" maxLength={10_000} rows={3} value={values.notes} onChange={(event) => updateValue('notes', event.currentTarget.value)} />
+            </Field>
           </div>
           {error && <p className="text-xs text-destructive" role="alert">{error}</p>}
-          <DialogFooter><Button type="button" variant="neutral" onClick={() => handleOpenChange(false)}>Cancel</Button><Button type="submit">Create clinic</Button></DialogFooter>
+          <DialogFooter>
+            <Button type="button" variant="neutral" onClick={() => onOpenChange(false)}>Cancel</Button>
+            <Button type="submit" disabled={isPending}>
+              {isPending ? 'Saving…' : clinic ? 'Save changes' : 'Create clinic'}
+            </Button>
+          </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>

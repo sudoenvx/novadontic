@@ -8,7 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../../../../shared/ui/Select'
-import { clinicFixtures } from '../../../clinics/data/clinics'
+import { useClinicOptions } from '../../../clinics/queries/clinic.queries'
 import type { Doctor } from '../../../doctors/domain/doctor'
 import type { CreateCaseValueUpdater, CreateCaseValues } from './createCase.types'
 
@@ -27,6 +27,9 @@ export function CreateCasePatientFields({
   onClinicChange,
   onUpdateValue,
 }: CreateCasePatientFieldsProps) {
+  const clinicsQuery = useClinicOptions()
+  const clinics = clinicsQuery.data ?? []
+
   return (
     <Card>
       <CardHeader>
@@ -67,21 +70,27 @@ export function CreateCasePatientFields({
             <Select
               items={[
                 { value: noClinicOption, label: 'All clinics / portal' },
-                ...clinicFixtures.map((clinic) => ({ value: clinic.id, label: clinic.name })),
+                ...clinics.map((clinic) => ({ value: clinic.id, label: clinic.name })),
               ]}
               value={values.clinicId || noClinicOption}
               onValueChange={(value) => onClinicChange(value === noClinicOption ? '' : (value ?? ''))}
+              disabled={clinicsQuery.isPending || clinicsQuery.isError}
             >
               <SelectTrigger id="case-clinic" className="w-full">
                 <SelectValue placeholder="All clinics / portal" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value={noClinicOption}>All clinics / portal</SelectItem>
-                {clinicFixtures.map((clinic) => (
+                {clinics.map((clinic) => (
                   <SelectItem key={clinic.id} value={clinic.id}>{clinic.name}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
+            {clinicsQuery.isError && (
+              <p role="alert" className="text-xs text-destructive">
+                Could not load clinics. Please retry before selecting a clinic.
+              </p>
+            )}
           </FieldContent>
         </Field>
         <Field>
@@ -90,16 +99,19 @@ export function CreateCasePatientFields({
           </FieldLabel>
           <FieldContent>
             <Select
-              items={doctors.map((doctor) => ({ value: doctor.id, label: doctor.name }))}
+              items={doctors.map((doctor) => ({ value: doctor.id, label: doctor.fullName }))}
               value={values.doctorId}
               onValueChange={(value) => onUpdateValue('doctorId', value ?? '')}
+              disabled={doctors.length === 0}
             >
               <SelectTrigger id="case-doctor" className="w-full">
-                <SelectValue placeholder="Select doctor" />
+                <SelectValue
+                  placeholder={doctors.length > 0 ? 'Select doctor' : 'No doctors available'}
+                />
               </SelectTrigger>
               <SelectContent>
                 {doctors.map((doctor) => (
-                  <SelectItem key={doctor.id} value={doctor.id}>{doctor.name}</SelectItem>
+                  <SelectItem key={doctor.id} value={doctor.id}>{doctor.fullName}</SelectItem>
                 ))}
               </SelectContent>
             </Select>

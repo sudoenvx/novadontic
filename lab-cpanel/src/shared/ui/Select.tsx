@@ -21,17 +21,17 @@ import { ChevronDownIcon, CheckIcon, ChevronUpIcon } from "lucide-react"
 const Select = SelectPrimitive.Root
 
 const OUTLINE =
-  "border-border bg-surface text-text-primary hover:border-border-strong"
+  "border-field-border text-text-primary hover:border-field-hover"
 const SIZE_MD = "h-control-md text-sm"
 
 const selectTriggerVariants = cva(
-  "flex w-fit items-center justify-between gap-1.5 rounded-sm border px-2.5 font-medium whitespace-nowrap transition-colors duration-(--duration-fast) outline-none focus-visible:border-primary focus-visible:ring-3 focus-visible:ring-focus/25 data-popup-open:border-primary disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 data-placeholder:text-text-faint *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-1.5 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-(--icon-size-sm)",
+  "flex w-fit items-center justify-between gap-1.5 rounded-sm border px-2.5 font-medium whitespace-nowrap transition-colors duration-(--duration-fast) outline-none focus-visible:border-border-focus focus-visible:ring-3 focus-visible:ring-ring data-popup-open:border-border-focus data-popup-open:ring-3 data-popup-open:ring-ring disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 data-placeholder:text-text-faint *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-1.5 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-(--icon-size-sm)",
   {
     variants: {
       variant: {
         outline: OUTLINE,
         neutral:
-          "border-transparent bg-surface-muted text-text-primary hover:bg-border",
+          "border-field-border bg-surface-muted text-text-primary hover:border-field-hover hover:bg-border",
         default: OUTLINE, // deprecated alias of outline
       },
       size: {
@@ -42,7 +42,7 @@ const selectTriggerVariants = cva(
         default: SIZE_MD, // deprecated alias of md
       },
     },
-    defaultVariants: { variant: "outline", size: "md" },
+    defaultVariants: { variant: "outline", size: "sm" },
   }
 )
 

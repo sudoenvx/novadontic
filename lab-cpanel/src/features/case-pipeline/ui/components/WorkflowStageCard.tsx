@@ -66,15 +66,23 @@ export function WorkflowStageCard({
     <Collapsible
       open={isOpen}
       onOpenChange={onOpenChange}
-      className={['stage overflow-hidden transition-all', isActive ? 'is-open' : ''].join(' ')}
+      className={`overflow-hidden rounded-md border bg-surface shadow-sm transition-all ${
+        isActive
+          ? 'border-border-active shadow-[var(--ring-active)]'
+          : 'border-border-subtle'
+      }`}
     >
-      <div className={['stage-head justify-between', isActive ? 'bg-primary-soft/40' : ''].join(' ')}>
+      <div
+        className={`flex min-h-[var(--row-height)] items-center justify-between gap-2.5 px-2.5 ${
+          isActive ? 'bg-primary-soft/40' : ''
+        }`}
+      >
         <CollapsibleTrigger className="group flex min-w-0 flex-1 items-center gap-3 rounded-xs text-left">
           <span
             className={[
-              'step-node shrink-0 font-mono text-xs font-extrabold transition-colors',
-              step.status === 'completed' ? 'bg-none bg-success text-success-foreground is-done' : '',
-              step.status === 'active' ? 'is-now' : '',
+              'grid size-6 shrink-0 place-items-center rounded-full font-mono text-xs font-extrabold transition-colors',
+              step.status === 'completed' ? 'bg-success text-success-foreground' : 'bg-surface-muted text-text-secondary',
+              step.status === 'active' ? 'border-2 border-primary bg-surface text-primary' : '',
             ].join(' ')}
           >
             {step.status === 'completed' ? <Check size={12} /> : index + 1}
@@ -92,10 +100,16 @@ export function WorkflowStageCard({
           </div>
           <div className="hidden shrink-0 items-center gap-1.5 text-xs text-text-muted sm:flex">
             {technicians.length > 0 && (
-              <span className="pill"><Users size={11} />{technicians.length}</span>
+              <span className="inline-flex items-center gap-1.25 rounded-full bg-surface-muted px-2.25 py-0.75 text-xs font-bold text-text-secondary">
+                <Users size={11} aria-hidden="true" />
+                {technicians.length}
+              </span>
             )}
             {step.files.length > 0 && (
-              <span className="pill"><FileCode size={11} />{step.files.length}</span>
+              <span className="inline-flex items-center gap-1.25 rounded-full bg-surface-muted px-2.25 py-0.75 text-xs font-bold text-text-secondary">
+                <FileCode size={11} aria-hidden="true" />
+                {step.files.length}
+              </span>
             )}
             <ChevronDown
               size={15}
@@ -123,7 +137,7 @@ export function WorkflowStageCard({
         </div>
       </div>
 
-      <CollapsiblePanel className="stage-body">
+      <CollapsiblePanel className="grid gap-3 border-t border-border-soft p-4">
         <div className="grid gap-3">
           <StageTechnicians
             technicians={technicians}

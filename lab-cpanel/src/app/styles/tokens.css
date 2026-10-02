@@ -32,28 +32,30 @@
   /* ==========================================================================
      1. BRAND  (the only place raw brand colours live)
      ========================================================================== */
-  /* --brand-blue: #2f6bff; */
-  --brand-blue: #2c64ef;
-  --brand-blue-dark: #1f4fd1;      /* text on pale blue, pressed states */
-  --brand-violet: #8b3ff2;
-  --brand-violet-dark: #6a26c4;
-  --brand-ink: #12172a;            /* the near-black used for text and dark pills */
+  --brand-blue: #3173c4;
+  --brand-blue-dark: #0866a4;      /* text on pale blue, pressed states */
+  /* --brand-violet: #8b3ff2; */
+  --brand-violet: #853ceb;
+  --brand-violet: #5248ae;
+  --brand-violet-dark: #5c31c9;
+  --brand-int: #1d2825;
+  --brand-ink: var(--brand-int);   /* the near-black used for dark pills */
   --brand-navy: #0e1526;           /* dark sections, dark mode background */
 
   /* ==========================================================================
      2. NEUTRALS  (blue-tinted greys, same as the landing page)
      Use semantic tokens below in components, not these directly.
      ========================================================================== */
-  --neutral-50: #f8f9fc;
-  --neutral-100: #f4f5fa;          /* app background */
-  --neutral-200: #eceff7;          /* soft fills, hover, dividers */
-  --neutral-300: #dfe3ee;          /* borders */
-  --neutral-400: #b8bfd0;
-  --neutral-500: #8a93a8;
-  --neutral-600: #5b6478;          /* secondary text */
+  --neutral-50: #f7f8fa;           /* secondary surfaces, hover states */
+  --neutral-100: #f0f2f5;          /* app background, sunken areas */
+  --neutral-200: #e4e6eb;          /* secondary buttons, progress tracks */
+  --neutral-300: #dadde1;          /* subtle borders, button hover states */
+  --neutral-400: #ccd0d5;          /* default borders */
+  --neutral-500: #8a8d91;          /* muted text, placeholders, disabled text */
+  --neutral-600: #65676b;          /* secondary text, icons */
   --neutral-700: #3a4258;
-  --neutral-800: #1e2540;
-  --neutral-900: #12172a;
+  --neutral-800: #1d2825;          /* high-contrast dark elements */
+  --neutral-900: #050505;          /* primary text and headings */
 
   /* ==========================================================================
      3. SURFACES  (what things sit on)
@@ -61,39 +63,26 @@
      surface → cards, panels, table rows, inputs
      muted   → hover fills, disabled fills, code blocks
      ========================================================================== */
-  --canvas: #f4f5fa;
-  --model-viewer-canvas-dark: var(--brand-ink);
-  --model-viewer-canvas-light: var(--canvas);
-  --model-viewer-ui-surface-light: #ffffff;
-  --model-viewer-ui-text-light: var(--brand-ink);
-  --model-viewer-ui-muted-light: #5b6478;
-  --model-viewer-ui-border-light: #dfe3ee;
-  --model-viewer-ui-hover-light: #eceff7;
-  --model-viewer-ui-active-light: #dde5f9;
-  --model-viewer-ui-surface-dark: #191b22;
-  --model-viewer-ui-text-dark: #e7e8ee;
-  --model-viewer-ui-muted-dark: #a4a8b8;
-  --model-viewer-ui-border-dark: #343744;
-  --model-viewer-ui-hover-dark: #252832;
-  --model-viewer-ui-active-dark: #30364a;
+  --canvas: #f0f2f5;
   --surface: #ffffff;
   --surface-raised: #ffffff;       /* popovers, menus, dialogs */
-  --surface-soft: #fafbfe;         /* subtle zebra / nested panels */
-  --surface-secondary: #eceff7;
-  --surface-muted: #eceff7;
-  --surface-muted-light: #f4f5fa;
+  --surface-soft: var(--neutral-100); /* subtle zebra / nested panels */
+  --surface-secondary: var(--neutral-100);
+  --surface-muted: var(--neutral-200);
+  --surface-muted-light: var(--neutral-50);
+  --surface-selected: var(--neutral-100);
   --overlay: rgb(14 21 38 / 45%);  /* dim layer behind dialogs */
 
   /* ==========================================================================
      4. TEXT
      ========================================================================== */
-  --text: var(--brand-ink);
-  --text-primary: var(--brand-ink);       /* headings, values, names */
+  --text: var(--neutral-900);
+  --text-primary: var(--neutral-900);     /* headings, values, names */
   --text-secondary: var(--neutral-600);   /* labels, descriptions */
   --text-muted: var(--neutral-600);
   --text-faint: var(--neutral-500);       /* placeholders, timestamps */
-  --ink: var(--brand-ink);
-  --link: var(--brand-blue);
+  --ink: var(--neutral-900);
+  --link: #0866a4;
 
   /* ==========================================================================
      5. ACTION COLOURS
@@ -103,7 +92,7 @@
      ========================================================================== */
   --primary: var(--brand-blue);
   --primary-light: #5b8cff;
-  --primary-hover: color-mix(in oklab, var(--primary) 88%, black);
+  --primary-hover: var(--brand-blue-dark);
   --primary-active: color-mix(in oklab, var(--primary) 78%, black);
   --primary-foreground: #ffffff;
   --primary-soft: #dde5f9;
@@ -161,14 +150,20 @@
      Default border is 1px --border. Never use 2px dark borders for "active";
      use --ring-active (soft halo) instead.
      ========================================================================== */
-  --border: #dfe3ee;
-  --border-soft: #eceff7;                 /* dividers inside cards */
-  --border-strong: #b8bfd0;               /* inputs on hover, dashed drop zones */
+     --border-border: #ccd0d5;
+     --border-subtle: #ccd0d5;
+  --border-focus: #0866a4;
+  --border: var(--border-border);
+  --border-soft: var(--border-subtle);    /* dividers inside cards */
+  --border-strong: #b8bfd0;               /* dashed drop zones */
   --border-hover: #c9cfdf;
   --border-active: #b9c9ff;               /* active stage / selected card */
-  --focus: var(--brand-blue);             /* keyboard focus outline */
+  --field-border: #afbecb;
+  --field-hover: #8da1b0;
+  --focus: var(--border-focus);           /* keyboard focus outline */
+  --ring: rgba(8,102,164,.2);
   --ring-active: 0 0 0 3px var(--primary-soft);   /* soft halo for active cards */
-  --ring-focus: 0 0 0 3px color-mix(in oklab, var(--brand-blue) 28%, transparent);
+  --ring-focus: 0 0 0 3px var(--ring);
 
   /* ==========================================================================
      8. GRADIENTS  (the signature; use on ONE primary action per view,
@@ -222,12 +217,28 @@
      xs tags inside dense rows · sm buttons/inputs · md stage rows, menus
      lg cards · xl dialogs, big panels · pill chips, avatars
      ========================================================================== */
-  --radius-token-xs: 0.25rem;      /* 4px  */
-  --radius-token-sm: 0.5rem;       /* 8px  */
-  --radius-token-md: 0.6875rem;    /* 11px */
-  --radius-token-lg: 0.875rem;     /* 14px */
-  --radius-token-xl: 1.125rem;     /* 18px */
-  --radius-token-2xl: 1.5rem;      /* 24px */
+  /* --radius-token-xs: 0.25rem;  
+  --radius-token-sm: 0.45rem;  
+  --radius-token-md: 0.6875rem;
+  --radius-token-lg: 0.875rem; 
+  --radius-token-xl: 1.125rem; 
+  --radius-token-2xl: 1.5rem;  
+  --radius-token-pill: 999px; */
+
+  /* --radius-token-xs: 0.25rem;  
+  --radius-token-sm: 3px;  
+  --radius-token-md: 4px;
+  --radius-token-lg: 6px; 
+  --radius-token-xl: 1.125rem; 
+  --radius-token-2xl: 1.5rem;      
+  --radius-token-pill: 999px; */
+
+  --radius-token-xs: 0.25rem;  
+  --radius-token-sm: 0.375rem;  
+  --radius-token-md: 0.5rem;
+  --radius-token-lg: 0.625rem; 
+  --radius-token-xl: 1.125rem; 
+  --radius-token-2xl: 1.5rem;      
   --radius-token-pill: 999px;
 
   /* ==========================================================================
@@ -238,7 +249,7 @@
   --control-sm: 1.75rem;           /* 28px small buttons, inline actions */
   --control-md: 2.125rem;          /* 34px DEFAULT button / input / select */
   --control-lg: 2.5rem;            /* 40px prominent forms */
-  --row-height: 2.5rem;            /* 40px table rows, stage headers, list rows */
+  --row-height: 3rem;            /* 40px table rows, stage headers, list rows */
   --row-height-compact: 2rem;      /* 32px dense tables */
   --card-padding: 0.875rem;        /* 14px */
   --page-gap: 0.75rem;             /* 12px space between cards */
@@ -300,14 +311,14 @@
 
   /* ---- surfaces: neutral charcoal, real elevation steps ---- */
   --canvas: #111318;
-  --model-viewer-canvas-dark: var(--canvas);
-  --model-viewer-canvas-light: var(--neutral-100);
   --surface: #191b22;
   --surface-raised: #20232c;       /* popovers, menus, dialogs */
   --surface-soft: #15171d;         /* subtle zebra / nested panels */
+  --bg-surface-2: var(--surface-soft);
   --surface-secondary: #1c1f28;
   --surface-muted: #1c1f28;
   --surface-muted-light: #171922;
+  --surface-selected: #2a2d38;
   --overlay: rgb(5 6 10 / 62%);
 
   /* ---- text: dimmed, never near-white ---- */
@@ -374,21 +385,28 @@
   --info-soft-foreground: var(--primary-soft-foreground);
 
   /* ---- borders & focus ---- */
-  --border: #2a2d38;
-  --border-soft: #212430;
+  --border-subtle: #212430;
+  --border-border: #2a2d38;
+  --border-focus: var(--primary);
+  --border: var(--border-border);
+  --border-soft: var(--border-subtle);
   --border-strong: #3c4051;
   --border-hover: #333747;
   --border-active: #3f5aa8;
-  --focus: var(--primary);
+  --field-border: #3c4051;
+  --field-hover: #50566a;
+  --focus: var(--border-focus);
+  --ring: color-mix(in srgb, var(--primary) 20%, transparent);
   --ring-active: 0 0 0 3px var(--primary-soft);
-  --ring-focus: 0 0 0 3px color-mix(in oklab, var(--primary) 30%, transparent);
+  --ring-focus: 0 0 0 3px var(--ring);
 
   /* ---- gradient follows the lightened brand pair above ---- */
   --gradient-brand: linear-gradient(135deg, var(--primary), var(--accent));
   --gradient-brand-hover: linear-gradient(135deg, var(--primary-hover), var(--accent-hover));
 
   /* ---- shadows: deeper, since dark surfaces show contrast poorly otherwise ---- */
-  --shadow-card-value: 0 1px 2px rgb(0 0 0 / 30%);
+  /* --shadow-card-value: 0 1px 2px rgb(0 0 0 / 30%); */
+  --shadow-card-value: 0 1px 2px rgba(0,0,0,.1);
   --shadow-float-value: 0 16px 34px rgb(0 0 0 / 40%);
   --shadow-popover-value: 0 12px 26px rgb(0 0 0 / 42%);
   --shadow-dialog-value: 0 24px 60px rgb(0 0 0 / 52%);

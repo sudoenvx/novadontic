@@ -9,7 +9,7 @@ export type CreateCaseValues = {
   applianceId: string
   categoryId: string
   workflowTemplateId: string
-  turnaroundDays?: number
+  dueDate?: string
   priority: CasePipelinePriority
   priceRule: CaseBillingRule
   billable: boolean

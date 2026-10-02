@@ -21,7 +21,7 @@ import React from 'react'
  *     </TableBody>
  *   </Table>
  *
- * Styling follows the design system's .table class semantics:
+ * Styling is expressed with Tailwind utilities and semantic design tokens:
  *   - Header: sentence-case, text-secondary, xs font, bold
  *   - Rows: h-row (40px), border-top on border-soft, hover → surface-soft
  *   - Cells: 0.75rem padding, base font size
@@ -30,7 +30,7 @@ import React from 'react'
 export function Table({ className, ...props }: HTMLAttributes<HTMLTableElement>) {
   return (
     <table
-      className={cn('w-full border-collapse text-start text-base', className)}
+      className={cn('w-full border-collapse text-start text-base text-text-primary', className)}
       {...props}
     />
   )
@@ -49,9 +49,19 @@ export function TableBody({ className, ...props }: HTMLAttributes<HTMLTableSecti
   return (
     <tbody
       className={cn(
-        '[&_tr>td]:border-t [&_tr>td]:border-border-soft [&_tr:hover>td]:bg-surface-soft transition-colors',
+        '',
         className,
       )}
+      {...props}
+    />
+  )
+}
+
+export function TableFooter({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
+  return (
+    <div
+      data-slot="table-footer"
+      className={cn('border-t border-border-subtle', className)}
       {...props}
     />
   )
@@ -80,7 +90,7 @@ export function TableCell({ className, ...props }: TdHTMLAttributes<HTMLTableCel
   return (
     <td
       className={cn(
-        'h-row whitespace-nowrap px-3 align-middle ',
+        'h-row whitespace-nowrap px-3 py-1 align-middle',
         className,
       )}
       {...props}

@@ -36,6 +36,7 @@ export type ModelRendererSettings = {
   wireframe: boolean
   flatShading: boolean
   panMode: boolean
+  canvasTheme: 'dark' | 'light'
   backgroundColor: string
   modelColor?: string
 }
@@ -254,7 +255,7 @@ export const ModelRenderer = forwardRef<ModelRendererHandle, ModelRendererProps>
               style={toolbarStyle}
               role="toolbar"
               aria-label="3D model tools"
-              data-canvas-theme={props.settings.backgroundColor.endsWith('dark') ? 'dark' : 'light'}
+              data-canvas-theme={props.settings.canvasTheme}
             >
               <Tooltip>
                 <TooltipTrigger

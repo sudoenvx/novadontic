@@ -10,6 +10,7 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: QUERY_STALE_TIME_MS,
+      refetchOnWindowFocus: false
     },
   },
 })

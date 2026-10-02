@@ -2,118 +2,183 @@ import { Plus, Search } from 'lucide-react'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
+import { useClinicOptions } from '../../clinics/queries/clinic.queries'
 import { Button } from '../../../shared/ui/Button'
+import { getApiErrorMessage } from '../../../shared/api/apiError'
 import { PageHeader, PageHeaderActions } from '../../../shared/ui/PageHeader'
-import { InputGroup, InputGroupAddon, InputGroupInput } from '../../../shared/ui/InputGroup'
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from '../../../shared/ui/InputGroup'
 import { Page } from '../../../shared/ui/Page'
 import { toast } from '../../../shared/ui/Toast'
-import { clinicFixtures } from '../../clinics/data/clinics'
-import { doctorFixtures } from '../data/doctors'
-import { filterDoctors } from '../domain/doctor'
-import type { Doctor } from '../domain/doctor'
-import { CreateDoctorDialog, type NewDoctor } from './CreateDoctorDialog'
-import { DoctorFormDialog, type DoctorFormValues } from './DoctorFormDialog'
+import type { Doctor, DoctorInput } from '../domain/doctor'
+import {
+  useCreateDoctor,
+  useDeleteDoctor,
+  useDoctors,
+  useUpdateDoctor,
+} from '../queries/doctor.queries'
+import { CreateDoctorDialog } from './CreateDoctorDialog'
+import { DoctorFormDialog } from './DoctorFormDialog'
 import { DoctorTable } from './DoctorTable'
 
 export function DoctorsPage() {
   const navigate = useNavigate()
-  const [doctors, setDoctors] = useState<Doctor[]>(doctorFixtures)
   const [searchTerm, setSearchTerm] = useState('')
   const [isCreateOpen, setIsCreateOpen] = useState(false)
   const [editingDoctor, setEditingDoctor] = useState<Doctor | null>(null)
-  const visibleDoctors = filterDoctors(doctors, clinicFixtures, searchTerm)
+  const doctorsQuery = useDoctors(searchTerm)
+  const clinicsQuery = useClinicOptions()
+  const createDoctor = useCreateDoctor()
+  const updateDoctor = useUpdateDoctor()
+  const deleteDoctor = useDeleteDoctor()
+  const doctors = doctorsQuery.data?.data ?? []
 
-  function handleCreateDoctor(values: NewDoctor) {
-    const doctor: Doctor = {
-      ...values,
-      id: `doctor-${doctors.length + 1}`,
-      activeCases: 0,
-      status: 'pending',
-    }
-
-    setDoctors((currentDoctors) => [...currentDoctors, doctor])
-    setIsCreateOpen(false)
-    toast.add({ title: 'Doctor invited', description: `${doctor.name} was added to your doctors list.`, type: 'success' })
+  function handleCreateDoctor(input: DoctorInput) {
+    createDoctor.mutate(input, {
+      onSuccess: (doctor) => {
+        setIsCreateOpen(false)
+        toast.add({
+          title: 'Doctor added',
+          description: `${doctor.fullName} was added to your doctors list.`,
+          type: 'success',
+        })
+      },
+      onError: (error) => showMutationError(error),
+    })
   }
 
-  function handleUpdateDoctor(values: DoctorFormValues) {
+  function handleUpdateDoctor(input: DoctorInput) {
     if (!editingDoctor) return
-
-    setDoctors((currentDoctors) =>
-      currentDoctors.map((doctor) =>
-        doctor.id === editingDoctor.id
-          ? {
-              ...doctor,
-              ...values,
-              status: values.isActive
-                ? doctor.status === 'inactive' ? 'pending' : doctor.status
-                : 'inactive',
-            }
-          : doctor,
-      ),
+    updateDoctor.mutate(
+      { doctorId: editingDoctor.id, input },
+      {
+        onSuccess: (doctor) => {
+          setEditingDoctor(null)
+          toast.add({
+            title: 'Doctor profile updated',
+            description: `${doctor.fullName} was updated.`,
+            type: 'success',
+          })
+        },
+        onError: (error) => showMutationError(error),
+      },
     )
-    setEditingDoctor(null)
-    toast.add({ title: 'Doctor profile updated', type: 'success' })
   }
 
-  function handleDeleteDoctor(doctorId: string) {
-    setDoctors((currentDoctors) => currentDoctors.filter((doctor) => doctor.id !== doctorId))
-    toast.add({ title: 'Doctor deleted', type: 'success' })
+  function handleDeleteDoctor(doctor: Doctor) {
+    deleteDoctor.mutate(doctor.id, {
+      onSuccess: () =>
+        toast.add({
+          title: 'Doctor deleted',
+          description: `${doctor.fullName} was removed.`,
+          type: 'success',
+        }),
+      onError: (error) => showMutationError(error),
+    })
   }
 
-  function handleRevokePortalAccess(doctorId: string) {
-    setDoctors((currentDoctors) =>
-      currentDoctors.map((doctor) =>
-        doctor.id === doctorId ? { ...doctor, isActive: false, status: 'inactive' } : doctor,
-      ),
+  function handleRevokePortalAccess(doctor: Doctor) {
+    updateDoctor.mutate(
+      {
+        doctorId: doctor.id,
+        input: {
+          fullName: doctor.fullName,
+          isActive: false,
+        },
+      },
+      {
+        onSuccess: () =>
+          toast.add({
+            title: 'Doctor deactivated',
+            description: `${doctor.fullName} is now inactive.`,
+            type: 'success',
+          }),
+        onError: (error) => showMutationError(error),
+      },
     )
-    toast.add({ title: 'Portal access revoked', type: 'success' })
+  }
+
+  function showMutationError(error: unknown) {
+    toast.add({
+      title: 'Unable to save doctor',
+      description: getApiErrorMessage(error, 'Please try again.'),
+      type: 'error',
+    })
   }
 
   function openDoctorDetails(doctor: Doctor) {
-    navigate(`/doctors/${doctor.id}`, {
-      state: { doctor, clinic: clinicFixtures.find((clinic) => clinic.id === doctor.clinicId) },
-    })
+    navigate(`/doctors/${doctor.id}`)
   }
 
   return (
     <Page size="full">
-      <PageHeader title="Doctors" description="Manage doctor profiles, clinic links, and portal access.">
+      <PageHeader
+        title="Doctors"
+        description="Manage doctor profiles, clinic links, and active status."
+      >
         <PageHeaderActions>
           <InputGroup className="w-64" variant="outline">
-            <InputGroupAddon><Search /></InputGroupAddon>
-            <InputGroupInput value={searchTerm} onChange={(event) => setSearchTerm(event.currentTarget.value)} placeholder="Search doctors" aria-label="Search doctors" />
+            <InputGroupAddon>
+              <Search />
+            </InputGroupAddon>
+            <InputGroupInput
+              value={searchTerm}
+              onChange={(event) => setSearchTerm(event.currentTarget.value)}
+              placeholder="Search doctors"
+              aria-label="Search doctors"
+            />
           </InputGroup>
-          <Button onClick={() => setIsCreateOpen(true)}><Plus /> Add doctor</Button>
+          <Button onClick={() => setIsCreateOpen(true)}>
+            <Plus /> Add doctor
+          </Button>
         </PageHeaderActions>
       </PageHeader>
 
-      <DoctorTable
-        description="Doctors can be linked to a clinic or added through the website portal."
-        doctors={visibleDoctors}
-        getClinicName={(doctor) => clinicFixtures.find((clinic) => clinic.id === doctor.clinicId)?.name}
-        onDelete={(doctor) => handleDeleteDoctor(doctor.id)}
-        onEdit={setEditingDoctor}
-        onRevokePortalAccess={(doctor) => handleRevokePortalAccess(doctor.id)}
-        onView={openDoctorDetails}
-        title={`All doctors (${visibleDoctors.length})`}
-      />
+      {doctorsQuery.isPending && <p role="status">Loading doctors…</p>}
+      {doctorsQuery.isError && (
+        <p role="alert">
+          {getApiErrorMessage(doctorsQuery.error, 'Unable to load doctors.')}
+        </p>
+      )}
+      {clinicsQuery.isError && (
+        <p role="alert">
+          {getApiErrorMessage(clinicsQuery.error, 'Unable to load clinics.')}
+        </p>
+      )}
+      {doctorsQuery.data && (
+        <DoctorTable
+          description="Doctors can be linked to a clinic or added through the website portal."
+          doctors={doctors}
+          getClinicName={(doctor) => doctor.clinics[0]?.name}
+          onDelete={handleDeleteDoctor}
+          onEdit={setEditingDoctor}
+          onRevokePortalAccess={handleRevokePortalAccess}
+          onView={openDoctorDetails}
+          title={`All doctors (${doctorsQuery.data.total})`}
+        />
+      )}
 
       <CreateDoctorDialog
-        clinics={clinicFixtures}
-        initialClinicId=""
+        clinics={clinicsQuery.data ?? []}
         onCreate={handleCreateDoctor}
         onOpenChange={setIsCreateOpen}
         open={isCreateOpen}
+        isPending={createDoctor.isPending}
       />
       <DoctorFormDialog
         key={editingDoctor?.id ?? 'doctor-edit-form'}
-        clinics={clinicFixtures}
+        clinics={clinicsQuery.data ?? []}
         doctor={editingDoctor ?? undefined}
         mode="edit"
-        onOpenChange={(open) => { if (!open) setEditingDoctor(null) }}
+        onOpenChange={(open) => {
+          if (!open) setEditingDoctor(null)
+        }}
         onSubmit={handleUpdateDoctor}
         open={editingDoctor !== null}
+        isPending={updateDoctor.isPending}
       />
     </Page>
   )

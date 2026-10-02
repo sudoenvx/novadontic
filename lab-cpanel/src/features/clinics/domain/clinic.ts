@@ -1,25 +1,61 @@
-import type { Doctor } from '../../doctors/domain/doctor'
+export type ClinicDoctor = {
+  id: string
+  fullName: string
+  email: string | null
+  specialty: string | null
+  isActive: boolean
+}
 
 export type Clinic = {
   id: string
   name: string
-  address: string
-  phone: string
-  email: string
+  legalName: string | null
+  email: string | null
+  phone: string | null
+  website: string | null
+  address: string | null
+  city: string | null
+  notes: string | null
+  isActive: boolean
+  createdAt: Date
+  updatedAt: Date
+  doctors: ClinicDoctor[]
 }
 
-export function filterClinics(clinics: Clinic[], doctors: Doctor[], searchTerm: string) {
+export type ClinicOption = Pick<Clinic, 'id' | 'name'>
+
+export type ClinicInput = {
+  name: string
+  legalName?: string | null
+  email?: string | null
+  phone?: string | null
+  website?: string | null
+  address?: string | null
+  city?: string | null
+  notes?: string | null
+  isActive?: boolean
+  doctorIds?: string[]
+}
+
+export function filterClinics(clinics: Clinic[], searchTerm: string) {
   const normalizedSearch = searchTerm.trim().toLowerCase()
 
   if (!normalizedSearch) return clinics
 
   return clinics.filter((clinic) => {
-    const clinicDoctors = doctors.filter((doctor) => doctor.clinicId === clinic.id)
+    const searchableValues = [
+      clinic.name,
+      clinic.legalName,
+      clinic.email,
+      clinic.phone,
+      clinic.website,
+      clinic.address,
+      clinic.city,
+      ...clinic.doctors.map((doctor) => doctor.fullName),
+    ]
 
-    return (
-      clinic.name.toLowerCase().includes(normalizedSearch) ||
-      clinic.address.toLowerCase().includes(normalizedSearch) ||
-      clinicDoctors.some((doctor) => doctor.name.toLowerCase().includes(normalizedSearch))
+    return searchableValues.some((value) =>
+      value?.toLowerCase().includes(normalizedSearch),
     )
   })
 }

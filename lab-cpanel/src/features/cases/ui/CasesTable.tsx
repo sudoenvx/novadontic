@@ -2,7 +2,8 @@ import { Link } from "react-router-dom";
 import type { ReactNode } from "react";
 
 import { Badge, type BadgeTone } from "../../../shared/ui/Badge";
-import { DataTable, type DataTableColumn } from "../../../shared/ui/data-table";
+import { Button } from "../../../shared/ui/Button";
+import { DataTable, DataTableEmptyState, type DataTableColumn } from "../../../shared/ui/data-table";
 import type { CaseListItem } from "../domain/case";
 
 const statusTone: Record<CaseListItem["status"], BadgeTone> = {
@@ -23,7 +24,10 @@ const columns: DataTableColumn<CaseListItem>[] = [
         to={`/cases/${caseItem.id}`}
         className="grid gap-0.5 rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
       >
-        <span className="font-semibold text-primary">{caseItem.id}</span>
+        <span className="flex items-center gap-2 font-semibold text-primary">
+          {caseItem.id}
+          {caseItem.priority === "Rush" && <Badge tone="destructive">Rush</Badge>}
+        </span>
         <span className="text-xs text-text-muted">
           {caseItem.patientName} · {caseItem.patientCode}
         </span>
@@ -33,32 +37,24 @@ const columns: DataTableColumn<CaseListItem>[] = [
   {
     id: "appliance",
     header: "Appliance",
-    sortable: true,
-    pinnable: true,
     accessorKey: "applianceType",
     className: "text-secondary",
   },
   {
     id: "category",
     header: "Category",
-    sortable: true,
-    pinnable: true,
     accessorKey: "category",
     cell: (caseItem) => <Badge tone="accent">{caseItem.category}</Badge>,
   },
   {
     id: "doctor",
     header: "Doctor",
-    sortable: true,
-    pinnable: true,
     accessorKey: "doctorName",
     className: "text-secondary",
   },
   {
     id: "stage",
     header: "Stage",
-    sortable: true,
-    pinnable: true,
     accessorKey: "stage",
     cell: (caseItem) => (
       <Badge tone={caseItem.stage === "Delivered" ? "success" : "info"}>
@@ -70,27 +66,13 @@ const columns: DataTableColumn<CaseListItem>[] = [
     id: "due-date",
     header: "Due",
     sortable: true,
-    pinnable: true,
     accessorKey: "dueDate",
     className: "text-secondary",
-  },
-  {
-    id: "priority",
-    header: "Priority",
-    sortable: true,
-    pinnable: true,
-    accessorKey: "priority",
-    cell: (caseItem) => (
-      <Badge tone={caseItem.priority === "Rush" ? "destructive" : "neutral"}>
-        {caseItem.priority}
-      </Badge>
-    ),
   },
   {
     id: "status",
     header: "Status",
     sortable: true,
-    pinnable: true,
     accessorKey: "status",
     cell: (caseItem) => (
       <Badge tone={statusTone[caseItem.status]}>{caseItem.status}</Badge>
@@ -100,23 +82,49 @@ const columns: DataTableColumn<CaseListItem>[] = [
 
 export function CasesTable({
   cases,
-  pagination,
+  footer,
   totalCount,
+  onResetFilters,
 }: {
   cases: CaseListItem[];
-  pagination: ReactNode;
+  footer: ReactNode;
   totalCount: number;
+  onResetFilters: () => void;
 }) {
   return (
     <DataTable
       columns={columns}
       data={cases}
       title="All cases"
-      
+      bulkActions={(row) => (
+        <>
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            onClick={() => console.log("Selected rows:", row.selectedRows)}
+          >
+            Export selected
+          </Button>
+        </>
+      )}
+      // bodyMaxHeight={400}
       description={`${totalCount} case${totalCount === 1 ? "" : "s"} match the current filters.`}
-      emptyMessage="No cases match the current filters."
+      emptyState={
+        <DataTableEmptyState
+          title="No cases match these filters"
+          description="Try a different search, or clear the filters to see every case."
+          action={
+            <Button type="button" variant="neutral" size="sm" onClick={onResetFilters}>
+              Clear filters
+            </Button>
+          }
+        />
+      }
       getRowId={(caseItem) => caseItem.id}
-      pagination={pagination}
+      selectable
+      footer={footer}
+      compact
     />
   );
 }
