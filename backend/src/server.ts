@@ -2,7 +2,6 @@ import { createServer } from 'node:http';
 import { resolve } from 'node:path';
 import { createApp } from './app/app.ts';
 import { createApiRoutes } from './app/routes.ts';
-import { corsOrigin } from './config/cors.ts';
 import { env } from './config/env.ts';
 import { logger } from './config/logger.ts';
 import { database } from './infrastructure/database/mysql.client.ts';
@@ -50,7 +49,7 @@ const app = createApp(createApiRoutes(
   caseFileStorage,
 ));
 const server = createServer(app);
-const io = attachSocketServer(server, corsOrigin);
+const io = attachSocketServer(server);
 
 server.listen(env.PORT, () => {
   logger.info('API server started', { port: env.PORT, environment: env.NODE_ENV });
